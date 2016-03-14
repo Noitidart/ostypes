@@ -76,6 +76,7 @@ var winTypes = function() {
 	this.PLONG = this.LONG.ptr;
 	this.PULONG = this.ULONG.ptr;
 	this.PULONG_PTR = this.ULONG.ptr;
+	this.PUINT = this.UINT.ptr;
 	this.PCWSTR = this.WCHAR.ptr;
 	this.SIZE_T = this.ULONG_PTR;
 	this.SYSTEM_INFORMATION_CLASS = this.INT; // i think due to this search: http://stackoverflow.com/questions/28858849/where-is-system-information-class-defined
@@ -94,6 +95,7 @@ var winTypes = function() {
 	this.HKEY = this.HANDLE;
 	this.HMENU = this.HANDLE;
 	this.HMONITOR = this.HANDLE;
+	this.HRAWINPUT = this.HANDLE;
 	this.HWND = this.HANDLE;
 	this.LPCOLESTR = this.OLECHAR.ptr; // typedef [string] const OLECHAR *LPCOLESTR; // https://github.com/wine-mirror/wine/blob/bdeb761357c87d41247e0960f71e20d3f05e40e6/include/wtypes.idl#L288
 	this.LPCTSTR = ifdef_UNICODE ? this.LPCWSTR : this.LPCSTR;
@@ -162,6 +164,28 @@ var winTypes = function() {
 		{ rgbGreen:		this.BYTE },
 		{ rgbRed:		this.BYTE },
 		{ rgbReserved:	this.BYTE }
+	]);
+	this.RAWINPUTHEADER = ctypes.StructType('tagRAWINPUTHEADER', [
+		{ dwType: this.DWORD },
+		{ dwSize: this.DWORD },
+		{ hDevice: this.HANDLE },
+		{ wParam: this.WPARAM }
+	]);
+	this.RAWINPUTDEVICE = ctypes.StructType('tagRAWINPUTDEVICE', [ // https://msdn.microsoft.com/en-us/library/windows/desktop/ms645565%28v=vs.85%29.aspx
+		{ usUsagePage: this.USHORT },
+		{ usUsage: this.USHORT },
+		{ dwFlags: this.DWORD },
+		{ hwndTarget: this.HWND }
+	]);
+	this.RAWMOUSE = ctypes.StructType('tagRAWMOUSE', [
+		{ usFlags: this.USHORT },
+		{ _padding0: this.USHORT },
+		{ usButtonFlags: this.USHORT },
+		{ usButtonData: this.USHORT },
+		{ ulRawButtons: this.ULONG },
+		{ lLastX: this.LONG },
+		{ lLastY: this.LONG },
+		{ ulExtraInformation: this.ULONG }
 	]);
     this.RECT = ctypes.StructType('_RECT', [ // https://msdn.microsoft.com/en-us/library/windows/desktop/dd162897%28v=vs.85%29.aspx
         { left: this.LONG },
@@ -232,6 +256,13 @@ var winTypes = function() {
 		{ dwFlags:		this.DWORD },
 		{ szDevice:		this.TCHAR.array(struct_const.CCHDEVICENAME) }
 	]);
+	this.MSLLHOOKSTRUCT = ctypes.StructType('tagMSLLHOOKSTRUCT', [
+		{ pt: this.POINT },
+		{ mouseData: this.DWORD },
+		{ flags: this.DWORD },
+		{ time: this.DWORD },
+		{ dwExtraInfo: this.ULONG_PTR }
+	]);
 	this.MSG = ctypes.StructType('tagMSG', [
 		{ hwnd: this.HWND },
 		{ message: this.UINT },
@@ -247,6 +278,11 @@ var winTypes = function() {
 	this.LPSHFILEOPSTRUCT = this.SHFILEOPSTRUCT.ptr;
 	this.PBITMAPINFOHEADER = this.BITMAPINFOHEADER.ptr;
 	this.PDISPLAY_DEVICE = this.DISPLAY_DEVICE.ptr;
+	this.PCRAWINPUTDEVICE = this.RAWINPUTDEVICE.ptr;
+	this.RAWINPUT = ctypes.StructType('tagRAWINPUT', [
+		{ header: this.RAWINPUTHEADER },
+		{ mouse: this.RAWMOUSE } // use this.RAWMOUSE instead of RAWHID or RAWKEYBOARD as RAWMOUSE struct is the biggest, the tutorial linked below also says this
+	]);
 
 	// FURTHER ADVANCED STRUCTS
 	this.BITMAPV5HEADER = ctypes.StructType('BITMAPV5HEADER', [
@@ -284,8 +320,31 @@ var winTypes = function() {
 	
 	// FUNCTION TYPES
 	this.MONITORENUMPROC = ctypes.FunctionType(this.CALLBACK_ABI, this.BOOL, [this.HMONITOR, this.HDC, this.LPRECT, this.LPARAM]);
+	this.LowLevelMouseProc = ctypes.FunctionType(this.CALLBACK_ABI, this.LRESULT, [this.INT, this.WPARAM, this.LPARAM]);
+	this.WNDPROC = ctypes.FunctionType(this.CALLBACK_ABI, this.LRESULT, [
+		this.HWND,		// hwnd,
+		this.UINT,		// uMsg,
+		this.WPARAM,	// wParam,
+		this.LPARAM	// lParam
+	]);
+	this.TIMERPROC = ctypes.FunctionType(this.CALLBACK_ABI, this.VOID, [this.HWND, this.UINT, this.UINT_PTR, this.DWORD]);
 
+	// ADV FUNC TYPES
+	this.HOOKPROC = this.LowLevelMouseProc.ptr; // not a guess really, as this is the hook type i use, so yeah it has to be a pointer to it
+	
 	// STRUCTS USING FUNC TYPES
+	this.WNDCLASS = ctypes.StructType('tagWNDCLASS', [
+		{ style: this.UINT },
+		{ lpfnWndProc: this.WNDPROC.ptr },
+		{ cbClsExtra: this.INT },
+		{ cbWndExtra: this.INT },
+		{ hInstance: this.HINSTANCE },
+		{ hIcon: this.HICON },
+		{ hCursor: this.HCURSOR },
+		{ hbrBackground: this.HBRUSH },
+		{ lpszMenuName: this.LPCTSTR },
+		{ lpszClassName: this.LPCTSTR }
+	]);
 	
 }
 
@@ -313,9 +372,12 @@ var winInit = function() {
 		ENUM_CURRENT_SETTINGS: self.TYPE.DWORD.size == 4 ? /*use 8 letters for size 4*/ self.TYPE.DWORD('0xFFFFFFFF') : /*size is 8 so use 16 letters*/ self.TYPE.DWORD('0xFFFFFFFFFFFFFFFF'),
 		ENUM_REGISTRY_SETTINGS: self.TYPE.DWORD.size == 4 ? self.TYPE.DWORD('0xFFFFFFFE') : self.TYPE.DWORD('0xFFFFFFFFFFFFFFFE'),
 		HORZRES: 8,
+		HWND_MESSAGE: -3,
 		LOGPIXELSX: 88,
 		LOGPIXELSY: 90,
 		MONITOR_DEFAULTTONEAREST: 2,
+		PM_NOREMOVE: 0,
+		PM_REMOVE: 1,
 		S_OK: 0,
 		SRCCOPY: self.TYPE.DWORD('0x00CC0020'),
 		VERTRES: 10,
@@ -341,7 +403,59 @@ var winInit = function() {
 		PM_REMOVE: 1,
 		WM_HOTKEY: 0x0312,
 		MOD_NOREPEAT: 0x4000,
-		VK_SNAPSHOT: 0x2C
+		VK_SNAPSHOT: 0x2C,
+		
+		WM_MOUSEMOVE: 0x200,
+		WM_LBUTTONDOWN: 0x201,
+		WM_LBUTTONUP: 0x202,
+		WM_LBUTTONDBLCLK: 0x203,
+		WM_RBUTTONDOWN: 0x204,
+		WM_RBUTTONUP: 0x205,
+		WM_RBUTTONDBLCLK: 0x206,
+		WM_MBUTTONDOWN: 0x207,
+		WM_MBUTTONUP: 0x208,
+		WM_MBUTTONDBLCLK: 0x209,
+		WM_MOUSEWHEEL: 0x20A,
+		WM_XBUTTONDOWN: 0x20B,
+		WM_XBUTTONUP: 0x20C,
+		WM_XBUTTONDBLCLK: 0x20D,
+		WM_MOUSEHWHEEL: 0x20E,
+		WM_NCXBUTTONDOWN: 0x00AB,
+		WM_NCXBUTTONUP: 0x00AC,
+		WM_NCXBUTTONDBLCLK: 0x00AD,
+		WH_MOUSE_LL: 14,
+		RIDEV_INPUTSINK: 0x00000100,
+		RID_INPUT: 0x10000003,
+		WM_CREATE: 0x0001,
+		WM_INPUT: 0x00FF,
+		RI_MOUSE_LEFT_BUTTON_DOWN: 0x0001,
+		RI_MOUSE_LEFT_BUTTON_UP: 0x0002,
+		RI_MOUSE_MIDDLE_BUTTON_DOWN: 0x0010,
+		RI_MOUSE_MIDDLE_BUTTON_UP: 0x0020,
+		RI_MOUSE_RIGHT_BUTTON_DOWN: 0x0004,
+		RI_MOUSE_RIGHT_BUTTON_UP: 0x0008,
+		RI_MOUSE_BUTTON_1_DOWN: 0x0001,
+		RI_MOUSE_BUTTON_1_UP: 0x0002,
+		RI_MOUSE_BUTTON_2_DOWN: 0x0004,
+		RI_MOUSE_BUTTON_2_UP: 0x0008,
+		RI_MOUSE_BUTTON_3_DOWN: 0x0010,
+		RI_MOUSE_BUTTON_3_UP: 0x0020,
+		RI_MOUSE_BUTTON_4_DOWN: 0x0040,
+		RI_MOUSE_BUTTON_4_UP: 0x0080,
+		RI_MOUSE_BUTTON_5_DOWN: 0x100,
+		RI_MOUSE_BUTTON_5_UP: 0x0200,
+		RI_MOUSE_WHEEL: 0x0400,
+		RI_MOUSE_HORIZONTAL_WHEEL: 0x0800,
+		XBUTTON1: 0x0001,
+		XBUTTON2: 0x0002,
+		
+		QS_ALLEVENTS: 0x04BF,
+		QS_ALLINPUT: 0x04FF,
+		WAIT_ABANDONED_0: 0x00000080, // 128
+		WAIT_FAILED: self.TYPE.DWORD('0xFFFFFFFF'),
+		WAIT_IO_COMPLETION: 0x000000C0, // 192
+		WAIT_OBJECT_0: 0,
+		WAIT_TIMEOUT: 0x00000102 // 258
 	};
 
 	var _lib = {}; // cache for lib
@@ -450,6 +564,22 @@ var winInit = function() {
 				self.TYPE.DWORD // dwRop
 			);
 		},
+		CallNextHookEx: function() {
+			/* LRESULT WINAPI CallNextHookEx(
+			 *   __in_opt_ HHOOK  hhk,
+			 *   __in_     int    nCode,
+			 *   __in_     WPARAM wParam,
+			 *   __in_     LPARAM lParam
+			 * );			
+			 */
+			return lib('user32').declare('CallNextHookEx', self.TYPE.ABI,
+				self.TYPE.LRESULT,
+				self.TYPE.HHOOK,
+				self.TYPE.INT,
+				self.TYPE.WPARAM,
+				self.TYPE.LPARAM
+			);
+		},
 		CreateCompatibleBitmap: function() {
 			/* http://msdn.microsoft.com/en-us/library/windows/desktop/dd183488%28v=vs.85%29.aspx
 			 * HBITMAP CreateCompatibleBitmap(
@@ -514,6 +644,56 @@ var winInit = function() {
 				self.TYPE.DWORD				// dwOffset
 			);
 		},
+		CreateWindowEx: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms632680%28v=vs.85%29.aspx
+			 * HWND WINAPI CreateWindowEx(
+			 *   __in_     DWORD     dwExStyle,
+			 *   __in_opt_ LPCTSTR   lpClassName,
+			 *   __in_opt_ LPCTSTR   lpWindowName,
+			 *   __in_     DWORD     dwStyle,
+			 *   __in_     int       x,
+			 *   __in_     int       y,
+			 *   __in_     int       nWidth,
+			 *   __in_     int       nHeight,
+			 *   __in_opt_ HWND      hWndParent,
+			 *   __in_opt_ HMENU     hMenu,
+			 *   __in_opt_ HINSTANCE hInstance,
+			 *   __in_opt_ LPVOID    lpParam
+			 * );
+			 */
+			return lib('user32').declare(ifdef_UNICODE ? 'CreateWindowExW' : 'CreateWindowExA', self.TYPE.ABI,
+				self.TYPE.HWND,			// return
+				self.TYPE.DWORD,		// dwExStyle
+				self.TYPE.LPCTSTR,		// lpClassName
+				self.TYPE.LPCTSTR,		// lpWindowName
+				self.TYPE.DWORD,		// dwStyle
+				self.TYPE.INT,			// x
+				self.TYPE.INT,			// y
+				self.TYPE.INT,			// nWidth
+				self.TYPE.INT,			// nHeight
+				self.TYPE.HWND,			// hWndParent
+				self.TYPE.HMENU,		// hMenu
+				self.TYPE.HINSTANCE,	// hInstance
+				self.TYPE.LPVOID		// lpParam
+			);
+		},
+		DefWindowProc: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms633572%28v=vs.85%29.aspx
+			 * LRESULT WINAPI DefWindowProc(
+			 *   __in_ HWND   hWnd,
+			 *   __in_ UINT   Msg,
+			 *   __in_ WPARAM wParam,
+			 *   __in_ LPARAM lParam
+			 * );
+			 */
+			return lib('user32').declare(ifdef_UNICODE ? 'DefWindowProcW' : 'DefWindowProcA', self.TYPE.ABI,
+				self.TYPE.LRESULT,	// return
+				self.TYPE.HWND,		// hWnd
+				self.TYPE.UINT,		// Msg
+				self.TYPE.WPARAM,	// wParam
+				self.TYPE.LPARAM	// lParam
+			);
+		},
 		DeleteDC: function() {
 			/* http://msdn.microsoft.com/en-us/library/windows/desktop/dd183489%28v=vs.85%29.aspx
 			 * BOOL DeleteDC(
@@ -534,6 +714,28 @@ var winInit = function() {
 			return lib('gdi32').declare('DeleteObject', self.TYPE.ABI,
 				self.TYPE.BOOL,		// return
 				self.TYPE.HGDIOBJ	// hObject
+			);
+		},
+		DestroyWindow: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms632682%28v=vs.85%29.aspx
+			 * BOOL WINAPI DestroyWindow(
+			 *   __in_ HWND hWnd
+			 * );
+			 */
+			return lib('user32').declare('DestroyWindow', self.TYPE.ABI,
+				self.TYPE.BOOL,	// return
+				self.TYPE.HWND	// hWnd
+			);
+		},
+		DispatchMessage: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms644934%28v=vs.85%29.aspx
+			 * LRESULT WINAPI DispatchMessage(
+			 *   __in_ const MSG *lpmsg
+			 * );
+			 */
+			return lib('user32').declare('DestroyWindow', self.TYPE.ABI,
+				self.TYPE.LRESULT,	// return
+				self.TYPE.MSG.ptr	// *lpmsg
 			);
 		},
 		EnumDisplayDevices: function() {
@@ -691,6 +893,23 @@ var winInit = function() {
 				self.TYPE.HWND		// return
 			)
 		},
+		GetMessage: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms644936%28v=vs.85%29.aspx
+			 * BOOL WINAPI GetMessage(
+			 *   __out_    LPMSG lpMsg,
+			 *   __in_opt_ HWND  hWnd,
+			 *   __in_     UINT  wMsgFilterMin,
+			 *   __in_     UINT  wMsgFilterMax
+			 * );
+			 */
+			return lib('user32').declare(ifdef_UNICODE ? 'GetMessageW' : 'GetMessageA', self.TYPE.ABI,
+				self.TYPE.BOOL,		// return
+				self.TYPE.LPMSG,	// lpMsg
+				self.TYPE.HWND, 	// hWnd
+				self.TYPE.UINT, 	// wMsgFilterMin
+				self.TYPE.UINT		// wMsgFilterMax
+			);
+		},
 		GetMonitorInfo: function() {
 			/* https://msdn.microsoft.com/en-us/library/windows/desktop/dd144901%28v=vs.85%29.aspx
 			 * BOOL GetMonitorInfo(
@@ -717,6 +936,25 @@ var winInit = function() {
 				self.TYPE.HDC, // hWnd
 				self.TYPE.INT, // nXPos
 				self.TYPE.INT // nYPos
+			);
+		},
+		GetRawInputData: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms645596%28v=vs.85%29.aspx
+			 *  UINT WINAPI GetRawInputData(
+			 *    __in_      HRAWINPUT hRawInput,
+			 *    __in_      UINT      uiCommand,
+			 *    __out_opt_ LPVOID    pData,
+			 *    __inout_   PUINT     pcbSize,
+			 *    __in_      UINT      cbSizeHeader
+			 *  );
+			 */
+			return lib('user32').declare('GetRawInputData', self.TYPE.ABI,
+				self.TYPE.UINT,			// return
+				self.TYPE.HRAWINPUT,	// hRawInput
+				self.TYPE.UINT,			// uiCommand
+				self.TYPE.LPVOID,		// pData
+				self.TYPE.PUINT,		// pcbSize
+				self.TYPE.UINT			// cbSizeHeader
 			);
 		},
 		GetWindowLongPtr: function() {
@@ -773,6 +1011,53 @@ var winInit = function() {
 				self.TYPE.LPDWORD	// lpdwProcessId
 			);
 		},
+		KillTimer: function() {
+			/* http://msdn.microsoft.com/en-us/library/windows/desktop/ms633522%28v=vs.85%29.aspx
+			 * BOOL WINAPI KillTimer(
+			 *   _in_opt_ HWND     hWnd,
+			 *   _in_     UINT_PTR uIDEvent
+			 * );
+			 */
+			return lib('user32').declare('KillTimer', self.TYPE.ABI,
+				self.TYPE.BOOL,		// return
+				self.TYPE.HWND,		// hWnd
+				self.TYPE.UINT_PTR	// uIDEvent
+			);
+		},
+		PostMessage: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms644944%28v=vs.85%29.aspx
+			 * BOOL WINAPI PostMessage(
+			 *   __in_opt_ HWND   hWnd,
+			 *   __in_     UINT   Msg,
+			 *   __in_     WPARAM wParam,
+			 *   __in_     LPARAM lParam
+			 * );
+			 */
+			return lib('user32').declare(ifdef_UNICODE ? 'PostMessageW' : 'PostMessageA', self.TYPE.ABI,
+				self.TYPE.BOOL,		// return
+				self.TYPE.HWND, 	// hWnd
+				self.TYPE.UINT,		// Msg
+				self.TYPE.WPARAM, 	// wParam
+				self.TYPE.LPARAM	// lParam
+			);
+		},
+		PostThreadMessage: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms644946%28v=vs.85%29.aspx
+			 * BOOL WINAPI PostThreadMessage(
+			 *   __in_ DWORD  idThread,
+			 *   __in_ UINT   Msg,
+			 *   __in_ WPARAM wParam,
+			 *   __in_ LPARAM lParam
+			 * );
+			 */
+			return lib('user32').declare(ifdef_UNICODE ? 'PostThreadMessageW' : 'PostThreadMessageA', self.TYPE.ABI,
+				self.TYPE.BOOL,		// return
+				self.TYPE.DWORD, 	// idThread
+				self.TYPE.UINT,		// Msg
+				self.TYPE.WPARAM, 	// wParam
+				self.TYPE.LPARAM	// lParam
+			);
+		},
 		memcpy: function() {
 			/* https://msdn.microsoft.com/en-us/library/dswaw1wk.aspx
 			 * void *memcpy(
@@ -799,6 +1084,25 @@ var winInit = function() {
 				self.TYPE.HMONITOR,	// HMONITOR
 				self.TYPE.POINT,	// pt
 				self.TYPE.DWORD		// dwFlags
+			);
+		},
+		MsgWaitForMultipleObjects: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms684242%28v=vs.85%29.aspx
+			 * DWORD WINAPI MsgWaitForMultipleObjects(
+			 *   __in_       DWORD  nCount,
+			 *   __in_ const HANDLE *pHandles,
+			 *   __in_       BOOL   bWaitAll,
+			 *   __in_       DWORD  dwMilliseconds,
+			 *   __in_       DWORD  dwWakeMask
+			 * );
+			 */
+			return lib('user32').declare('MsgWaitForMultipleObjects', self.TYPE.ABI,
+				self.TYPE.DWORD,		// return
+				self.TYPE.DWORD,		// nCount
+				self.TYPE.HANDLE.ptr,	// *pHandles
+				self.TYPE.BOOL,			// bWaitAll
+				self.TYPE.DWORD,		// dwMilliseconds
+				self.TYPE.DWORD			// dwWakeMask
 			);
 		},
 		PeekMessage: function() {
@@ -835,6 +1139,32 @@ var winInit = function() {
 				self.TYPE.int,		// id
 				self.TYPE.UINT,		// fsModifiers
 				self.TYPE.UINT		// vk
+			);
+		},
+		RegisterClass: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms633586%28v=vs.85%29.aspx
+			 * ATOM WINAPI RegisterClass(
+			 *   __in_ const WNDCLASS *lpWndClass
+			 * );
+			 */
+			return lib('user32').declare(ifdef_UNICODE ? 'RegisterClassW' : 'RegisterClassA', self.TYPE.ABI,
+				self.TYPE.ATOM,			// return
+				self.TYPE.WNDCLASS.ptr	// *lpWndClass
+			);
+		},
+		RegisterRawInputDevices: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms645600%28v=vs.85%29.aspx
+			 * BOOL WINAPI RegisterRawInputDevices(
+			 *  __in_ PCRAWINPUTDEVICE pRawInputDevices,
+			 *  __in_ UINT             uiNumDevices,
+			 *  __in_ UINT             cbSize
+			 * );
+			 */
+			return lib('user32').declare('RegisterRawInputDevices', self.TYPE.ABI,
+				self.TYPE.BOOL,					// return
+				self.TYPE.PCRAWINPUTDEVICE,		// pRawInputDevices
+				self.TYPE.UINT,					// uiNumDevices
+				self.TYPE.UINT					// cbSize
 			);
 		},
 		ReleaseDC: function() {
@@ -874,6 +1204,39 @@ var winInit = function() {
 				self.TYPE.HWND	// hWnd
 			);
 		},
+		SetTimer: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms644906%28v=vs.85%29.aspx
+			 * UINT_PTR WINAPI SetTimer(
+			 *   _in_opt_ HWND      hWnd,
+			 *   _in_     UINT_PTR  nIDEvent,
+			 *   _in_     UINT      uElapse,
+			 *   _in_opt_ TIMERPROC lpTimerFunc
+			 * );
+			 */
+			return lib('user32').declare('SetTimer', self.TYPE.ABI,
+				self.TYPE.UINT_PTR,		//return
+				self.TYPE.HWND,			// hWnd
+				self.TYPE.UINT_PTR,		// nIDEvent
+				self.TYPE.UINT,			// uElapse
+				self.TYPE.TIMERPROC.ptr	// lpTimerFunc
+			);
+		},
+		SetWindowsHookEx: function() {
+			/* HHOOK WINAPI SetWindowsHookEx(
+			 *   __in_ int       idHook,
+			 *   __in_ HOOKPROC  lpfn,
+			 *   __in_ HINSTANCE hMod,
+			 *   __in_ DWORD     dwThreadId
+			 * );
+			 */
+			return lib('user32').declare(ifdef_UNICODE ? 'SetWindowsHookExW' : 'SetWindowsHookExA', self.TYPE.ABI,
+				self.TYPE.HHOOK,
+				self.TYPE.INT,
+				self.TYPE.HOOKPROC,
+				self.TYPE.HINSTANCE,
+				self.TYPE.DWORD
+			);
+		},
 		SetWindowPos: function() {
 			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms633545%28v=vs.85%29.aspx
 			 * BOOL WINAPI SetWindowPos(
@@ -906,6 +1269,30 @@ var winInit = function() {
 			return lib('shell32').declare(ifdef_UNICODE ? 'SHFileOperationW' : 'SHFileOperationA', self.TYPE.ABI,
 				self.TYPE.INT,				// return
 				self.TYPE.LPSHFILEOPSTRUCT	// lpFileOp
+			);
+		},
+		UnhookWindowsHookEx: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms644993%28v=vs.85%29.aspx
+			 * BOOL WINAPI UnhookWindowsHookEx(
+			 *   _in_ HHOOK hhk
+			 * );
+			 */
+			return lib('user32').declare('UnhookWindowsHookEx', self.TYPE.ABI,
+				self.TYPE.BOOL,
+				self.TYPE.HHOOK
+			);
+		},
+		UnregisterClass: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms644899%28v=vs.85%29.aspx
+			 * BOOL WINAPI UnregisterClass(
+			 *   __in_     LPCTSTR   lpClassName,
+			 *   __in_opt_ HINSTANCE hInstance
+			 * );
+			 */
+			return lib('user32').declare(ifdef_UNICODE ? 'UnregisterClassW' : 'UnregisterClassA', self.TYPE.ABI,
+				self.TYPE.BOOL,		// return
+				self.TYPE.LPCTSTR,	// lpClassName
+				self.TYPE.HINSTANCE	// hInstance
 			);
 		},
 		UnregisterHotKey: function() {

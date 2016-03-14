@@ -17,6 +17,7 @@ var macTypes = function() {
 	this.ABI = ctypes.default_abi;
 
 	// C TYPES
+	this.bool = ctypes.bool;
 	this.char = ctypes.char;
 	this.int = ctypes.int;
 	this.int16_t = ctypes.int16_t;
@@ -46,6 +47,11 @@ var macTypes = function() {
 	this.CFTypeRef = ctypes.voidptr_t;
 	this.CGDirectDisplayID = ctypes.uint32_t;
 	this.CGError = ctypes.int32_t;
+	this.CGEventField = ctypes.uint32_t;
+	this.CGEventMask = ctypes.uint64_t;
+	this.CGEventTapOptions = ctypes.uint32_t;
+	this.CGEventTapPlacement = ctypes.uint32_t;
+	this.CGEventType = ctypes.uint32_t;
 	this.CGFloat = is64bit ? ctypes.double : ctypes.float; // ctypes.float is 32bit deosntw ork as of May 10th 2015 see this bug: https://bugzilla.mozilla.org/show_bug.cgi?id=1163406 this would cause crash on CGDisplayGetBounds http://stackoverflow.com/questions/28216681/how-can-i-get-screenshot-from-all-displays-on-mac#comment48414568_28247749
 	this.CGWindowID = ctypes.uint32_t;
 	this.CGWindowLevel = ctypes.int32_t;
@@ -96,11 +102,15 @@ var macTypes = function() {
 
 	// SIMPLE STRUCTS // based on any of the types above
 	this.__CFAllocator = ctypes.StructType('__CFAllocator');
-	this.__CFArray = ctypes.StructType("__CFArray");
-	this.__CFDictionary = new ctypes.StructType('__CFDictionary');
-	this.__CFRunLoop = ctypes.StructType("__CFRunLoop");
+	this.__CFArray = ctypes.StructType('__CFArray');
+	this.__CFDictionary = ctypes.StructType('__CFDictionary');
+	this.__CFMachPort = ctypes.StructType('__CFMachPort');
+	this.__CFRunLoop = ctypes.StructType('__CFRunLoop');
+	this.__CFRunLoopSource = ctypes.StructType('__CFRunLoopSource');
 	this.__CFString = ctypes.StructType('__CFString');
 	this.__CFURL = ctypes.StructType('__CFURL');
+	this.__CGEvent = ctypes.StructType('__CGEvent');
+	this.__CGEventTapProxy = ctypes.StructType('__CGEventTapProxy');
 	this.__FSEventStream = ctypes.StructType("__FSEventStream");
 	this.CFDictionaryRef = this.__CFDictionary.ptr;
 	this.CGImage = ctypes.StructType('CGImage');
@@ -144,11 +154,15 @@ var macTypes = function() {
 	// ADVANCED STRUCTS // based on "simple structs" to be defined first
 	this.CFAllocatorRef = this.__CFAllocator.ptr;
 	this.CFArrayRef = this.__CFArray.ptr;
+	this.CFMachPortRef = this.__CFMachPort.ptr;
 	this.CFRunLoopRef = this.__CFRunLoop.ptr;
+	this.CFRunLoopSourceRef = this.__CFRunLoopSource.ptr;
 	this.CFStringRef = this.__CFString.ptr;
 	this.CFURLRef = this.__CFURL.ptr;
 	this.CGImageRef = this.CGImage.ptr;
 	this.CGContextRef = this.CGContext.ptr;
+	this.CGEventRef = this.__CGEvent.ptr;
+	this.CGEventTapProxy = this.__CGEventTapProxy.ptr;
 	this.CGRect = ctypes.StructType('CGRect', [
 		{ origin: this.CGPoint },
 		{ size: this.CGSize }
@@ -186,13 +200,14 @@ var macTypes = function() {
 	this.EventHandlerProcPtr = ctypes.FunctionType(this.CALLBACK_ABI, this.OSStatus, [this.EventHandlerCallRef, this.EventRef, this.void.ptr]).ptr;
 	this.FSEventStreamCallback = ctypes.FunctionType(this.CALLBACK_ABI, this.void, [this.ConstFSEventStreamRef, this.void.ptr, this.size_t, this.void.ptr, this.FSEventStreamEventFlags.ptr, this.FSEventStreamEventId.ptr]).ptr;
 	this.ModalFilterProcPtr = ctypes.FunctionType(this.CALLBACK_ABI, this.Boolean, [this.DialogRef, this.EventRecord.ptr, this.DialogItemIndex.ptr]).ptr;
+	this.CGEventTapCallBack = ctypes.FunctionType(this.CALLBACK_ABI, this.CGEventRef, [this.CGEventTapProxy, this.CGEventType, this.CGEventRef, this.VOID.ptr]).ptr;
 	
 	// ADVANCED FUNCTION TYPES
 	this.EventHandlerUPP = this.EventHandlerProcPtr;
 	this.ModalFilterUPP = this.ModalFilterProcPtr;
 	
 	// STRUCTS USING FUNC TYPES
-	this.AlertStdAlertParamRec = ctypes.StructType("AlertStdAlertParamRec", [
+	this.AlertStdAlertParamRec = ctypes.StructType('AlertStdAlertParamRec', [
 		{ movable: this.Boolean },
 		{ helpButton: this.Boolean },
 		{ filterProc: this.ModalFilterUPP },
@@ -203,14 +218,14 @@ var macTypes = function() {
 		{ cancelButton: this.SInt16 },
 		{ position: this.UInt16 }
 	]);
-	this.CFArrayCallBacks = ctypes.StructType("CFArrayCallBacks", [
+	this.CFArrayCallBacks = ctypes.StructType('CFArrayCallBacks', [
 		{ version: this.CFIndex },
 		{ retain: this.CFArrayRetainCallBack },
 		{ release: this.CFArrayReleaseCallBack },
 		{ copyDescription: this.CFArrayCopyDescriptionCallBack },
 		{ equal: this.CFArrayEqualCallBack }
 	]);
-	this.FSEventStreamContext = ctypes.StructType("FSEventStreamContext", [
+	this.FSEventStreamContext = ctypes.StructType('FSEventStreamContext', [
 		{version: this.CFIndex},
 		{info: this.void.ptr},
 		{retain: this.CFAllocatorRetainCallBack},
@@ -228,16 +243,18 @@ var macTypes = function() {
 	
 	// ADV OBJC TYPES
 	this.NSBitmapFormat = this.NSUInteger;
+	this.NSEventType = this.NSUInteger;
+	this.NSEventMask = this.NSUInteger;
 	
 	// GUESS TYPES OBJC - they work though
 	this.id = ctypes.voidptr_t;
 	this.IMP = ctypes.voidptr_t;
 	this.SEL = ctypes.voidptr_t;
 	this.Class = ctypes.voidptr_t;
+	this.NSEvent = ctypes.voidptr_t;
 	this.NSWindow = ctypes.voidptr_t;
 	
 	// NULL CONSTs that i use for vaiadic args
-	
 	
 	// SIMPLE OBJC STRUCTS
 	this.Block_descriptor_1 = ctypes.StructType('Block_descriptor_1', [
@@ -254,8 +271,10 @@ var macTypes = function() {
 		{ descriptor: this.Block_descriptor_1.ptr }
 	]);
 	
+	// FUNC OBJC TYPES
+	this.IMP_for_EventMonitorCallback = ctypes.FunctionType(this.CALLBACK_ABI, this.NSEvent.ptr, [this.id, this.NSEvent.ptr]);
 
-	// dispatch stuff
+	// LIBDISPATCH STUFF
 	this.dispatch_block_t = ctypes.FunctionType(this.CALLBACK_ABI, this.void, []).ptr;
 	this.dispatch_queue_t = ctypes.voidptr_t; // guess
 }
@@ -273,6 +292,9 @@ var macInit = function() {
 		get CGRectNull () { if (!('CGRectNull' in _const)) { _const['CGRectNull'] = lib('CoreGraphics').declare('CGRectNull', self.TYPE.CGRect); } return _const['CGRectNull']; },
 		get kCFTypeArrayCallBacks () { if (!('kCFTypeArrayCallBacks' in _const)) { _const['kCFTypeArrayCallBacks'] = lib('CoreFoundation').declare('kCFTypeArrayCallBacks', self.TYPE.CFArrayCallBacks); } return _const['kCFTypeArrayCallBacks']; },
 		get _NSConcreteGlobalBlock () { if (!('_NSConcreteGlobalBlock' in _const)) { _const['_NSConcreteGlobalBlock'] = lib('objc').declare('_NSConcreteGlobalBlock', self.TYPE.void.ptr); } return _const['_NSConcreteGlobalBlock']; },
+		get kCFAllocatorDefault () { if (!('kCFAllocatorDefault' in _const)) { _const['kCFAllocatorDefault'] = lib('CoreFoundation').declare('kCFAllocatorDefault', self.TYPE.CFAllocatorRef); } return _const['kCFAllocatorDefault']; },
+		get kCFRunLoopDefaultMode () { if (!('kCFRunLoopDefaultMode' in _const)) { _const['kCFRunLoopDefaultMode'] = lib('CoreFoundation').declare('kCFRunLoopDefaultMode', self.TYPE.CFStringRef); } return _const['kCFRunLoopDefaultMode']; },
+		get kCFRunLoopCommonModes () { if (!('kCFRunLoopCommonModes' in _const)) { _const['kCFRunLoopCommonModes'] = lib('CoreFoundation').declare('kCFRunLoopCommonModes', self.TYPE.CFStringRef); } return _const['kCFRunLoopCommonModes']; },
 		kCGErrorSuccess: 0,
 		kCGNullDirectDisplay: 0,
 		kCGBaseWindowLevelKey: 0,
@@ -304,17 +326,9 @@ var macInit = function() {
 		kCGWindowListOptionOnScreenBelowWindow: 4,
 		kCGWindowListOptionIncludingWindow: 8,
 		kCGWindowListExcludeDesktopElements: 16,
-		///////// OBJC - all consts are wrapped in a type as if its passed to variadic it needs to have type defind, see jsctypes chat with arai on 051015 357p
-		NO: self.TYPE.BOOL(0),
-		NSPNGFileType: self.TYPE.NSUInteger(4),
-		YES: self.TYPE.BOOL(1), // i do this instead of 1 becuase for varidic types we need to expclicitly define it
-		NIL: self.TYPE.void.ptr(ctypes.UInt64('0x0')), // needed for varidic args, as i cant pass null there
 		
-		BLOCK_HAS_COPY_DISPOSE: 1 << 25,
-		BLOCK_HAS_CTOR: 1 << 26,
-		BLOCK_IS_GLOBAL: 1 << 28,
-		BLOCK_HAS_STRET: 1 << 29,
-		BLOCK_HAS_SIGNATURE: 1 << 30,
+		kCGHeadInsertEventTap: 0,
+		kCGEventTapOptionDefault: 0,
 		
 		// https://github.com/cbednarski/nv/blob/73da1a303f5051e1e012025085402157bb3deece/PTHotKeys/PTKeyCombo.m#L113-L121
 		cmdKey: is64bit ? 0x23180000 : 0x00002318,
@@ -323,8 +337,134 @@ var macInit = function() {
 		shiftKey: is64bit ? 0x21e70000 : 0x000021e7,
 		
 		kEventClassKeyboard: self.TYPE.OSType('0x6B657962'), // :todo: figure out if i can just use this without wrapping it in OSType. this is a number of 1801812322
-		kEventHotKeyPressed: 5
+		kEventHotKeyPressed: 5,
+		
+		kCGEventNull: 0,
+		kCGEventLeftMouseDown: 1,
+		kCGEventLeftMouseUp: 2,
+		kCGEventRightMouseDown: 3,
+		kCGEventRightMouseUp: 4,
+		kCGEventMouseMoved: 5,
+		kCGEventLeftMouseDragged: 6,
+		kCGEventRightMouseDragged: 7,
+		kCGEventKeyDown: 10,
+		kCGEventKeyUp: 11,
+		kCGEventFlagsChanged: 12,
+		kCGEventScrollWheel: 22,
+		kCGEventTabletPointer: 23,
+		kCGEventTabletProximity: 24,
+		kCGEventOtherMouseDown: 25,
+		kCGEventOtherMouseUp: 26,
+		kCGEventOtherMouseDragged: 27,
+		kCGEventTapDisabledByTimeout: 0xFFFFFFFE, // this.TYPE.CGEventType('0xFFFFFFFE'),
+		kCGEventTapDisabledByUserInput: 0xFFFFFFFF, // this.TYPE.CGEventType('0xFFFFFFFF'),
+		kCGEventMaskForAllEvents: ctypes.UInt64('0xffffffffffffffff'), // #define kCGEventMaskForAllEvents	(~(CGEventMask)0) // https://github.com/sschiesser/ASK_server/blob/a51e2fbdac894c37d97142fc72faa35f89057744/MacOSX10.6/System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/CoreGraphics.framework/Versions/A/Headers/CGEventTypes.h#L380
+		
+		kCGMouseEventNumber: 0,
+		kCGMouseEventClickState: 1,
+		kCGMouseEventPressure: 2,
+		kCGMouseEventButtonNumber: 3,
+		kCGMouseEventDeltaX: 4,
+		kCGMouseEventDeltaY: 5,
+		kCGMouseEventInstantMouser: 6,
+		kCGMouseEventSubtype: 7,
+		
+		kCGScrollWheelEventDeltaAxis1: 11,
+		kCGScrollWheelEventDeltaAxis2: 12,
+		kCGScrollWheelEventDeltaAxis3: 13,
+		kCGScrollWheelEventFixedPtDeltaAxis1: 93,
+		kCGScrollWheelEventFixedPtDeltaAxis2: 94,
+		kCGScrollWheelEventFixedPtDeltaAxis3: 95,
+		kCGScrollWheelEventPointDeltaAxis1: 96,
+		kCGScrollWheelEventPointDeltaAxis2: 97,
+		kCGScrollWheelEventPointDeltaAxis3: 98,
+		kCGScrollWheelEventInstantMouser: 14,
+		
+		kCFRunLoopRunFinished: 1,
+		kCFRunLoopRunStopped: 2,
+		kCFRunLoopRunTimedOut: 3,
+		kCFRunLoopRunHandledSource: 4,
+		
+		///////// OBJC - all consts are wrapped in a type as if its passed to variadic it needs to have type defind, see jsctypes chat with arai on 051015 357p
+		NO: self.TYPE.BOOL(0),
+		NSPNGFileType: self.TYPE.NSUInteger(4),
+		YES: self.TYPE.BOOL(1), // i do this instead of 1 becuase for varidic types we need to expclicitly define it
+		NIL: self.TYPE.void.ptr(ctypes.UInt64('0x0')), // needed for varidic args, as i cant pass null there
+		
+		NSLeftMouseDown: 1,				// TYPES.NSEventType
+		NSLeftMouseUp: 2,				// TYPES.NSEventType
+		NSRightMouseDown: 3,			// TYPES.NSEventType
+		NSRightMouseUp: 4,				// TYPES.NSEventType
+		NSMouseMoved: 5,				// TYPES.NSEventType
+		NSLeftMouseDragged: 6,			// TYPES.NSEventType
+		NSRightMouseDragged: 7,			// TYPES.NSEventType
+		NSMouseEntered: 8,				// TYPES.NSEventType
+		NSMouseExited: 9,				// TYPES.NSEventType
+		NSKeyDown: 10,					// TYPES.NSEventType
+		NSKeyUp: 11,					// TYPES.NSEventType
+		NSFlagsChanged: 12,				// TYPES.NSEventType
+		NSAppKitDefined: 13,			// TYPES.NSEventType
+		NSSystemDefined: 14,			// TYPES.NSEventType
+		NSApplicationDefined: 15,		// TYPES.NSEventType
+		NSPeriodic: 16,					// TYPES.NSEventType
+		NSCursorUpdate: 17,				// TYPES.NSEventType
+		NSScrollWheel: 22,				// TYPES.NSEventType
+		NSTabletPoint: 23,				// TYPES.NSEventType
+		NSTabletProximity: 24,			// TYPES.NSEventType
+		NSOtherMouseDown: 25,			// TYPES.NSEventType
+		NSOtherMouseUp: 26,				// TYPES.NSEventType
+		NSOtherMouseDragged: 27,		// TYPES.NSEventType
+		NSEventTypeGesture: 29,			// TYPES.NSEventType
+		NSEventTypeMagnify: 30,			// TYPES.NSEventType
+		NSEventTypeSwipe: 31,			// TYPES.NSEventType
+		NSEventTypeRotate: 18,			// TYPES.NSEventType
+		NSEventTypeBeginGesture: 19,	// TYPES.NSEventType
+		NSEventTypeEndGesture: 20,		// TYPES.NSEventType
+		NSEventTypeSmartMagnify: 32,	// TYPES.NSEventType
+		NSEventTypeQuickLook: 33,		// TYPES.NSEventType
+		NSEventTypePressure: 34,		// TYPES.NSEventType
+		NSUIntegerMax: this.TYPE.NSUInteger(is64bit ? '0xffffffff' : '0xffff'),		// TYPES.NSUInteger
+		
+		BLOCK_HAS_COPY_DISPOSE: 1 << 25,
+		BLOCK_HAS_CTOR: 1 << 26,
+		BLOCK_IS_GLOBAL: 1 << 28,
+		BLOCK_HAS_STRET: 1 << 29,
+		BLOCK_HAS_SIGNATURE: 1 << 30,
 	};
+	
+	// ADVANCED CONST
+	this.CONST.NSLeftMouseDownMask = 1 << this.CONST.NSLeftMouseDown;
+	this.CONST.NSLeftMouseUpMask = 1 << this.CONST.NSLeftMouseUp;
+	this.CONST.NSRightMouseDownMask = 1 << this.CONST.NSRightMouseDown;
+	this.CONST.NSRightMouseUpMask = 1 << this.CONST.NSRightMouseUp;
+	this.CONST.NSMouseMovedMask = 1 << this.CONST.NSMouseMoved;
+	this.CONST.NSLeftMouseDraggedMask = 1 << this.CONST.NSLeftMouseDragged;
+	this.CONST.NSRightMouseDraggedMask = 1 << this.CONST.NSRightMouseDragged;
+	this.CONST.NSMouseEnteredMask = 1 << this.CONST.NSMouseEntered;
+	this.CONST.NSMouseExitedMask = 1 << this.CONST.NSMouseExited;
+	this.CONST.NSKeyDownMask = 1 << this.CONST.NSKeyDown;
+	this.CONST.NSKeyUpMask = 1 << this.CONST.NSKeyUp;
+	this.CONST.NSFlagsChangedMask = 1 << this.CONST.NSFlagsChanged;
+	this.CONST.NSAppKitDefinedMask = 1 << this.CONST.NSAppKitDefined;
+	this.CONST.NSSystemDefinedMask = 1 << this.CONST.NSSystemDefined;
+	this.CONST.NSApplicationDefinedMask = 1 << this.CONST.NSApplicationDefined;
+	this.CONST.NSPeriodicMask = 1 << this.CONST.NSPeriodic;
+	this.CONST.NSCursorUpdateMask = 1 << this.CONST.NSCursorUpdate;
+	this.CONST.NSScrollWheelMask = 1 << this.CONST.NSScrollWheel;
+	this.CONST.NSTabletPointMask = 1 << this.CONST.NSTabletPoint;
+	this.CONST.NSTabletProximityMask = 1 << this.CONST.NSTabletProximity;
+	this.CONST.NSOtherMouseDownMask = 1 << this.CONST.NSOtherMouseDown;
+	this.CONST.NSOtherMouseUpMask = 1 << this.CONST.NSOtherMouseUp;
+	this.CONST.NSOtherMouseDraggedMask = 1 << this.CONST.NSOtherMouseDragged;
+	this.CONST.NSEventMaskGesture = 1 << this.CONST.NSEventTypeGesture;
+	this.CONST.NSEventMaskMagnify = 1 << this.CONST.NSEventTypeMagnify;
+	this.CONST.NSEventMaskSwipe = 1 << this.CONST.NSEventTypeSwipe;	// 1U << NSEventTypeSwipe
+	this.CONST.NSEventMaskRotate = 1 << this.CONST.NSEventTypeRotate;
+	this.CONST.NSEventMaskBeginGesture = 1 << this.CONST.NSEventTypeBeginGesture;
+	this.CONST.NSEventMaskEndGesture = 1 << this.CONST.NSEventTypeEndGesture;
+	this.CONST.NSEventMaskSmartMagnify = 1 << this.CONST.NSEventTypeSmartMagnify;	// 1ULL << NSEventTypeSmartMagnify;
+	this.CONST.NSEventMaskPressure = 1 << this.CONST.NSEventTypePressure;	// 1ULL << NSEventTypePressure
+	this.CONST.NSAnyEventMask = this.CONST.NSUIntegerMax; //0xffffffffU
 
 	var _lib = {}; // cache for lib
 	var lib = function(path) {
@@ -450,6 +590,66 @@ var macInit = function() {
 				self.TYPE.CFIndex
 			);
 		},
+		CFMachPortCreateRunLoopSource: function() {
+			return lib('CoreFoundation').declare('CFMachPortCreateRunLoopSource', self.TYPE.ABI,
+				self.TYPE.CFRunLoopSourceRef,
+				self.TYPE.CFAllocatorRef,
+				self.TYPE.CFMachPortRef,
+				self.TYPE.CFIndex
+			);
+		},
+		CFRunLoopAddSource: function() {
+			return lib('CoreFoundation').declare('CFRunLoopAddSource', self.TYPE.ABI,
+				self.TYPE.VOID,
+				self.TYPE.CFRunLoopRef,
+				self.TYPE.CFRunLoopSourceRef,
+				self.TYPE.CFStringRef
+			);
+		},
+		CFRunLoopGetCurrent: function() {
+			return lib('CoreFoundation').declare('CFRunLoopGetCurrent', self.TYPE.ABI,
+				self.TYPE.CFRunLoopRef
+			);
+		},
+		CFRunLoopSourceInvalidate: function() {
+			return lib('CoreFoundation').declare('CFRunLoopSourceInvalidate', self.TYPE.ABI,
+				self.TYPE.VOID,
+				self.TYPE.CFRunLoopSourceRef
+			);
+		},
+		CFRunLoopRemoveSource: function() {
+			lib('CoreFoundation').declare('CFRunLoopRemoveSource', self.TYPE.ABI,
+				self.TYPE.VOID,
+				self.TYPE.CFRunLoopRef,
+				self.TYPE.CFRunLoopSourceRef,
+				self.TYPE.CFStringRef
+			);
+		},
+		CFRunLoopRun: function() {
+			/* https://developer.apple.com/library/ios/documentation/CoreFoundation/Reference/CFRunLoopRef/index.html#//apple_ref/c/func/CFRunLoopRun
+			*/
+			return lib('CoreFoundation').declare('CFRunLoopRun', self.TYPE.ABI,
+				self.TYPE.VOID
+			);
+		},
+		CFRunLoopRunInMode: function() {
+			/* https://developer.apple.com/library/ios/documentation/CoreFoundation/Reference/CFRunLoopRef/index.html#//apple_ref/c/func/CFRunLoopRunInMode
+			*/
+			return lib('CoreFoundation').declare("CFRunLoopRunInMode", self.TYPE.ABI,
+				self.TYPE.SInt32,
+				self.TYPE.CFStringRef,
+				self.TYPE.CFTimeInterval,
+				self.TYPE.Boolean
+			);
+		},
+		CFRunLoopStop: function() {
+			/* https://developer.apple.com/library/ios/documentation/CoreFoundation/Reference/CFRunLoopRef/index.html#//apple_ref/c/func/CFRunLoopStop
+			*/
+			return lib('CoreFoundation').declare('CFRunLoopStop', self.TYPE.ABI,
+				self.TYPE.VOID,
+				self.TYPE.CFRunLoopRef
+			);
+		},
 		CFStringCreateWithCharacters: function() {
 			/* https://developer.apple.com/library/mac/documentation/CoreFoundation/Reference/CFStringRef/#//apple_ref/c/func/CFStringCreateWithCharacters
 			 * CFStringRef CFStringCreateWithCharacters (
@@ -528,7 +728,7 @@ var macInit = function() {
 			);
 		},
 		CGDisplayHideCursor: function() {
-			return lib('CoreGraphics').declare("CGDisplayHideCursor", self.TYPE.ABI,
+			return lib('CoreGraphics').declare('CGDisplayHideCursor', self.TYPE.ABI,
 				self.TYPE.CGError,
 				self.TYPE.CGDirectDisplayID
 			);
@@ -540,9 +740,67 @@ var macInit = function() {
 			);
 		},
 		CGDisplayShowCursor: function() {
-			return lib('CoreGraphics').declare("CGDisplayShowCursor", self.TYPE.ABI,
+			return lib('CoreGraphics').declare('CGDisplayShowCursor', self.TYPE.ABI,
 				self.TYPE.CGError,
 				self.TYPE.CGDirectDisplayID
+			);
+		},
+		CGEventGetIntegerValueField: function() {
+			/* https://developer.apple.com/library/mac/documentation/Carbon/Reference/QuartzEventServicesRef/index.html#//apple_ref/c/func/CGEventGetIntegerValueField
+			 * int64_t CGEventGetIntegerValueField (
+			 *   CGEventRef event,
+			 *   CGEventField field
+			 * ); 
+			 */
+			return lib('CoreGraphics').declare('CGEventGetIntegerValueField', self.TYPE.ABI,
+				self.TYPE.int64_t,		// return
+				self.TYPE.CGEventRef,	// event
+				self.TYPE.CGEventField	// field
+			);
+		},
+		CGEventMaskBit: function() {
+			/* https://developer.apple.com/library/mac/documentation/Carbon/Reference/QuartzEventServicesRef/index.html#//apple_ref/c/macro/CGEventMaskBit
+			 * CGEventMask CGEventMaskBit (
+			 *   CGEventType eventType
+			 * ); 
+			 */
+			// its inlined apparently: as this doesnt work
+			  // return lib('CoreGraphics').declare('CGEventMaskBit', self.TYPE.ABI,
+			  // 	self.TYPE.CGEventType
+			  // );
+			// inlined found here: https://github.com/sschiesser/ASK_server/blob/a51e2fbdac894c37d97142fc72faa35f89057744/MacOSX10.6/System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/CoreGraphics.framework/Versions/A/Headers/CGEventTypes.h#L377
+			  // #define CGEventMaskBit(eventType) ((CGEventMask)1 << (eventType))
+			return function(eventType) {
+				return self.TYPE.CGEventMask(1 << eventType);
+			};
+		},
+		CGEventTapCreateForPSN: function() {
+			/* https://developer.apple.com/library/mac/documentation/Carbon/Reference/QuartzEventServicesRef/index.html#//apple_ref/c/func/CGEventTapCreateForPSN
+			 * CFMachPortRef CGEventTapCreateForPSN (
+			 *   void *processSerialNumber,
+			 *   CGEventTapPlacement place,
+			 *   CGEventTapOptions options,
+			 *   CGEventMask eventsOfInterest,
+			 *   CGEventTapCallBack callback,
+			 *   void *userInfo
+			 * );
+			 */
+			// oxtypes uses libpath: '/System/Library/Frameworks/ApplicationServices.framework/Frameworks/CoreGraphics.framework/CoreGraphics' both work for me though,  tested on osx 10
+			return lib('CoreGraphics').declare('CGEventTapCreateForPSN', self.TYPE.ABI,
+				self.TYPE.CFMachPortRef,
+				self.TYPE.VOID.ptr,
+				self.TYPE.CGEventTapPlacement,
+				self.TYPE.CGEventTapOptions,
+				self.TYPE.CGEventMask,
+				self.TYPE.CGEventTapCallBack,
+				self.TYPE.VOID.ptr
+			);
+		},
+		CGEventTapEnable: function() {
+			return lib('CoreGraphics').declare('CGEventTapEnable', self.TYPE.ABI,
+				self.TYPE.VOID,
+				self.TYPE.CFMachPortRef,
+				self.TYPE.bool
 			);
 		},
 		CGGetActiveDisplayList: function() {
@@ -595,6 +853,7 @@ var macInit = function() {
 			 * ); 
 			 */
 			 /*
+			 // its inlined, so this declare doesnt work, see: http://stackoverflow.com/questions/30158864/cgrectmake-symbol-not-found#comment48456276_30173759
 			return lib('CGGeometry').declare('CGRectMake', self.TYPE.ABI,
 				self.TYPE.CGRect,	// return
 				self.TYPE.CGFloat,	// x
@@ -662,6 +921,12 @@ var macInit = function() {
 			 */
 			return lib('/System/Library/Frameworks/Carbon.framework/Frameworks/HIToolbox.framework/HIToolbox').declare('GetApplicationEventTarget', self.TYPE.ABI,
 				self.TYPE.EventTargetRef	// return
+			);
+		},
+		GetCurrentProcess: function() {
+			return lib('/System/Library/Frameworks/ApplicationServices.framework/Frameworks/HIServices.framework/HIServices').declare('GetCurrentProcess', self.TYPE.ABI,
+				self.TYPE.OSErr,
+				self.TYPE.ProcessSerialNumber.ptr
 			);
 		},
 		GetEventDispatcherTarget: function() {
@@ -883,7 +1148,34 @@ var macInit = function() {
 				self.TYPE.void.ptr,	// *src
 				self.TYPE.size_t	// n
 			);
-		}
+		},
+		////////////// LIBDISPATCH
+		dispatch_get_main_queue: function() {
+			/* https://developer.apple.com/library/prerelease/mac/documentation/Performance/Reference/GCD_libdispatch_Ref/#//apple_ref/c/func/dispatch_get_main_queue
+			 *  dispatch_queue_t dispatch_get_main_queue (
+			 *   void
+			 * ); 
+			 */
+			// return lib('/usr/lib/system/libdispatch.dylib').declare('_dispatch_main_q', self.TYPE.ABI,
+			// 	self.TYPE.dispatch_queue_t	// return
+			// );
+			// do not do ostypes.API('dispatch_get_main_queue')() the () will give error not FuncitonType.ptr somhting like that, must just use ostypes.API('dispatch_get_main_queue')
+			// http://stackoverflow.com/questions/31637321/standard-library-containing-dispatch-get-main-queue-gcd
+			return lib('/usr/lib/system/libdispatch.dylib').declare('_dispatch_main_q', self.TYPE.dispatch_queue_t);
+		},
+		dispatch_sync: function() {
+			/* https://developer.apple.com/library/prerelease/mac/documentation/Performance/Reference/GCD_libdispatch_Ref/#//apple_ref/c/func/dispatch_sync
+			 * void dispatch_sync (
+			 *   dispatch_queue_t queue,
+			 *   dispatch_block_t block
+			 * ); 
+			 */
+			return lib('/usr/lib/system/libdispatch.dylib').declare('dispatch_sync', self.TYPE.ABI,
+				self.TYPE.void,					// return
+				self.TYPE.dispatch_queue_t,		// queue
+				self.TYPE.dispatch_block_t		// block
+			);
+		}		
 	};
 	// end - predefine your declares here
 	// end - function declares
