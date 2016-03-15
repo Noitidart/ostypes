@@ -1730,7 +1730,7 @@ var x11Init = function() {
 			/* https://developer.gnome.org/gdk3/stable/gdk3-Windows.html#gdk-get-default-root-window
 			 * GdkWindow *gdk_get_default_root_window (void);
 			 */
-			return lib('gdk2').declare('gdk_get_default_root_window', self.TYPE.ABI,
+			return lib(parseInt(core.firefox.version) <= 45 ? 'gdk2' : 'gdk3').declare('gdk_get_default_root_window', self.TYPE.ABI,
 				self.TYPE.GdkWindow.ptr	// return
 			);
 		},
@@ -1740,7 +1740,7 @@ var x11Init = function() {
 			 *   GdkScreen *screen
 			 * );
 			 */
-			return lib('gdk2').declare('gdk_screen_get_active_window', self.TYPE.ABI,
+			return lib(parseInt(core.firefox.version) <= 45 ? 'gdk2' : 'gdk3').declare('gdk_screen_get_active_window', self.TYPE.ABI,
 				self.TYPE.GdkWindow.ptr,	// return
 				self.TYPE.GdkScreen.ptr		// *screen
 			);
@@ -1749,7 +1749,7 @@ var x11Init = function() {
 			/* https://developer.gnome.org/gdk3/stable/GdkScreen.html#gdk-screen-get-default
 			 * GdkScreen *gdk_screen_get_default (void);
 			 */
-			return lib('gdk2').declare('gdk_screen_get_default', self.TYPE.ABI,
+			return lib(parseInt(core.firefox.version) <= 45 ? 'gdk2' : 'gdk3').declare('gdk_screen_get_default', self.TYPE.ABI,
 				self.TYPE.GdkScreen.ptr	// return
 			);
 		},
@@ -1759,7 +1759,7 @@ var x11Init = function() {
 			 *   GdkScreen *screen
 			 * );
 			 */
-			return lib('gdk2').declare('gdk_screen_get_root_window', self.TYPE.ABI,
+			return lib(parseInt(core.firefox.version) <= 45 ? 'gdk2' : 'gdk3').declare('gdk_screen_get_root_window', self.TYPE.ABI,
 				self.TYPE.GdkWindow.ptr,	// return
 				self.TYPE.GdkScreen.ptr		// *screen
 			);
@@ -1772,7 +1772,7 @@ var x11Init = function() {
 			 *   gpointer data
 			 * );
 			 */
-			return lib('gdk2').declare('gdk_window_add_filter', self.TYPE.ABI,
+			return lib(parseInt(core.firefox.version) <= 45 ? 'gdk2' : 'gdk3').declare('gdk_window_add_filter', self.TYPE.ABI,
 				self.TYPE.void,				// return
 				self.TYPE.GdkWindow.ptr,	// *window
 				self.TYPE.GdkFilterFunc,	// function
@@ -1786,7 +1786,7 @@ var x11Init = function() {
 			 *   gpointer *data
 			 * );
 			 */
-			return lib('gdk2').declare('gdk_window_get_user_data', self.TYPE.ABI,
+			return lib(parseInt(core.firefox.version) <= 45 ? 'gdk2' : 'gdk3').declare('gdk_window_get_user_data', self.TYPE.ABI,
 				self.TYPE.void,				// return
 				self.TYPE.GdkWindow.ptr,	// *window
 				self.TYPE.gpointer.ptr		// *data
@@ -1800,7 +1800,7 @@ var x11Init = function() {
 			 *   gpointer data
 			 * );
 			 */
-			return lib('gdk2').declare('gdk_window_remove_filter', self.TYPE.ABI,
+			return lib(parseInt(core.firefox.version) <= 45 ? 'gdk2' : 'gdk3').declare('gdk_window_remove_filter', self.TYPE.ABI,
 				self.TYPE.void,				// return
 				self.TYPE.GdkWindow.ptr,	// *window
 				self.TYPE.GdkFilterFunc,	// function
@@ -1814,7 +1814,7 @@ var x11Init = function() {
 			 *   GdkEventMask event_mask
 			 * );
 			 */
-			return lib('gdk2').declare('gdk_window_set_events', self.TYPE.ABI,
+			return lib(parseInt(core.firefox.version) <= 45 ? 'gdk2' : 'gdk3').declare('gdk_window_set_events', self.TYPE.ABI,
 				self.TYPE.void,				// return
 				self.TYPE.GdkWindow.ptr,	// *window
 				self.TYPE.GdkEventMask		// event_mask
@@ -1826,7 +1826,7 @@ var x11Init = function() {
 			 *   GdkDrawable *drawable
 			 * );
 			 */
-			return lib('gdk2').declare('gdk_x11_drawable_get_xid', self.TYPE.ABI,
+			return lib(parseInt(core.firefox.version) <= 45 ? 'gdk2' : 'gdk3').declare('gdk_x11_drawable_get_xid', self.TYPE.ABI,
 				self.TYPE.XID,				// return
 				self.TYPE.GdkDrawable.ptr	// *drawable
 			);
@@ -1838,7 +1838,7 @@ var x11Init = function() {
 			 *   Window window
 			 * );
 			 */
-			return lib('gdk2').declare('gdk_x11_window_lookup_for_display', self.TYPE.ABI,
+			return lib(parseInt(core.firefox.version) <= 45 ? 'gdk2' : 'gdk3').declare('gdk_x11_window_lookup_for_display', self.TYPE.ABI,
 				self.TYPE.GdkWindow.ptr,	// *return
 				self.TYPE.GdkDisplay.ptr,	// *display
 				self.TYPE.Window			// window
@@ -1848,6 +1848,8 @@ var x11Init = function() {
 			/* https://developer.gnome.org/gdk2/stable/gdk2-X-Window-System-Interaction.html#gdk-xid-table-lookup
 			 * gpointer gdk_xid_table_lookup (XID xid);
 			 */
+			// return lib(parseInt(core.firefox.version) <= 45 ? 'gdk2' : 'gdk3').declare('gdk_xid_table_lookup', self.TYPE.ABI,
+			// not available in gdk3
 			return lib('gdk2').declare('gdk_xid_table_lookup', self.TYPE.ABI,
 				self.TYPE.gpointer,		// return
 				self.TYPE.XID			// xid
