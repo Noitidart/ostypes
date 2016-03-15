@@ -1734,6 +1734,17 @@ var x11Init = function() {
 				self.TYPE.GdkWindow.ptr	// return
 			);
 		},
+		gdk_screen_get_active_window: function() {
+			/* https://developer.gnome.org/gdk3/stable/GdkScreen.html#gdk-screen-get-active-window
+			 * GdkWindow *gdk_screen_get_active_window (
+			 *   GdkScreen *screen
+			 * );
+			 */
+			return lib('gdk2').declare('gdk_screen_get_active_window', self.TYPE.ABI,
+				self.TYPE.GdkWindow.ptr,	// return
+				self.TYPE.GdkScreen.ptr,	// *screen
+			);
+		},
 		gdk_screen_get_default: function() {
 			/* https://developer.gnome.org/gdk3/stable/GdkScreen.html#gdk-screen-get-default
 			 * GdkScreen *gdk_screen_get_default (void);
