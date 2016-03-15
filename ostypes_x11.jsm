@@ -1742,7 +1742,7 @@ var x11Init = function() {
 			 */
 			return lib('gdk2').declare('gdk_screen_get_active_window', self.TYPE.ABI,
 				self.TYPE.GdkWindow.ptr,	// return
-				self.TYPE.GdkScreen.ptr,	// *screen
+				self.TYPE.GdkScreen.ptr		// *screen
 			);
 		},
 		gdk_screen_get_default: function() {
