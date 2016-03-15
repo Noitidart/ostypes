@@ -1702,6 +1702,14 @@ var x11Init = function() {
 				self.TYPE.GError.ptr.ptr		// **error
 			);
 		},
+		gdk_get_default_root_window: function() {
+			/* https://developer.gnome.org/gdk3/stable/gdk3-Windows.html#gdk-get-default-root-window
+			 * GdkWindow *gdk_get_default_root_window (void);
+			 */
+			return lib('gdk2').declare('gdk_get_default_root_window', self.TYPE.ABI,
+				self.TYPE.GdkWindow.ptr	// return
+			);
+		},
 		gdk_window_add_filter: function() {
 			/* https://developer.gnome.org/gdk3/stable/gdk3-Windows.html#gdk-window-add-filter
 			 * void gdk_window_add_filter (
@@ -1767,6 +1775,15 @@ var x11Init = function() {
 				self.TYPE.GdkWindow.ptr,	// *return
 				self.TYPE.GdkDisplay.ptr,	// *display
 				self.TYPE.Window			// window
+			);
+		},
+		gdk_xid_table_lookup: function() {
+			/* https://developer.gnome.org/gdk2/stable/gdk2-X-Window-System-Interaction.html#gdk-xid-table-lookup
+			 * gpointer gdk_xid_table_lookup (XID xid);
+			 */
+			return lib('gdk2').declare('gdk_xid_table_lookup', self.TYPE.ABI,
+				self.TYPE.gpointer,		// return
+				self.TYPE.XID			// xid
 			);
 		},
 		gtk_widget_get_window: function() {
