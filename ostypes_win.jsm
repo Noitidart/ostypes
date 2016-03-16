@@ -151,6 +151,18 @@ var winTypes = function() {
 		{ DeviceID:		this.TCHAR.array(128) },
 		{ DeviceKey:	this.TCHAR.array(128) }
 	]);
+	this.GUID = ctypes.StructType('GUID', [
+	  { 'Data1': this.ULONG },
+	  { 'Data2': this.USHORT },
+	  { 'Data3': this.USHORT },
+	  { 'Data4': this.BYTE.array(8) }
+	]);
+	this.OVERLAPPED = ctypes.StructType('_OVERLAPPED', [ // https://msdn.microsoft.com/en-us/library/windows/desktop/ms684342%28v=vs.85%29.aspx
+		{ Internal: this.ULONG_PTR },
+		{ InternalHigh: this.ULONG_PTR },
+		{ Pointer: this.PVOID }, //  union { struct { DWORD Offset; DWORD OffsetHigh; }; PVOID Pointer; };
+		{ hEvent: this.HANDLE },
+	]);
 	this.POINT = ctypes.StructType('tagPOINT', [
 		{ x: this.LONG },
 		{ y: this.LONG }
@@ -193,6 +205,11 @@ var winTypes = function() {
         { right: this.LONG },
         { bottom: this.LONG }
     ]);
+	this.SECURITY_ATTRIBUTES = ctypes.StructType('_SECURITY_ATTRIBUTES', [ // https://msdn.microsoft.com/en-us/library/windows/desktop/aa379560%28v=vs.85%29.aspx
+		{ 'nLength': this.DWORD },
+		{ 'lpSecurityDescriptor': this.LPVOID },
+		{ 'bInheritHandle': this.BOOL }
+	]);
 	this.SHFILEOPSTRUCT = ctypes.StructType('_SHFILEOPSTRUCT', [ // https://msdn.microsoft.com/en-us/library/windows/desktop/bb759795%28v=vs.85%29.aspx
 		{ hwnd: this.HWND },
 		{ wFunc: this.UINT },
@@ -249,6 +266,9 @@ var winTypes = function() {
 		{ 'dmPanningWidth': this.DWORD },
 		{ 'dmPanningHeight': this.DWORD }
 	]);
+	this.IID = this.GUID;
+	this.LPOVERLAPPED = this.OVERLAPPED.ptr;
+	this.LPSECURITY_ATTRIBUTES = this.SECURITY_ATTRIBUTES.ptr;
 	this.MONITORINFOEX = ctypes.StructType('tagMONITORINFOEX', [
 		{ cbSize:		this.DWORD },
 		{ rcMonitor:	this.RECT },
@@ -271,6 +291,7 @@ var winTypes = function() {
 		{ time: this.DWORD },
 		{ pt: this.POINT }
 	]);
+	this.PGUID = this.GUID.ptr;
     this.PRECT = this.RECT.ptr;
     this.LPRECT = this.RECT.ptr;
     this.LPCRECT = this.RECT.ptr;
@@ -455,7 +476,24 @@ var winInit = function() {
 		WAIT_FAILED: self.TYPE.DWORD('0xFFFFFFFF'),
 		WAIT_IO_COMPLETION: 0x000000C0, // 192
 		WAIT_OBJECT_0: 0,
-		WAIT_TIMEOUT: 0x00000102 // 258
+		WAIT_TIMEOUT: 0x00000102, // 258
+		
+		GENERIC_READ: 0x80000000,
+		GENERIC_WRITE: 0x40000000,
+		CREATE_NEW: 1,
+		CREATE_ALWAYS: 2,
+		OPEN_EXISTING: 3,
+		OPEN_ALWAYS: 4,
+		TRUNCATE_EXISTING: 5,
+		FILE_ATTRIBUTE_NORMAL: 0x80, //128
+		FILE_FLAG_OVERLAPPED: 0x40000000,
+		FILE_SHARE_READ: 0x00000001,
+		FILE_SHARE_WRITE: 0x00000002,
+		FILE_SHARE_DELETE: 0x00000004
+		INVALID_HANDLE_VALUE: -1,
+		FSCTL_SET_SPARSE: 0x900c4,
+		FSCTL_SET_ZERO_DATA: 0x980c8,
+		FILE_BEGIN: 0
 	};
 
 	var _lib = {}; // cache for lib
@@ -580,6 +618,17 @@ var winInit = function() {
 				self.TYPE.LPARAM
 			);
 		},
+		CloseHandle: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms724211%28v=vs.85%29.aspx?f=255&MSPPError=-2147217396
+			 * BOOL WINAPI CloseHandle(
+			 *   __in_ HANDLE hObject
+			 * );
+			 */
+			return lib('kernel32').declare('CloseHandle', self.TYPE.ABI,
+				self.TYPE.BOOL,		// return
+				self.TYPE.HANDLE	// hObject
+			);
+		},
 		CreateCompatibleBitmap: function() {
 			/* http://msdn.microsoft.com/en-us/library/windows/desktop/dd183488%28v=vs.85%29.aspx
 			 * HBITMAP CreateCompatibleBitmap(
@@ -642,6 +691,29 @@ var winInit = function() {
 				self.TYPE.BYTE.ptr.ptr,		// **ppvBits
 				self.TYPE.HANDLE,			// hSection
 				self.TYPE.DWORD				// dwOffset
+			);
+		},
+		CreateFile: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/aa363858%28v=vs.85%29.aspx
+			 * HANDLE WINAPI CreateFile(
+			 *   __in_     LPCTSTR               lpFileName,
+			 *   __in_     DWORD                 dwDesiredAccess,
+			 *   __in_     DWORD                 dwShareMode,
+			 *   __in_opt_ LPSECURITY_ATTRIBUTES lpSecurityAttributes,
+			 *   __in_     DWORD                 dwCreationDisposition,
+			 *   __in_     DWORD                 dwFlagsAndAttributes,
+			 *   __in_opt_ HANDLE                hTemplateFile
+			 * );
+			 */
+			return lib('kernel32').declare(ifdef_UNICODE ? 'CreateFileW' : 'CreateFileA', self.TYPE.ABI,
+				self.TYPE.HANDLE,					// return
+				self.TYPE.LPCTSTR,					// lpFileName
+				self.TYPE.DWORD,					// dwDesiredAccess
+				self.TYPE.DWORD,					// dwShareMode
+				self.TYPE.LPSECURITY_ATTRIBUTES,	// lpSecurityAttributes
+				self.TYPE.DWORD,					// dwCreationDisposition
+				self.TYPE.DWORD,					// dwFlagsAndAttributes
+				self.TYPE.HANDLE					// hTemplateFile
 			);
 		},
 		CreateWindowEx: function() {
@@ -798,6 +870,17 @@ var winInit = function() {
 				self.TYPE.BOOL,				// return
 				self.TYPE.WNDENUMPROC.ptr,	// lpEnumFunc
 				self.TYPE.LPARAM			// lParam
+			);
+		},
+		FlushFileBuffers: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/aa364439%28v=vs.85%29.aspx
+			 * BOOL WINAPI FlushFileBuffers(
+			 *   __in_ HANDLE hFile
+			 * );
+			 */
+			return lib('kernel32').declare('FlushFileBuffers', self.TYPE.ABI,
+				self.TYPE.BOOL,		// return
+				self.TYPE.HANDLE	// hFile
 			);
 		},
 		GetClientRect: function() {
@@ -1306,6 +1389,25 @@ var winInit = function() {
 				self.TYPE.BOOL,		// return
 				self.TYPE.HWND,		// hWnd
 				self.TYPE.int		// id
+			);
+		},
+		WriteFile: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/aa365747%28v=vs.85%29.aspx
+			 * BOOL WINAPI WriteFile(
+			 *   __in_        HANDLE       hFile,
+			 *   __in_        LPCVOID      lpBuffer,
+			 *   __in_        DWORD        nNumberOfBytesToWrite,
+			 *   __out_opt_   LPDWORD      lpNumberOfBytesWritten,
+			 *   __inout_opt_ LPOVERLAPPED lpOverlapped
+			 * );
+			 */
+			return lib('kernel32').declare('WriteFile', self.TYPE.ABI,
+				self.TYPE.BOOL,			// return
+				self.TYPE.HANDLE,		// hFile
+				self.TYPE.LPCVOID,		// lpBuffer
+				self.TYPE.DWORD,		// nNumberOfBytesToWrite
+				self.TYPE.LPDWORD,		// lpNumberOfBytesWritten
+				self.TYPE.LPOVERLAPPED	// lpOverlapped
 			);
 		}
 	};
