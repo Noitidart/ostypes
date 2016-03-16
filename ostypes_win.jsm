@@ -1207,6 +1207,25 @@ var winInit = function() {
 				self.TYPE.UINT		// wRemoveMsg
 			);
 		},
+		ReadFile: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/aa365467%28v=vs.85%29.aspx
+			 * BOOL WINAPI ReadFile(
+			 *   __in_        HANDLE       hFile,
+			 *   __out_       LPVOID       lpBuffer,
+			 *   __in_        DWORD        nNumberOfBytesToRead,
+			 *   __out_opt_   LPDWORD      lpNumberOfBytesRead,
+			 *   __inout_opt_ LPOVERLAPPED lpOverlapped
+			 * );
+			 */
+			return lib('kernel32').declare('ReadFile', self.TYPE.ABI,
+				self.TYPE.BOOL,			// return
+				self.TYPE.HANDLE,		// hFile
+				self.TYPE.LPVOID,		// lpBuffer
+				self.TYPE.DWORD,		// nNumberOfBytesToRead
+				self.TYPE.LPDWORD,		// lpNumberOfBytesWritten
+				self.TYPE.LPOVERLAPPED	// lpOverlapped
+			);
+		},
 		RegisterHotKey: function() {
 			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms646309%28v=vs.85%29.aspx
 			 * BOOL WINAPI RegisterHotKey(

@@ -1,4 +1,4 @@
-/* Thanks to @arai */
+/* Thanks to @arai-a - https://github.com/arai-a */
 
 var EXPORTED_SYMBOLS = ['ctypes_math'];
 

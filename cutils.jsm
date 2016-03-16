@@ -18,6 +18,11 @@ function utilsInit() {
 	this.jscGetDeepest = function(obj, castVoidptrAsDecOrAsHex) {
 		// set castVoidptrAsDecOrAsHex to 10 (AsDec) or 16 (AsHex). 10 is same as doing .toString() -- see link118489111
 			// by default it will not. so if you do jscGetDeepest on ```ctypes.voidptr_t(ctypes.UInt64("0x1148"))``` it will give you ```ctypes.voidptr_t(ctypes.UInt64("0x1148")).toString``` which is "ctypes.voidptr_t(ctypes.UInt64("0x1148"))"
+				// console.log results
+				// hFile.toString()					--> ctypes.voidptr_t(ctypes.UInt64("0xffffffff"))
+				// cutils.jscGetDeepest(hFile)		--> ctypes.voidptr_t(ctypes.UInt64("0xffffffff"))
+				// cutils.jscGetDeepest(hFile, 10)	--> 4294967295
+				// cutils.jscGetDeepest(hFile, 16)	--> ffffffff
 			// this argument means if at deepest level, it finds it has .contents but cannot access .contents on it, then it will get the number that pointer is pointing to (of course if its a ctype [meaning a cdata], meaning if its just an object with a .contents it wont do it on that)
 		/*
 		if (obj !== null && obj !== undefined) {
