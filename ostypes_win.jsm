@@ -403,6 +403,7 @@ var winInit = function() {
 		SRCCOPY: self.TYPE.DWORD('0x00CC0020'),
 		VERTRES: 10,
 		HWND_TOPMOST: self.TYPE.HWND(-1), // toString: "ctypes.voidptr_t(ctypes.UInt64("0xffffffff"))" cannot do self.TYPE.HWND('-1') as that puts out `TypeError: can't convert the string "-1" to the type ctypes.voidptr_t`
+		HWND_NOTOPMOST: self.TYPE.HWND(-2),
 		SWP_NOSIZE: 1,
 		SWP_NOMOVE: 2,
 		SWP_NOREDRAW: 8,
@@ -412,7 +413,8 @@ var winInit = function() {
 		MDT_Default: 0, // MDT_Effective_DPI
 		WS_VISIBLE: 0x10000000,
 		GWL_STYLE: -16,
-		
+		GWL_EXSTYLE: -20,
+		WS_EX_TOPMOST: 0x00000008,
 		FO_DELETE: 3,
 		FOF_ALLOWUNDO: 64,
 		FOF_SILENT: 4,
@@ -425,6 +427,7 @@ var winInit = function() {
 		WM_HOTKEY: 0x0312,
 		MOD_NOREPEAT: 0x4000,
 		VK_SNAPSHOT: 0x2C,
+		VK_SCROLL: 0x91,
 		
 		WM_MOUSEMOVE: 0x200,
 		WM_LBUTTONDOWN: 0x201,
