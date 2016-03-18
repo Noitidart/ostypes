@@ -16,17 +16,22 @@ var macTypes = function() {
 	this.CALLBACK_ABI = ctypes.default_abi;
 	this.ABI = ctypes.default_abi;
 
-	// C TYPES
+	////// C TYPES
+	// SIMPLE TYPES
 	this.bool = ctypes.bool;
 	this.char = ctypes.char;
+	this.float = ctypes.float;
 	this.int = ctypes.int;
 	this.int16_t = ctypes.int16_t;
 	this.int32_t = ctypes.int32_t;
 	this.int64_t = ctypes.int64_t;
 	this.intptr_t = ctypes.intptr_t;
 	this.long = ctypes.long;
+	this.off_t = ctypes.off_t;
+	this.pid_t = ctypes.int32_t;
 	this.short = ctypes.short;
 	this.size_t = ctypes.size_t;
+	this.ssize_t = ctypes.ssize_t;
 	this.uint16_t = ctypes.uint16_t;
 	this.uint32_t = ctypes.uint32_t;
 	this.uintptr_t = ctypes.uintptr_t;
@@ -39,7 +44,21 @@ var macTypes = function() {
 	// ADV C TYPES
 	this.time_t = this.long; // https://github.com/j4cbo/chiral/blob/3c66a8bb64e541c0f63b04b78ec2d0ffdf5b473c/chiral/os/kqueue.py#L34 AND also based on this github search https://github.com/search?utf8=%E2%9C%93&q=time_t+ctypes&type=Code&ref=searchresults AND based on this answer here: http://stackoverflow.com/a/471287/1828637
 	
-	// SIMPLE TYPES // based on ctypes.BLAH // as per WinNT.h etc
+	// GUESS C TYPES
+	this.FILE = ctypes.void_t; // not really a guess, i just dont have a need to fill it
+	
+	// C SIMPLE STRUCTS
+	var flockHollowStruct = new cutils.HollowStructure('flock', OS.Constants.libc.OSFILE_SIZEOF_FLOCK);
+	flockHollowStruct.add_field_at(OS.Constants.libc.OSFILE_OFFSETOF_FLOCK_L_WHENCE, 'l_whence', this.short);
+	flockHollowStruct.add_field_at(OS.Constants.libc.OSFILE_OFFSETOF_FLOCK_L_TYPE, 'l_type', this.short);
+	flockHollowStruct.add_field_at(OS.Constants.libc.OSFILE_OFFSETOF_FLOCK_L_START, 'l_start', this.off_t);
+	flockHollowStruct.add_field_at(OS.Constants.libc.OSFILE_OFFSETOF_FLOCK_L_PID, 'l_pid', this.pid_t);
+	flockHollowStruct.add_field_at(OS.Constants.libc.OSFILE_OFFSETOF_FLOCK_L_LEN, 'l_len', this.off_t);
+	this.flock = flockHollowStruct.getType().implementation;
+	
+	
+	////// CoreFoundation TYPES
+	// SIMPLE TYPES // based on ctypes.BLAH
 	this.Boolean = ctypes.unsigned_char;
 	this.CFIndex = ctypes.long;
 	this.CFOptionFlags = ctypes.unsigned_long;
@@ -53,6 +72,13 @@ var macTypes = function() {
 	this.CGEventTapPlacement = ctypes.uint32_t;
 	this.CGEventType = ctypes.uint32_t;
 	this.CGFloat = is64bit ? ctypes.double : ctypes.float; // ctypes.float is 32bit deosntw ork as of May 10th 2015 see this bug: https://bugzilla.mozilla.org/show_bug.cgi?id=1163406 this would cause crash on CGDisplayGetBounds http://stackoverflow.com/questions/28216681/how-can-i-get-screenshot-from-all-displays-on-mac#comment48414568_28247749
+	this.CGSConnection = ctypes.int;
+	this.CGSTransitionOption = ctypes.int; // type is enum so i guess int - https://gist.github.com/Noitidart/3664c5c2059c9aa6779f#file-cgsprivate-h-L162
+	this.CGSTransitionType = ctypes.int; // type is enum so i guess int - https://gist.github.com/Noitidart/3664c5c2059c9aa6779f#file-cgsprivate-h-L148
+	this.CGSWindow = ctypes.int;
+	this.CGSWindowOrderingMode = ctypes.int; // type is enum so i guess int - https://gist.github.com/Noitidart/3664c5c2059c9aa6779f#file-cgsprivate-h-L66
+	this.CGSWorkspace = ctypes.int;
+	this.CGSValue = ctypes.int;
 	this.CGWindowID = ctypes.uint32_t;
 	this.CGWindowLevel = ctypes.int32_t;
 	this.CGWindowLevelKey = ctypes.int32_t;
@@ -92,7 +118,7 @@ var macTypes = function() {
 	
 	// SUPER DUPER ADVANCED TYPES // defined by "super advanced types"
 
-	// inaccrurate types - i know these are something else but setting them to voidptr_t or something just works and all the extra work isnt needed
+	// GUESS TYPES - i know these are something else but setting them to voidptr_t or something just works and all the extra work isnt needed
 
 	// STRUCTURES
 	// consts for structures
@@ -245,6 +271,7 @@ var macTypes = function() {
 	this.NSBitmapFormat = this.NSUInteger;
 	this.NSEventType = this.NSUInteger;
 	this.NSEventMask = this.NSUInteger;
+	this.NSURLBookmarkCreationOptions = this.NSUInteger;
 	
 	// GUESS TYPES OBJC - they work though
 	this.id = ctypes.voidptr_t;
@@ -295,6 +322,7 @@ var macInit = function() {
 		get kCFAllocatorDefault () { if (!('kCFAllocatorDefault' in _const)) { _const['kCFAllocatorDefault'] = lib('CoreFoundation').declare('kCFAllocatorDefault', self.TYPE.CFAllocatorRef); } return _const['kCFAllocatorDefault']; },
 		get kCFRunLoopDefaultMode () { if (!('kCFRunLoopDefaultMode' in _const)) { _const['kCFRunLoopDefaultMode'] = lib('CoreFoundation').declare('kCFRunLoopDefaultMode', self.TYPE.CFStringRef); } return _const['kCFRunLoopDefaultMode']; },
 		get kCFRunLoopCommonModes () { if (!('kCFRunLoopCommonModes' in _const)) { _const['kCFRunLoopCommonModes'] = lib('CoreFoundation').declare('kCFRunLoopCommonModes', self.TYPE.CFStringRef); } return _const['kCFRunLoopCommonModes']; },
+		get CGSDefaultConnection () { if (!('CGSDefaultConnection' in _const)) { _const['CGSDefaultConnection'] = self.API('_CGSDefaultConnection')(); } return _const['CGSDefaultConnection']; }, // https://gist.github.com/Noitidart/3664c5c2059c9aa6779f#file-cgsprivate-h-L39
 		kCGErrorSuccess: 0,
 		kCGNullDirectDisplay: 0,
 		kCGBaseWindowLevelKey: 0,
@@ -384,12 +412,22 @@ var macInit = function() {
 		kCFRunLoopRunStopped: 2,
 		kCFRunLoopRunTimedOut: 3,
 		kCFRunLoopRunHandledSource: 4,
+
+		kCGSOrderAbove: 1,
+		kCGSOrderBelow: -1,
+		kCGSOrderOut: 0,
 		
 		///////// OBJC - all consts are wrapped in a type as if its passed to variadic it needs to have type defind, see jsctypes chat with arai on 051015 357p
 		NO: self.TYPE.BOOL(0),
 		NSPNGFileType: self.TYPE.NSUInteger(4),
 		YES: self.TYPE.BOOL(1), // i do this instead of 1 becuase for varidic types we need to expclicitly define it
 		NIL: self.TYPE.void.ptr(ctypes.UInt64('0x0')), // needed for varidic args, as i cant pass null there
+		
+		NSFileWriteFileExistsError: 516, // i dont use this a variadic, just for compare so i dont wrap this in a type, but the type is  NSInteger. I figured this because NSError says its code value is NSInteger. The types for NSFileWriteFileExistsError says its enum - but by looking up code i can see that enum is type NSInteger - sources: https://developer.apple.com/library/ios/documentation/Cocoa/Reference/Foundation/Classes/NSError_Class/index.html#//apple_ref/occ/instp/NSError/code && https://developer.apple.com/library/ios/documentation/Cocoa/Reference/Foundation/Miscellaneous/Foundation_Constants/index.html#//apple_ref/doc/constant_group/NSError_Codes
+		NSURLBookmarkCreationSuitableForBookmarkFile: self.TYPE.NSURLBookmarkCreationOptions(1 << 10),
+		
+		NSApplicationActivateAllWindows: self.TYPE.NSUInteger(1 << 0),
+		NSApplicationActivateIgnoringOtherApps: self.TYPE.NSUInteger(1 << 1),
 		
 		NSLeftMouseDown: 1,				// TYPES.NSEventType
 		NSLeftMouseUp: 2,				// TYPES.NSEventType
@@ -433,6 +471,8 @@ var macInit = function() {
 	};
 	
 	// ADVANCED CONST
+	this.CONST.NULL = this.CONST.NIL.address();
+	
 	this.CONST.NSLeftMouseDownMask = 1 << this.CONST.NSLeftMouseDown;
 	this.CONST.NSLeftMouseUpMask = 1 << this.CONST.NSLeftMouseUp;
 	this.CONST.NSRightMouseDownMask = 1 << this.CONST.NSRightMouseDown;
@@ -568,6 +608,154 @@ var macInit = function() {
 
 	// start - predefine your declares here
 	var preDec = { //stands for pre-declare (so its just lazy stuff) //this must be pre-populated by dev // do it alphabateized by key so its ez to look through
+		_CGSDefaultConnection: function () {
+			/* https://gist.github.com/Noitidart/3664c5c2059c9aa6779f#file-cgsprivate-h-L39
+			 * CGSConnection _CGSDefaultConnection(
+			 *   void
+			 * );
+			 */
+			return lib('CoreGraphics').declare('_CGSDefaultConnection', self.TYPE.ABI,
+				self.TYPE.CGSConnection		// return
+			);
+		},
+		CGSConnectionGetPID: function () {
+			/* https://gist.github.com/Noitidart/3664c5c2059c9aa6779f#file-cgsprivate-h-L108
+			 * CGError CGSConnectionGetPID(
+			 *   const CGSConnection cid,
+			 *   pid_t *pid,
+			 *   const CGSConnection ownerCid
+			 * );
+			 */
+			return lib('CoreGraphics').declare('CGSConnectionGetPID', self.TYPE.ABI,
+				self.TYPE.CGError,			// return
+				self.TYPE.CGSConnection,	// cid
+				self.TYPE.pid_t.ptr,		// *pid
+				self.TYPE.CGSConnection		// ownerCid
+			);
+		},
+		CGSMoveWorkspaceWindowList: function() {
+			/* https://gist.github.com/Noitidart/3664c5c2059c9aa6779f#file-cgsprivate-h-L96
+			 * CGError CGSMoveWorkspaceWindowList(
+			 *   const CGSConnection connection,
+			 *   CGSWindow *wids,
+			 *   int count,
+			 *   CGSWorkspace toWorkspace
+			 * );
+			 */
+			return lib('CoreGraphics').declare('CGSMoveWorkspaceWindowList', self.TYPE.ABI,
+				self.TYPE.CGError,			// return
+				self.TYPE.CGSConnection,	// cid
+				self.TYPE.CGSWindow.ptr,	// *wids
+				self.TYPE.CGSWorkspace		// toWorkspace
+			);
+		},
+		CGSGetWindowCount: function() {
+			/* https://gist.github.com/Noitidart/3664c5c2059c9aa6779f#file-cgsprivate-h-L48
+			 * CGError CGSGetWindowCount(
+			 *   const CGSConnection cid,
+			 *   CGSConnection targetCID,
+			 *   int* outCount
+			 * );
+			 */
+			return lib('CoreGraphics').declare('CGSGetWindowCount', self.TYPE.ABI,
+				self.TYPE.CGError,			// return
+				self.TYPE.CGSConnection,	// cid
+				self.TYPE.CGSConnection,	// targetCID
+				self.TYPE.int.ptr			// outCount
+			);
+		},
+		CGSGetWindowWorkspace: function() {
+			/* https://gist.github.com/Noitidart/3664c5c2059c9aa6779f#file-cgsprivate-h-L196
+			 * CGError CGSGetWindowWorkspace(
+			 *   const CGSConnection cid,
+			 *   const CGSWindow wid,
+			 *   CGSWorkspace *workspace
+			 * );
+			 */
+			return lib('CoreGraphics').declare('CGSGetWindowWorkspace', self.TYPE.ABI,
+				self.TYPE.CGError,			// return
+				self.TYPE.CGSConnection,	// cid
+				self.TYPE.CGSWindow,		// wid
+				self.TYPE.CGSWorkspace.ptr	// *workspace
+			);
+		},
+		CGSGetWindowOwner: function() {
+			/* https://gist.github.com/Noitidart/3664c5c2059c9aa6779f#file-cgsprivate-h-L107
+			 * CGError CGSGetWindowOwner(
+			 *   const CGSConnection cid,
+			 *   const CGSWindow wid,
+			 *   CGSConnection *ownerCid
+			 * );
+			 */
+			return lib('CoreGraphics').declare('CGSGetWindowOwner', self.TYPE.ABI,
+				self.TYPE.CGError,			// return
+				self.TYPE.CGSConnection,	// cid
+				self.TYPE.CGSWindow,		// wid
+				self.TYPE.CGSConnection.ptr	// *ownerCid
+			);
+		},
+		CGSGetWorkspace: function() {
+			/* https://gist.github.com/Noitidart/3664c5c2059c9aa6779f#file-cgsprivate-h-L56
+			 * CGSGetWorkspace(
+			 *   const CGSConnection cid,
+			 *   CGSWorkspace *workspace
+			 * );
+			 */
+			return lib('CoreGraphics').declare('CGSGetWorkspace', self.TYPE.ABI,
+				self.TYPE.CGError,			// return
+				self.TYPE.CGSConnection,	// cid
+				self.TYPE.CGSWorkspace.ptr	// *workspace
+			);
+		},
+		CGSOrderWindow: function() {
+			/* https://gist.github.com/Noitidart/3664c5c2059c9aa6779f#file-cgsprivate-h-L72
+			 * CGError CGSOrderWindow(
+			 *   const CGSConnection cid,
+			 *   const CGSWindow wid,
+			 *   CGSWindowOrderingMode place,
+			 *   CGSWindow relativeToWindowID		// can be NULL
+			 * );
+			 */
+			return lib('CoreGraphics').declare('CGSOrderWindow', self.TYPE.ABI,
+				self.TYPE.CGError,					// return
+				self.TYPE.CGSConnection,			// cid
+				self.TYPE.CGSWindow,				// wid
+				self.TYPE.CGSWindowOrderingMode,	// place
+				self.TYPE.CGSWindow					// relativeToWindowID
+			);
+		},
+		CGSSetWorkspace: function() {
+			/* https://gist.github.com/Noitidart/3664c5c2059c9aa6779f#file-cgsprivate-h-L197
+			 * CGError CGSSetWorkspace(
+			 *   const CGSConnection cid,
+			 *   CGSWorkspace workspace
+			 * );
+			 */
+			return lib('CoreGraphics').declare('CGSSetWorkspace', self.TYPE.ABI,
+				self.TYPE.CGError,			// return
+				self.TYPE.CGSConnection,	// cid
+				self.TYPE.CGSWorkspace		// workspace
+			);
+		},
+		CGSSetWorkspaceWithTransition: function() {
+			/* https://gist.github.com/Noitidart/3664c5c2059c9aa6779f#file-cgsprivate-h-L198
+			 * CGError CGSSetWorkspaceWithTransition(
+			 *   const CGSConnection cid,
+			 *   CGSWorkspace workspace,
+			 *   CGSTransitionType transition,
+			 *   CGSTransitionOption subtype,
+			 *   float time
+			 * );
+			 */
+			return lib('CoreGraphics').declare('CGSSetWorkspaceWithTransition', self.TYPE.ABI,
+				self.TYPE.CGError,				// return
+				self.TYPE.CGSConnection,		// cid
+				self.TYPE.CGSWorkspace,			// workspace
+				self.TYPE.CGSTransitionType,	// transition
+				self.TYPE.CGSTransitionOption,	// subtype
+				self.TYPE.float					// time
+			);
+		},
 		CFArrayCreate: function() {
 			return lib('CoreFoundation').declare('CFArrayCreate', self.TYPE.ABI,
 				self.TYPE.CFArrayRef,
@@ -1015,32 +1203,6 @@ var macInit = function() {
 				self.TYPE.RgnHandle
 			);
 		},
-		dispatch_get_main_queue: function() {
-			/* https://developer.apple.com/library/prerelease/mac/documentation/Performance/Reference/GCD_libdispatch_Ref/#//apple_ref/c/func/dispatch_get_main_queue
-			 *  dispatch_queue_t dispatch_get_main_queue (
-			 *   void
-			 * ); 
-			 */
-			// return lib('/usr/lib/system/libdispatch.dylib').declare('_dispatch_main_q', self.TYPE.ABI,
-			// 	self.TYPE.dispatch_queue_t	// return
-			// );
-			// do not do ostypes.API('dispatch_get_main_queue')() the () will give error not FuncitonType.ptr somhting like that, must just use ostypes.API('dispatch_get_main_queue')
-			// http://stackoverflow.com/questions/31637321/standard-library-containing-dispatch-get-main-queue-gcd
-			return lib('/usr/lib/system/libdispatch.dylib').declare('_dispatch_main_q', self.TYPE.dispatch_queue_t);
-		},
-		dispatch_sync: function() {
-			/* https://developer.apple.com/library/prerelease/mac/documentation/Performance/Reference/GCD_libdispatch_Ref/#//apple_ref/c/func/dispatch_sync
-			 * void dispatch_sync (
-			 *   dispatch_queue_t queue,
-			 *   dispatch_block_t block
-			 * ); 
-			 */
-			return lib('/usr/lib/system/libdispatch.dylib').declare('dispatch_sync', self.TYPE.ABI,
-				self.TYPE.void,					// return
-				self.TYPE.dispatch_queue_t,		// queue
-				self.TYPE.dispatch_block_t		// block
-			);
-		},
 		//////////// OBJC
 		objc_getClass: function() {
 			/* https://developer.apple.com/library/mac/documentation/Cocoa/Reference/ObjCRuntimeRef/index.html#//apple_ref/c/func/objc_getClass
@@ -1134,6 +1296,63 @@ var macInit = function() {
 			);
 		},
 		///////////// LIBC
+		close: function() {
+			/* http://linux.die.net/man/2/close
+			 * int close(int fd);
+			 *
+			 * https://developer.apple.com/library/mac/documentation/Darwin/Reference/ManPages/man2/close.2.html#//apple_ref/doc/man/2/close
+			 * int close(int fildes);
+			 */
+			return lib('libc').declare('close', self.TYPE.ABI,
+				self.TYPE.int,	// return
+				self.TYPE.int	// fd
+			);
+		},
+		fcntl: function() {
+			/* https://developer.apple.com/library/mac/documentation/Darwin/Reference/ManPages/man2/fcntl.2.html
+			 * http://linux.die.net/man/2/fcntl
+			 * fcntl() can take an optional third argument. Whether or not this argument is required is determined by cmd.
+			 * F_GETLK, F_SETLK and F_SETLKW are used to acquire, release, and test for the existence of record locks (also known as file-segment or file-region locks). The third argument, lock, is a pointer to a structure that has at least the following fields (in unspecified order). 
+			 * int fcntl(int fd, int cmd);
+			 * int fcntl(int fd, int cmd, long arg);
+			 * int fcntl(int fd, int cmd, struct flock *lock);
+			 */
+			return lib('libc').declare('fcntl', self.TYPE.ABI,
+				self.TYPE.int,			// return
+				self.TYPE.int,			// fd
+				self.TYPE.int,			// cmd
+				self.TYPE.flock.ptr		// *lock
+			);
+		},
+		feof: function() {
+			/* http://linux.die.net/man/3/feof
+			 * https://developer.apple.com/library/ios/documentation/System/Conceptual/ManPages_iPhoneOS/man3/feof.3.html
+			 * int feof(
+			 *   FILE *stream
+			 * );
+			 */
+			return lib('libc').declare('feof', self.TYPE.ABI,
+				self.TYPE.int,		// return
+				self.TYPE.FILE.ptr	// *stream
+			);
+		},
+		fread: function() {
+			/* http://linux.die.net/man/3/fread
+			 * size_t fread (
+			 *   void *ptr,
+			 *   size_t size,
+			 *   size_t nmemb,
+			 *   FILE *stream
+			 * );
+			 */
+			return lib('libc').declare('fread', self.TYPE.ABI, 
+				self.TYPE.size_t,		// return
+				self.TYPE.void.ptr,		// *ptr
+				self.TYPE.size_t, 		// size
+				self.TYPE.size_t, 		// count
+				self.TYPE.FILE.ptr		// *stream
+			);
+		},
 		memcpy: function() {
 			/* https://developer.apple.com/library/mac/documentation/Darwin/Reference/ManPages/man3/memcpy.3.html#//apple_ref/doc/man/3/memcpy
 			 * void *memcpy (
@@ -1147,6 +1366,60 @@ var macInit = function() {
 				self.TYPE.void.ptr,	// *dst
 				self.TYPE.void.ptr,	// *src
 				self.TYPE.size_t	// n
+			);
+		},
+		open: function() {
+			/* http://linux.die.net/man/2/open
+			 * int open(const char *pathname, int flags);
+			 * int open(const char *pathname, int flags, mode_t mode);
+			 * int creat(const char *pathname, mode_t mode);
+			 *
+			 * https://developer.apple.com/library/mac/documentation/Darwin/Reference/ManPages/man2/open.2.html#//apple_ref/doc/man/2/open
+			 * int open(const char *path, int oflag, ...);
+			 */
+			return lib('libc').declare('open', self.TYPE.ABI,
+				self.TYPE.int,		// return
+				self.TYPE.char.ptr,	// *path
+				self.TYPE.int		// flags
+			);
+		},
+		popen: function() {
+			/* https://developer.apple.com/library/mac/documentation/Darwin/Reference/ManPages/man3/popen.3.html
+			 * FILE *popen(
+			 *   const char *command,
+			 *   const char *mode
+			 * );
+			 */
+			return lib('libc').declare('popen', self.TYPE.ABI,
+				self.TYPE.FILE.ptr,		// return
+				self.TYPE.char.ptr,		// *command
+				self.TYPE.char.ptr		// *mode
+			);
+		},
+		pclose: function() {
+			/* https://developer.apple.com/library/mac/documentation/Darwin/Reference/ManPages/man3/popen.3.html
+			 * int pclose(
+			 *   FILE *stream
+			 * );
+			 */
+			return lib('libc').declare('pclose', self.TYPE.ABI,
+				self.TYPE.int,			// return
+				self.TYPE.FILE.ptr		// *stream
+			);
+		},
+		readlink: function() {
+			/* https://developer.apple.com/library/mac/documentation/Darwin/Reference/ManPages/man2/readlink.2.html
+			 * ssize_t readlink(
+			 *   const char *restrict path,
+			 *   char *restrict buf,
+			 *   size_t bufsize
+			 * );
+			 */
+			return lib('libc').declare('readlink', self.TYPE.ABI,
+				self.TYPE.ssize_t,		// return
+				self.TYPE.char.ptr,		// *restrict path
+				self.TYPE.char.ptr,		// *restrict buf
+				self.TYPE.size_t		// bufsize
 			);
 		},
 		////////////// LIBDISPATCH
@@ -1175,7 +1448,7 @@ var macInit = function() {
 				self.TYPE.dispatch_queue_t,		// queue
 				self.TYPE.dispatch_block_t		// block
 			);
-		}		
+		}
 	};
 	// end - predefine your declares here
 	// end - function declares
@@ -1238,6 +1511,11 @@ var macInit = function() {
 				}
 				this.coll = null;
 			};
+		},
+		readNSString: function(aNSStringPtr) {
+			var cUTF8Ptr = self.API('objc_msgSend')(aNSStringPtr, self.HELPER.sel('UTF8String'));
+			var cCharPtr = ctypes.cast(cUTF8Ptr, ctypes.char.ptr);
+			return cCharPtr.readStringReplaceMalformed();
 		},
 		createBlock: function(aFuncTypePtr) {
 			// based on work from here: https://github.com/trueinteractions/tint2/blob/f6ce18b16ada165b98b07869314dad1d7bee0252/modules/Bridge/core.js#L370-L394
