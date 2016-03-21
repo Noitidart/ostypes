@@ -1135,6 +1135,23 @@ var winInit = function() {
 				self.TYPE.UINT_PTR	// uIDEvent
 			);
 		},
+		MessageBox: function() {
+			/*	https://msdn.microsoft.com/en-us/library/windows/desktop/ms645505(v=vs.85).aspx
+				int WINAPI MessageBox(
+				  _In_opt_ HWND    hWnd,
+				  _In_opt_ LPCTSTR lpText,
+				  _In_opt_ LPCTSTR lpCaption,
+				  _In_     UINT    uType
+				);
+			*/
+			return lib('user32').declare(ifdef_UNICODE ? 'MessageBoxW' : 'MessageBox', self.TYPE.ABI,
+				self.TYPE.INT,			// return
+				self.TYPE.HWND, 		// hWnd
+				self.TYPE.LPCTSTR,	// lpText
+				self.TYPE.LPCTSTR,	// lpCaption
+				self.TYPE.UINT			// uType
+			);	
+		},
 		PostMessage: function() {
 			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms644944%28v=vs.85%29.aspx
 			 * BOOL WINAPI PostMessage(
