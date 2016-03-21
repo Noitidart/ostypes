@@ -500,7 +500,9 @@ var winInit = function() {
 		INVALID_HANDLE_VALUE: -1,
 		FSCTL_SET_SPARSE: 0x900c4,
 		FSCTL_SET_ZERO_DATA: 0x980c8,
-		FILE_BEGIN: 0
+		FILE_BEGIN: 0,
+		
+		WT_EXECUTEDEFAULT: 0x00000000
 	};
 
 	var _lib = {}; // cache for lib
@@ -816,6 +818,21 @@ var winInit = function() {
 			return lib('gdi32').declare('DeleteObject', self.TYPE.ABI,
 				self.TYPE.BOOL,		// return
 				self.TYPE.HGDIOBJ	// hObject
+			);
+		},
+		DeleteTimerQueueTimer: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms682569%28v=vs.85%29.aspx?f=255&MSPPError=-2147217396
+			 * BOOL WINAPI DeleteTimerQueueTimer(
+			 *  __in_opt_ HANDLE TimerQueue,
+			 *  __in_     HANDLE Timer,
+			 *  __in_opt_ HANDLE CompletionEvent
+			 * );
+			 */
+			return lib('kernel32').declare('DeleteTimerQueueTimer', self.TYPE.ABI,
+				self.TYPE.BOOL,		// return
+				self.TYPE.HANDLE,	// TimerQueue
+				self.TYPE.HANDLE,	// Timer
+				self.TYPE.HANDLE	// CompletionEvent
 			);
 		},
 		DestroyWindow: function() {
