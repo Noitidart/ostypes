@@ -736,11 +736,12 @@ var winInit = function() {
 			*/
 			return lib('kernel32').declare("CreateTimerQueueTimer", self.TYPE.ABI,
 				self.TYPE.BOOL,												// return
-				self.TYPE.HANDLE,											// phNewTimer
+				self.TYPE.HANDLE.ptr,									// phNewTimer
+				self.TYPE.HANDLE,											// TimerQueue
 				self.TYPE.WAITORTIMERCALLBACK.ptr,		// Callback,
 				self.TYPE.PVOID,											// Parameter,
 				self.TYPE.DWORD,											// DueTime,
-				self.TYPE.PERIOD,											// Period,
+				self.TYPE.DWORD,											// Period,
 				self.TYPE.ULONG												// Flags
 			);
 		},
@@ -1150,7 +1151,7 @@ var winInit = function() {
 				self.TYPE.LPCTSTR,	// lpText
 				self.TYPE.LPCTSTR,	// lpCaption
 				self.TYPE.UINT			// uType
-			);	
+			);
 		},
 		PostMessage: function() {
 			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms644944%28v=vs.85%29.aspx
