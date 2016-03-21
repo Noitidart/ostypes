@@ -103,6 +103,7 @@ var winTypes = function() {
 	this.LPOLESTR = this.OLECHAR.ptr; // typedef [string] OLECHAR *LPOLESTR; // https://github.com/wine-mirror/wine/blob/bdeb761357c87d41247e0960f71e20d3f05e40e6/include/wtypes.idl#L287 // http://stackoverflow.com/a/1607335/1828637 // LPOLESTR is usually to be allocated with CoTaskMemAlloc()
 	this.LPTSTR = ifdef_UNICODE ? this.LPWSTR : this.LPSTR;
 	this.PCTSTR = ifdef_UNICODE ? this.LPCWSTR : this.LPCSTR;
+	this.PHANDLE = this.HANDLE.ptr;
 	this.PCZZTSTR = this.PCZZSTR; // double null terminated from msdn docs // typedef from https://github.com/wine-mirror/wine/blob/b1ee60f22fbd6b854c3810a89603458ec0585369/include/winnt.h#L535
 
 	// SUPER DUPER ADVANCED TYPES // defined by "super advanced types"
@@ -736,9 +737,9 @@ var winInit = function() {
 			*/
 			return lib('kernel32').declare("CreateTimerQueueTimer", self.TYPE.ABI,
 				self.TYPE.BOOL,												// return
-				self.TYPE.HANDLE.ptr,									// phNewTimer
+				self.TYPE.PHANDLE,											// phNewTimer
 				self.TYPE.HANDLE,											// TimerQueue
-				self.TYPE.WAITORTIMERCALLBACK.ptr,		// Callback,
+				self.TYPE.WAITORTIMERCALLBACK.ptr,							// Callback,
 				self.TYPE.PVOID,											// Parameter,
 				self.TYPE.DWORD,											// DueTime,
 				self.TYPE.DWORD,											// Period,
@@ -1148,8 +1149,8 @@ var winInit = function() {
 			return lib('user32').declare(ifdef_UNICODE ? 'MessageBoxW' : 'MessageBoxA', self.TYPE.ABI,
 				self.TYPE.INT,			// return
 				self.TYPE.HWND, 		// hWnd
-				self.TYPE.LPCTSTR,	// lpText
-				self.TYPE.LPCTSTR,	// lpCaption
+				self.TYPE.LPCTSTR,		// lpText
+				self.TYPE.LPCTSTR,		// lpCaption
 				self.TYPE.UINT			// uType
 			);
 		},
