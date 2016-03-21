@@ -72,7 +72,7 @@ var winTypes = function() {
 	this.LPWSTR = this.WCHAR.ptr;
 	this.LRESULT = this.LONG_PTR;
 	this.OLECHAR = this.WCHAR; // typedef WCHAR OLECHAR; // https://github.com/wine-mirror/wine/blob/bdeb761357c87d41247e0960f71e20d3f05e40e6/include/wtypes.idl#L286
-	this.PCZZSTR = ifdef_UNICODE ? this.WCHAR.ptr : this.CHAR.ptr; // EDUCATED GUESS BASED ON TYPEDEF FROM --> // ansi / unicode - https://github.com/wine-mirror/wine/blob/b1ee60f22fbd6b854c3810a89603458ec0585369/include/winnt.h#L483 --- 
+	this.PCZZSTR = ifdef_UNICODE ? this.WCHAR.ptr : this.CHAR.ptr; // EDUCATED GUESS BASED ON TYPEDEF FROM --> // ansi / unicode - https://github.com/wine-mirror/wine/blob/b1ee60f22fbd6b854c3810a89603458ec0585369/include/winnt.h#L483 ---
 	this.PLONG = this.LONG.ptr;
 	this.PULONG = this.ULONG.ptr;
 	this.PULONG_PTR = this.ULONG.ptr;
@@ -103,8 +103,9 @@ var winTypes = function() {
 	this.LPOLESTR = this.OLECHAR.ptr; // typedef [string] OLECHAR *LPOLESTR; // https://github.com/wine-mirror/wine/blob/bdeb761357c87d41247e0960f71e20d3f05e40e6/include/wtypes.idl#L287 // http://stackoverflow.com/a/1607335/1828637 // LPOLESTR is usually to be allocated with CoTaskMemAlloc()
 	this.LPTSTR = ifdef_UNICODE ? this.LPWSTR : this.LPSTR;
 	this.PCTSTR = ifdef_UNICODE ? this.LPCWSTR : this.LPCSTR;
+	this.PHANDLE = this.HANDLE.ptr;
 	this.PCZZTSTR = this.PCZZSTR; // double null terminated from msdn docs // typedef from https://github.com/wine-mirror/wine/blob/b1ee60f22fbd6b854c3810a89603458ec0585369/include/winnt.h#L535
-	
+
 	// SUPER DUPER ADVANCED TYPES // defined by "super advanced types"
 	this.HCURSOR = this.HICON;
 	this.HMODULE = this.HINSTANCE;
@@ -335,10 +336,10 @@ var winTypes = function() {
 	this.LPMONITORINFOEX = this.MONITORINFOEX.ptr;
 	this.LPMSG = this.MSG.ptr;
 	this.PMSG = this.MSG.ptr
-	
+
 	// FURTHER ADV STRUCTS
 	this.PBITMAPINFO = this.BITMAPINFO.ptr;
-	
+
 	// FUNCTION TYPES
 	this.MONITORENUMPROC = ctypes.FunctionType(this.CALLBACK_ABI, this.BOOL, [this.HMONITOR, this.HDC, this.LPRECT, this.LPARAM]);
 	this.LowLevelMouseProc = ctypes.FunctionType(this.CALLBACK_ABI, this.LRESULT, [this.INT, this.WPARAM, this.LPARAM]);
@@ -349,10 +350,14 @@ var winTypes = function() {
 		this.LPARAM	// lParam
 	]);
 	this.TIMERPROC = ctypes.FunctionType(this.CALLBACK_ABI, this.VOID, [this.HWND, this.UINT, this.UINT_PTR, this.DWORD]);
+	this.WAITORTIMERCALLBACK = ctypes.FunctionType(this.CALLBACK_ABI, this.VOID, [
+		this.PVOID,			// lpParameter,
+		this.BOOLEAN		// TimerOrWaitFired
+	]);
 
 	// ADV FUNC TYPES
 	this.HOOKPROC = this.LowLevelMouseProc.ptr; // not a guess really, as this is the hook type i use, so yeah it has to be a pointer to it
-	
+
 	// STRUCTS USING FUNC TYPES
 	this.WNDCLASS = ctypes.StructType('tagWNDCLASS', [
 		{ style: this.UINT },
@@ -366,7 +371,6 @@ var winTypes = function() {
 		{ lpszMenuName: this.LPCTSTR },
 		{ lpszClassName: this.LPCTSTR }
 	]);
-	
 }
 
 var winInit = function() {
@@ -421,14 +425,14 @@ var winInit = function() {
 		FOF_NOCONFIRMATION: 16,
 		FOF_NOERRORUI: 1024,
 		// FOF_NOCONFIRMMKDIR: ,
-		// FOF_WANTNUKEWARNING: 
-		
+		// FOF_WANTNUKEWARNING:
+
 		PM_REMOVE: 1,
 		WM_HOTKEY: 0x0312,
 		MOD_NOREPEAT: 0x4000,
 		VK_SNAPSHOT: 0x2C,
 		VK_SCROLL: 0x91,
-		
+
 		WM_MOUSEMOVE: 0x200,
 		WM_LBUTTONDOWN: 0x201,
 		WM_LBUTTONUP: 0x202,
@@ -472,7 +476,7 @@ var winInit = function() {
 		RI_MOUSE_HORIZONTAL_WHEEL: 0x0800,
 		XBUTTON1: 0x0001,
 		XBUTTON2: 0x0002,
-		
+
 		QS_ALLEVENTS: 0x04BF,
 		QS_ALLINPUT: 0x04FF,
 		WAIT_ABANDONED_0: 0x00000080, // 128
@@ -480,7 +484,7 @@ var winInit = function() {
 		WAIT_IO_COMPLETION: 0x000000C0, // 192
 		WAIT_OBJECT_0: 0,
 		WAIT_TIMEOUT: 0x00000102, // 258
-		
+
 		GENERIC_READ: 0x80000000,
 		GENERIC_WRITE: 0x40000000,
 		CREATE_NEW: 1,
@@ -611,7 +615,7 @@ var winInit = function() {
 			 *   __in_     int    nCode,
 			 *   __in_     WPARAM wParam,
 			 *   __in_     LPARAM lParam
-			 * );			
+			 * );
 			 */
 			return lib('user32').declare('CallNextHookEx', self.TYPE.ABI,
 				self.TYPE.LRESULT,
@@ -717,6 +721,29 @@ var winInit = function() {
 				self.TYPE.DWORD,					// dwCreationDisposition
 				self.TYPE.DWORD,					// dwFlagsAndAttributes
 				self.TYPE.HANDLE					// hTemplateFile
+			);
+		},
+		CreateTimerQueueTimer: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms682485(v=vs.85).aspx
+				 BOOL WINAPI CreateTimerQueueTimer(
+				  _Out_    PHANDLE             phNewTimer,
+				  _In_opt_ HANDLE              TimerQueue,
+				  _In_     WAITORTIMERCALLBACK Callback,
+				  _In_opt_ PVOID               Parameter,
+				  _In_     DWORD               DueTime,
+				  _In_     DWORD               Period,
+				  _In_     ULONG               Flags
+				);
+			*/
+			return lib('kernel32').declare("CreateTimerQueueTimer", self.TYPE.ABI,
+				self.TYPE.BOOL,												// return
+				self.TYPE.PHANDLE,											// phNewTimer
+				self.TYPE.HANDLE,											// TimerQueue
+				self.TYPE.WAITORTIMERCALLBACK.ptr,							// Callback,
+				self.TYPE.PVOID,											// Parameter,
+				self.TYPE.DWORD,											// DueTime,
+				self.TYPE.DWORD,											// Period,
+				self.TYPE.ULONG												// Flags
 			);
 		},
 		CreateWindowEx: function() {
@@ -1108,6 +1135,23 @@ var winInit = function() {
 				self.TYPE.BOOL,		// return
 				self.TYPE.HWND,		// hWnd
 				self.TYPE.UINT_PTR	// uIDEvent
+			);
+		},
+		MessageBox: function() {
+			/*	https://msdn.microsoft.com/en-us/library/windows/desktop/ms645505(v=vs.85).aspx
+				int WINAPI MessageBox(
+				  _In_opt_ HWND    hWnd,
+				  _In_opt_ LPCTSTR lpText,
+				  _In_opt_ LPCTSTR lpCaption,
+				  _In_     UINT    uType
+				);
+			*/
+			return lib('user32').declare(ifdef_UNICODE ? 'MessageBoxW' : 'MessageBoxA', self.TYPE.ABI,
+				self.TYPE.INT,			// return
+				self.TYPE.HWND, 		// hWnd
+				self.TYPE.LPCTSTR,		// lpText
+				self.TYPE.LPCTSTR,		// lpCaption
+				self.TYPE.UINT			// uType
 			);
 		},
 		PostMessage: function() {
