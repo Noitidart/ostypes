@@ -1145,7 +1145,7 @@ var winInit = function() {
 				  _In_     UINT    uType
 				);
 			*/
-			return lib('user32').declare(ifdef_UNICODE ? 'MessageBoxW' : 'MessageBox', self.TYPE.ABI,
+			return lib('user32').declare(ifdef_UNICODE ? 'MessageBoxW' : 'MessageBoxA', self.TYPE.ABI,
 				self.TYPE.INT,			// return
 				self.TYPE.HWND, 		// hWnd
 				self.TYPE.LPCTSTR,	// lpText
