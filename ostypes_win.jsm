@@ -34,6 +34,7 @@ var winTypes = function() {
 	this.BYTE = ctypes.unsigned_char;
 	this.CHAR = ctypes.char;
 	this.DWORD = ctypes.unsigned_long; // IntSafe.h defines it as: // typedef unsigned long DWORD; // so maybe can change this to ctypes.unsigned_long // i was always using `ctypes.uint32_t`
+	this.LPDWORD = this.DWORD.ptr;
 	this.FXPT2DOT30 = ctypes.long; // http://stackoverflow.com/a/20864995/1828637 // https://github.com/wine-mirror/wine/blob/a7247df6ca54fd1209eff9f9199447643ebdaec5/include/wingdi.h#L150
 	this.INT = ctypes.int;
 	this.INT_PTR = is64bit ? ctypes.int64_t : ctypes.int;
@@ -164,6 +165,7 @@ var winTypes = function() {
 		{ Pointer: this.PVOID }, //  union { struct { DWORD Offset; DWORD OffsetHigh; }; PVOID Pointer; };
 		{ hEvent: this.HANDLE },
 	]);
+	this.LPOVERLAPPED = this.OVERLAPPED.ptr;
 	this.POINT = ctypes.StructType('tagPOINT', [
 		{ x: this.LONG },
 		{ y: this.LONG }
@@ -1059,6 +1061,23 @@ var winInit = function() {
 				self.TYPE.LPMONITORINFOEX	// lpmi
 			);
 		},
+		GetOverlappedResult: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms683209(v=vs.85).aspx
+			 * BOOL WINAPI GetOverlappedResult(
+			 *	  _In_  HANDLE       hFile,
+			 *	  _In_  LPOVERLAPPED lpOverlapped,
+			 *	  _Out_ LPDWORD      lpNumberOfBytesTransferred,
+			 *	  _In_  BOOL         bWait
+			 *	);
+			 */
+			 return lib('kernel32').declare('GetOverlappedResult', self.TYPE.ABI,
+				 self.TYPE.BOOL,				// return
+				 self.TYPE.HANDLE,				// hFile
+				 self.TYPE.LPOVERLAPPED,		// lpOverlapped
+				 self.TYPE.LPDWORD,				// lpNumberOfBytesTransferred
+				 self.TYPE.BOOL					// bWait
+			 );
+		}
 		GetPixel: function() {
 			/* http://msdn.microsoft.com/en-us/library/windows/desktop/dd144909%28v=vs.85%29.aspx
 			 * COLORREF GetPixel(
