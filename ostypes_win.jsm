@@ -34,7 +34,6 @@ var winTypes = function() {
 	this.BYTE = ctypes.unsigned_char;
 	this.CHAR = ctypes.char;
 	this.DWORD = ctypes.unsigned_long; // IntSafe.h defines it as: // typedef unsigned long DWORD; // so maybe can change this to ctypes.unsigned_long // i was always using `ctypes.uint32_t`
-	this.LPDWORD = this.DWORD.ptr;
 	this.FXPT2DOT30 = ctypes.long; // http://stackoverflow.com/a/20864995/1828637 // https://github.com/wine-mirror/wine/blob/a7247df6ca54fd1209eff9f9199447643ebdaec5/include/wingdi.h#L150
 	this.INT = ctypes.int;
 	this.INT_PTR = is64bit ? ctypes.int64_t : ctypes.int;
@@ -165,7 +164,6 @@ var winTypes = function() {
 		{ Pointer: this.PVOID }, //  union { struct { DWORD Offset; DWORD OffsetHigh; }; PVOID Pointer; };
 		{ hEvent: this.HANDLE },
 	]);
-	this.LPOVERLAPPED = this.OVERLAPPED.ptr;
 	this.POINT = ctypes.StructType('tagPOINT', [
 		{ x: this.LONG },
 		{ y: this.LONG }
@@ -639,7 +637,8 @@ var winInit = function() {
 			);
 		},
 		CancelIo: function() {
-			/* BOOL WINAPI CancelIo(
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/aa363791%28v=vs.85%29.aspx?f=255&MSPPError=-2147217396
+			 * BOOL WINAPI CancelIo(
 			 *	_In_ HANDLE hFile
 			 * );
 			 */
@@ -649,10 +648,12 @@ var winInit = function() {
 			);
 		},
 		CancelIoEx: function() {
-			// BOOL WINAPI CancelIoEx(
-			//   _In_     HANDLE       hFile,
-			//   _In_opt_ LPOVERLAPPED lpOverlapped
-			// );
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/aa363792%28v=vs.85%29.aspx
+			 * BOOL WINAPI CancelIoEx(
+			 *   _in_     HANDLE       hFile,
+			 *   _in_opt_ LPOVERLAPPED lpOverlapped
+			 * );
+			 */
 			return lib('kernel32').declare('CancelIoEx', self.TYPE.ABI,
 				self.TYPE.BOOL,			// return
 				self.TYPE.HANDLE,		// hFile
@@ -1341,13 +1342,13 @@ var winInit = function() {
 		},
     	ReadFileEx: function() {
 			/* https://msdn.microsoft.com/en-us/library/windows/desktop/aa365468(v=vs.85).aspx
-       * BOOL WINAPI ReadFileEx(
-       *   _In_      HANDLE                          hFile,
-       *   _Out_opt_ LPVOID                          lpBuffer,
-       *   _In_      DWORD                           nNumberOfBytesToRead,
-       *   _Inout_   LPOVERLAPPED                    lpOverlapped,
-       *   _In_      LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine
-       * );
+			 * BOOL WINAPI ReadFileEx(
+			 *   _In_      HANDLE                          hFile,
+			 *   _Out_opt_ LPVOID                          lpBuffer,
+			 *   _In_      DWORD                           nNumberOfBytesToRead,
+			 *   _Inout_   LPOVERLAPPED                    lpOverlapped,
+			 *   _In_      LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine
+			 * );
 			 */
 			return lib('kernel32').declare('ReadFileEx', self.TYPE.ABI,
 				self.TYPE.BOOL,                             // return
@@ -1557,11 +1558,11 @@ var winInit = function() {
 		},
 		WaitForSingleObjectEx: function() {
 			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms687036(v=vs.85).aspx
-				DWORD WINAPI WaitForSingleObjectEx(
-				  _In_ HANDLE hHandle,
-				  _In_ DWORD  dwMilliseconds,
-				  _In_ BOOL   bAlertable
-				);
+			 * DWORD WINAPI WaitForSingleObjectEx(
+			 *   _In_ HANDLE hHandle,
+			 *    _In_ DWORD  dwMilliseconds,
+			 *   _In_ BOOL   bAlertable
+			 * );
 			 */
 			return lib('kernel32').declare('WaitForSingleObjectEx', self.TYPE.ABI,
 				self.TYPE.DWORD,	// return
