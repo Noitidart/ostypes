@@ -510,7 +510,10 @@ var winInit = function() {
 		FSCTL_SET_ZERO_DATA: 0x980c8,
 		FILE_BEGIN: 0,
 
-		WT_EXECUTEDEFAULT: 0x00000000
+		WT_EXECUTEDEFAULT: 0x00000000,
+
+		ERROR_BROKEN_PIPE: 0x6D,
+		ERROR_OPERATION_ABORTED: 0x3E3				
 	};
 
 	var _lib = {}; // cache for lib
