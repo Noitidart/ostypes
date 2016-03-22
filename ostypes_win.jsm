@@ -354,6 +354,12 @@ var winTypes = function() {
 		this.PVOID,			// lpParameter,
 		this.BOOLEAN		// TimerOrWaitFired
 	]);
+	this.OVERLAPPED_COMPLETION_ROUTINE = ctypes.FunctionType(this.CALLBACK_ABI, this.VOID, [
+		this.DWORD,            // _In_    DWORD        dwErrorCode,
+		this.DWORD,            // _In_    DWORD        dwNumberOfBytesTransfered,
+		this.OVERLAPPED.ptr    // _Inout_ LPOVERLAPPED lpOverlapped
+	]);
+  this.LPOVERLAPPED_COMPLETION_ROUTINE = this.OVERLAPPED_COMPLETION_ROUTINE.ptr;
 
 	// ADV FUNC TYPES
 	this.HOOKPROC = this.LowLevelMouseProc.ptr; // not a guess really, as this is the hook type i use, so yeah it has to be a pointer to it
@@ -501,7 +507,7 @@ var winInit = function() {
 		FSCTL_SET_SPARSE: 0x900c4,
 		FSCTL_SET_ZERO_DATA: 0x980c8,
 		FILE_BEGIN: 0,
-		
+
 		WT_EXECUTEDEFAULT: 0x00000000
 	};
 
@@ -1290,7 +1296,26 @@ var winInit = function() {
 				self.TYPE.LPOVERLAPPED	// lpOverlapped
 			);
 		},
-		RegisterHotKey: function() {
+    ReadFileEx: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/aa365468(v=vs.85).aspx
+       * BOOL WINAPI ReadFileEx(
+       *   _In_      HANDLE                          hFile,
+       *   _Out_opt_ LPVOID                          lpBuffer,
+       *   _In_      DWORD                           nNumberOfBytesToRead,
+       *   _Inout_   LPOVERLAPPED                    lpOverlapped,
+       *   _In_      LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine
+       * );
+			 */
+			return lib('kernel32').declare('ReadFileEx', self.TYPE.ABI,
+				self.TYPE.BOOL,                             // return
+				self.TYPE.HANDLE,                           // hFile
+			  self.TYPE.LPVOID,                           // lpBuffer
+				self.TYPE.DWORD,                            // nNumberOfBytesToRead
+				self.TYPE.LPOVERLAPPED,		                  // lpNumberOfBytesWritten
+				self.TYPE.LPOVERLAPPED_COMPLETION_ROUTINE	  // lpOverlapped
+			);
+		},
+    RegisterHotKey: function() {
 			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms646309%28v=vs.85%29.aspx
 			 * BOOL WINAPI RegisterHotKey(
 			 *   __in_opt_ HWND hWnd,
@@ -1492,7 +1517,26 @@ var winInit = function() {
 				self.TYPE.LPDWORD,		// lpNumberOfBytesWritten
 				self.TYPE.LPOVERLAPPED	// lpOverlapped
 			);
-		}
+		},
+    WriteFileEx: function() {
+      /* https://msdn.microsoft.com/en-us/library/windows/desktop/aa365748(v=vs.85).aspx
+       * BOOL WINAPI WriteFileEx(
+       *   _In_      HANDLE                          hFile,
+       *   _In_opt_  LPVOID                          lpBuffer,
+       *   _In_      DWORD                           nNumberOfBytesToWrite,
+       *   _Inout_   LPOVERLAPPED                    lpOverlapped,
+       *   _In_      LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine
+       * );
+       */
+      return lib('kernel32').declare('WriteFileEx', self.TYPE.ABI,
+        self.TYPE.BOOL,                             // return
+        self.TYPE.HANDLE,                           // hFile
+        self.TYPE.LPVOID,                           // lpBuffer
+        self.TYPE.DWORD,                            // nNumberOfBytesToRead
+        self.TYPE.LPOVERLAPPED,		                  // lpNumberOfBytesWritten
+        self.TYPE.LPOVERLAPPED_COMPLETION_ROUTINE	  // lpOverlapped
+      );
+    }
 	};
 	// end - predefine your declares here
 	// end - function declares
