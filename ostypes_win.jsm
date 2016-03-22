@@ -508,7 +508,10 @@ var winInit = function() {
 		FSCTL_SET_ZERO_DATA: 0x980c8,
 		FILE_BEGIN: 0,
 
-		WT_EXECUTEDEFAULT: 0x00000000
+		WT_EXECUTEDEFAULT: 0x00000000,
+
+		ERROR_BROKEN_PIPE: 0x6D,
+		ERROR_OPERATION_ABORTED: 0x3E3
 	};
 
 	var _lib = {}; // cache for lib
@@ -631,6 +634,30 @@ var winInit = function() {
 				self.TYPE.INT,
 				self.TYPE.WPARAM,
 				self.TYPE.LPARAM
+			);
+		},
+		CancelIo: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/aa363791%28v=vs.85%29.aspx?f=255&MSPPError=-2147217396
+			 * BOOL WINAPI CancelIo(
+			 *	_In_ HANDLE hFile
+			 * );
+			 */
+			return lib('kernel32').declare('CancelIo', self.TYPE.ABI,
+				self.TYPE.BOOL,		// return
+				self.TYPE.HANDLE	// hFile
+			);
+		},
+		CancelIoEx: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/aa363792%28v=vs.85%29.aspx
+			 * BOOL WINAPI CancelIoEx(
+			 *   _in_     HANDLE       hFile,
+			 *   _in_opt_ LPOVERLAPPED lpOverlapped
+			 * );
+			 */
+			return lib('kernel32').declare('CancelIoEx', self.TYPE.ABI,
+				self.TYPE.BOOL,			// return
+				self.TYPE.HANDLE,		// hFile
+				self.TYPE.LPOVERLAPPED	// lpOverlapped
 			);
 		},
 		CloseHandle: function() {
@@ -1059,6 +1086,23 @@ var winInit = function() {
 				self.TYPE.LPMONITORINFOEX	// lpmi
 			);
 		},
+		GetOverlappedResult: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms683209(v=vs.85).aspx
+			 * BOOL WINAPI GetOverlappedResult(
+			 *	  _In_  HANDLE       hFile,
+			 *	  _In_  LPOVERLAPPED lpOverlapped,
+			 *	  _Out_ LPDWORD      lpNumberOfBytesTransferred,
+			 *	  _In_  BOOL         bWait
+			 *	);
+			 */
+			 return lib('kernel32').declare('GetOverlappedResult', self.TYPE.ABI,
+				 self.TYPE.BOOL,				// return
+				 self.TYPE.HANDLE,				// hFile
+				 self.TYPE.LPOVERLAPPED,		// lpOverlapped
+				 self.TYPE.LPDWORD,				// lpNumberOfBytesTransferred
+				 self.TYPE.BOOL					// bWait
+			 );
+		},
 		GetPixel: function() {
 			/* http://msdn.microsoft.com/en-us/library/windows/desktop/dd144909%28v=vs.85%29.aspx
 			 * COLORREF GetPixel(
@@ -1296,15 +1340,15 @@ var winInit = function() {
 				self.TYPE.LPOVERLAPPED	// lpOverlapped
 			);
 		},
-    ReadFileEx: function() {
+    	ReadFileEx: function() {
 			/* https://msdn.microsoft.com/en-us/library/windows/desktop/aa365468(v=vs.85).aspx
-       * BOOL WINAPI ReadFileEx(
-       *   _In_      HANDLE                          hFile,
-       *   _Out_opt_ LPVOID                          lpBuffer,
-       *   _In_      DWORD                           nNumberOfBytesToRead,
-       *   _Inout_   LPOVERLAPPED                    lpOverlapped,
-       *   _In_      LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine
-       * );
+			 * BOOL WINAPI ReadFileEx(
+			 *   _In_      HANDLE                          hFile,
+			 *   _Out_opt_ LPVOID                          lpBuffer,
+			 *   _In_      DWORD                           nNumberOfBytesToRead,
+			 *   _Inout_   LPOVERLAPPED                    lpOverlapped,
+			 *   _In_      LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine
+			 * );
 			 */
 			return lib('kernel32').declare('ReadFileEx', self.TYPE.ABI,
 				self.TYPE.BOOL,                             // return
@@ -1315,7 +1359,7 @@ var winInit = function() {
 				self.TYPE.LPOVERLAPPED_COMPLETION_ROUTINE	  // lpOverlapped
 			);
 		},
-    RegisterHotKey: function() {
+    	RegisterHotKey: function() {
 			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms646309%28v=vs.85%29.aspx
 			 * BOOL WINAPI RegisterHotKey(
 			 *   __in_opt_ HWND hWnd,
@@ -1512,6 +1556,21 @@ var winInit = function() {
 				self.TYPE.int		// id
 			);
 		},
+		WaitForSingleObjectEx: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms687036(v=vs.85).aspx
+			 * DWORD WINAPI WaitForSingleObjectEx(
+			 *   _In_ HANDLE hHandle,
+			 *    _In_ DWORD  dwMilliseconds,
+			 *   _In_ BOOL   bAlertable
+			 * );
+			 */
+			return lib('kernel32').declare('WaitForSingleObjectEx', self.TYPE.ABI,
+				self.TYPE.DWORD,	// return
+				self.TYPE.HANDLE,	// hHandle
+				self.TYPE.DWORD,	// dwMilliseconds
+				self.TYPE.BOOL		// bAlertable
+			);
+		},
 		WriteFile: function() {
 			/* https://msdn.microsoft.com/en-us/library/windows/desktop/aa365747%28v=vs.85%29.aspx
 			 * BOOL WINAPI WriteFile(
@@ -1531,25 +1590,25 @@ var winInit = function() {
 				self.TYPE.LPOVERLAPPED	// lpOverlapped
 			);
 		},
-    WriteFileEx: function() {
-      /* https://msdn.microsoft.com/en-us/library/windows/desktop/aa365748(v=vs.85).aspx
-       * BOOL WINAPI WriteFileEx(
-       *   _In_      HANDLE                          hFile,
-       *   _In_opt_  LPVOID                          lpBuffer,
-       *   _In_      DWORD                           nNumberOfBytesToWrite,
-       *   _Inout_   LPOVERLAPPED                    lpOverlapped,
-       *   _In_      LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine
-       * );
-       */
-      return lib('kernel32').declare('WriteFileEx', self.TYPE.ABI,
-        self.TYPE.BOOL,                             // return
-        self.TYPE.HANDLE,                           // hFile
-        self.TYPE.LPVOID,                           // lpBuffer
-        self.TYPE.DWORD,                            // nNumberOfBytesToRead
-        self.TYPE.LPOVERLAPPED,		                  // lpNumberOfBytesWritten
-        self.TYPE.LPOVERLAPPED_COMPLETION_ROUTINE	  // lpOverlapped
-      );
-    }
+    	WriteFileEx: function() {
+	      /* https://msdn.microsoft.com/en-us/library/windows/desktop/aa365748(v=vs.85).aspx
+	       * BOOL WINAPI WriteFileEx(
+	       *   _In_      HANDLE                          hFile,
+	       *   _In_opt_  LPVOID                          lpBuffer,
+	       *   _In_      DWORD                           nNumberOfBytesToWrite,
+	       *   _Inout_   LPOVERLAPPED                    lpOverlapped,
+	       *   _In_      LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine
+	       * );
+	       */
+	      return lib('kernel32').declare('WriteFileEx', self.TYPE.ABI,
+	        self.TYPE.BOOL,                             // return
+	        self.TYPE.HANDLE,                           // hFile
+	        self.TYPE.LPVOID,                           // lpBuffer
+	        self.TYPE.DWORD,                            // nNumberOfBytesToRead
+	        self.TYPE.LPOVERLAPPED,		                  // lpNumberOfBytesWritten
+	        self.TYPE.LPOVERLAPPED_COMPLETION_ROUTINE	  // lpOverlapped
+	      );
+	    }
 	};
 	// end - predefine your declares here
 	// end - function declares
