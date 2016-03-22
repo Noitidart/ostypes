@@ -1462,6 +1462,19 @@ var winInit = function() {
 				self.TYPE.LPSHFILEOPSTRUCT	// lpFileOp
 			);
 		},
+    	SleepEx: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms686307(v=vs.85).aspx
+			 * DWORD WINAPI SleepEx(
+  	 		 *   _In_ DWORD dwMilliseconds,
+  	 		 *   _In_ BOOL  bAlertable
+		 	 * );
+			 */
+			return lib('kernel32').declare('SleepEx', self.TYPE.ABI,
+				self.TYPE.BOOL,		// return
+				self.TYPE.DWORD,	// dwMilliseconds
+				self.TYPE.BOOL		// bAlertable
+			);
+		},
 		UnhookWindowsHookEx: function() {
 			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms644993%28v=vs.85%29.aspx
 			 * BOOL WINAPI UnhookWindowsHookEx(
