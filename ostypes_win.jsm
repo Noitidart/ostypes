@@ -1462,7 +1462,7 @@ var winInit = function() {
 				self.TYPE.LPSHFILEOPSTRUCT	// lpFileOp
 			);
 		},
-    	SleepEx: function() {
+		SleepEx: function() {
 			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms686307(v=vs.85).aspx
 			 * DWORD WINAPI SleepEx(
   	 		 *   _In_ DWORD dwMilliseconds,
@@ -1470,7 +1470,7 @@ var winInit = function() {
 		 	 * );
 			 */
 			return lib('kernel32').declare('SleepEx', self.TYPE.ABI,
-				self.TYPE.BOOL,		// return
+				self.TYPE.DWORD,	// return
 				self.TYPE.DWORD,	// dwMilliseconds
 				self.TYPE.BOOL		// bAlertable
 			);
