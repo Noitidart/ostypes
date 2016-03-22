@@ -1077,7 +1077,7 @@ var winInit = function() {
 				 self.TYPE.LPDWORD,				// lpNumberOfBytesTransferred
 				 self.TYPE.BOOL					// bWait
 			 );
-		}
+		},
 		GetPixel: function() {
 			/* http://msdn.microsoft.com/en-us/library/windows/desktop/dd144909%28v=vs.85%29.aspx
 			 * COLORREF GetPixel(
@@ -1315,7 +1315,7 @@ var winInit = function() {
 				self.TYPE.LPOVERLAPPED	// lpOverlapped
 			);
 		},
-    ReadFileEx: function() {
+    	ReadFileEx: function() {
 			/* https://msdn.microsoft.com/en-us/library/windows/desktop/aa365468(v=vs.85).aspx
        * BOOL WINAPI ReadFileEx(
        *   _In_      HANDLE                          hFile,
@@ -1334,7 +1334,7 @@ var winInit = function() {
 				self.TYPE.LPOVERLAPPED_COMPLETION_ROUTINE	  // lpOverlapped
 			);
 		},
-    RegisterHotKey: function() {
+    	RegisterHotKey: function() {
 			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms646309%28v=vs.85%29.aspx
 			 * BOOL WINAPI RegisterHotKey(
 			 *   __in_opt_ HWND hWnd,
