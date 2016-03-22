@@ -513,7 +513,7 @@ var winInit = function() {
 		WT_EXECUTEDEFAULT: 0x00000000,
 
 		ERROR_BROKEN_PIPE: 0x6D,
-		ERROR_OPERATION_ABORTED: 0x3E3				
+		ERROR_OPERATION_ABORTED: 0x3E3
 	};
 
 	var _lib = {}; // cache for lib
@@ -1553,6 +1553,21 @@ var winInit = function() {
 				self.TYPE.BOOL,		// return
 				self.TYPE.HWND,		// hWnd
 				self.TYPE.int		// id
+			);
+		},
+		WaitForSingleObjectEx: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms687036(v=vs.85).aspx
+				DWORD WINAPI WaitForSingleObjectEx(
+				  _In_ HANDLE hHandle,
+				  _In_ DWORD  dwMilliseconds,
+				  _In_ BOOL   bAlertable
+				);
+			 */
+			return lib('kernel32').declare('WaitForSingleObjectEx', self.TYPE.ABI,
+				self.TYPE.DWORD,	// return
+				self.TYPE.HANDLE,	// hHandle
+				self.TYPE.DWORD,	// dwMilliseconds
+				self.TYPE.BOOL		// bAlertable
 			);
 		},
 		WriteFile: function() {
