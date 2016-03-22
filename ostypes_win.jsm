@@ -1550,25 +1550,25 @@ var winInit = function() {
 				self.TYPE.LPOVERLAPPED	// lpOverlapped
 			);
 		},
-    WriteFileEx: function() {
-      /* https://msdn.microsoft.com/en-us/library/windows/desktop/aa365748(v=vs.85).aspx
-       * BOOL WINAPI WriteFileEx(
-       *   _In_      HANDLE                          hFile,
-       *   _In_opt_  LPVOID                          lpBuffer,
-       *   _In_      DWORD                           nNumberOfBytesToWrite,
-       *   _Inout_   LPOVERLAPPED                    lpOverlapped,
-       *   _In_      LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine
-       * );
-       */
-      return lib('kernel32').declare('WriteFileEx', self.TYPE.ABI,
-        self.TYPE.BOOL,                             // return
-        self.TYPE.HANDLE,                           // hFile
-        self.TYPE.LPVOID,                           // lpBuffer
-        self.TYPE.DWORD,                            // nNumberOfBytesToRead
-        self.TYPE.LPOVERLAPPED,		                  // lpNumberOfBytesWritten
-        self.TYPE.LPOVERLAPPED_COMPLETION_ROUTINE	  // lpOverlapped
-      );
-    }
+    	WriteFileEx: function() {
+	      /* https://msdn.microsoft.com/en-us/library/windows/desktop/aa365748(v=vs.85).aspx
+	       * BOOL WINAPI WriteFileEx(
+	       *   _In_      HANDLE                          hFile,
+	       *   _In_opt_  LPVOID                          lpBuffer,
+	       *   _In_      DWORD                           nNumberOfBytesToWrite,
+	       *   _Inout_   LPOVERLAPPED                    lpOverlapped,
+	       *   _In_      LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine
+	       * );
+	       */
+	      return lib('kernel32').declare('WriteFileEx', self.TYPE.ABI,
+	        self.TYPE.BOOL,                             // return
+	        self.TYPE.HANDLE,                           // hFile
+	        self.TYPE.LPVOID,                           // lpBuffer
+	        self.TYPE.DWORD,                            // nNumberOfBytesToRead
+	        self.TYPE.LPOVERLAPPED,		                  // lpNumberOfBytesWritten
+	        self.TYPE.LPOVERLAPPED_COMPLETION_ROUTINE	  // lpOverlapped
+	      );
+	    }
 	};
 	// end - predefine your declares here
 	// end - function declares
