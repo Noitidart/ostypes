@@ -635,6 +635,27 @@ var winInit = function() {
 				self.TYPE.LPARAM
 			);
 		},
+		CancelIo: function() {
+			/* BOOL WINAPI CancelIo(
+			 *	_In_ HANDLE hFile
+			 * );
+			 */
+			return lib('kernel32').declare('CancelIo', self.TYPE.ABI,
+				self.TYPE.BOOL,		// return
+				self.TYPE.HANDLE	// hFile
+			);
+		},
+		CancelIoEx: function() {
+			// BOOL WINAPI CancelIoEx(
+			//   _In_     HANDLE       hFile,
+			//   _In_opt_ LPOVERLAPPED lpOverlapped
+			// );
+			return lib('kernel32').declare('CancelIoEx', self.TYPE.ABI,
+				self.TYPE.BOOL,			// return
+				self.TYPE.HANDLE,		// hFile
+				self.TYPE.LPOVERLAPPED	// lpOverlapped
+			);
+		},
 		CloseHandle: function() {
 			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms724211%28v=vs.85%29.aspx?f=255&MSPPError=-2147217396
 			 * BOOL WINAPI CloseHandle(
