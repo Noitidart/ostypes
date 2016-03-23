@@ -1073,6 +1073,17 @@ var winInit = function() {
 				self.TYPE.UINT		// wMsgFilterMax
 			);
 		},
+		GetModuleHandle: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms683199%28v=vs.85%29.aspx
+			 * HMODULE WINAPI GetModuleHandle(
+			 *   _In_opt_ LPCTSTR lpModuleName
+			 * );
+			 */
+			return lib('kernel32').declare(ifdef_UNICODE ? 'GetModuleHandleW' : 'GetModuleHandleA', self.TYPE.ABI,
+				self.TYPE.HMODULE,		// return
+				self.TYPE.LPCTSTR		// lpModuleName
+			);
+		},
 		GetMonitorInfo: function() {
 			/* https://msdn.microsoft.com/en-us/library/windows/desktop/dd144901%28v=vs.85%29.aspx
 			 * BOOL GetMonitorInfo(
