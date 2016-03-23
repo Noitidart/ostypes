@@ -93,11 +93,11 @@ var macTypes = function() {
 	this.UInt32 = ctypes.unsigned_long;
 	this.UInt64 = ctypes.unsigned_long_long;
 	this.UniChar = ctypes.jschar;
-	this.void = ctypes.void_t;
 	this.VOID = ctypes.void_t;
 	
 	// ADVANCED TYPES // as per how it was defined in WinNT.h // defined by "simple types"
 	this.AlertType = this.SInt16;
+	this.CFAbsoluteTime = this.CFTimeInterval;
 	this.DialogItemIndex = this.SInt16;
 	this.EventKind = this.UInt16;
 	this.EventMask = this.UInt16;
@@ -133,12 +133,12 @@ var macTypes = function() {
 	this.__CFMachPort = ctypes.StructType('__CFMachPort');
 	this.__CFRunLoop = ctypes.StructType('__CFRunLoop');
 	this.__CFRunLoopSource = ctypes.StructType('__CFRunLoopSource');
+	this.__CFRunLoopTimer = ctypes.StructType('__CFRunLoopTimer');
 	this.__CFString = ctypes.StructType('__CFString');
 	this.__CFURL = ctypes.StructType('__CFURL');
 	this.__CGEvent = ctypes.StructType('__CGEvent');
 	this.__CGEventTapProxy = ctypes.StructType('__CGEventTapProxy');
 	this.__FSEventStream = ctypes.StructType("__FSEventStream");
-	this.CFDictionaryRef = this.__CFDictionary.ptr;
 	this.CGImage = ctypes.StructType('CGImage');
 	this.CGContext = ctypes.StructType('CGContext');
 	this.CGPoint = ctypes.StructType('CGPoint', [
@@ -180,9 +180,11 @@ var macTypes = function() {
 	// ADVANCED STRUCTS // based on "simple structs" to be defined first
 	this.CFAllocatorRef = this.__CFAllocator.ptr;
 	this.CFArrayRef = this.__CFArray.ptr;
+	this.CFDictionaryRef = this.__CFDictionary.ptr;
 	this.CFMachPortRef = this.__CFMachPort.ptr;
 	this.CFRunLoopRef = this.__CFRunLoop.ptr;
 	this.CFRunLoopSourceRef = this.__CFRunLoopSource.ptr;
+	this.CFRunLoopTimerRef = this.__CFRunLoopTimer.ptr
 	this.CFStringRef = this.__CFString.ptr;
 	this.CFURLRef = this.__CFURL.ptr;
 	this.CGImageRef = this.CGImage.ptr;
@@ -216,13 +218,14 @@ var macTypes = function() {
 	// FURTHER ADV STRUCTS
 
 	// FUNCTION TYPES
-	this.CFAllocatorCopyDescriptionCallBack = ctypes.FunctionType(this.CALLBACK_ABI, this.CFStringRef, [this.void.ptr]).ptr;
-	this.CFAllocatorRetainCallBack = ctypes.FunctionType(this.CALLBACK_ABI, this.void.ptr, [this.void.ptr]).ptr;
-	this.CFAllocatorReleaseCallBack = ctypes.FunctionType(this.CALLBACK_ABI, this.void, [this.void.ptr]).ptr;
+	this.CFAllocatorCopyDescriptionCallBack = ctypes.FunctionType(this.CALLBACK_ABI, this.CFStringRef, [this.void.ptr]).ptr; // https://developer.apple.com/library/ios/documentation/CoreFoundation/Reference/CFAllocatorRef/index.html#//apple_ref/doc/c_ref/CFAllocatorCopyDescriptionCallBack
+	this.CFAllocatorRetainCallBack = ctypes.FunctionType(this.CALLBACK_ABI, this.void.ptr, [this.void.ptr]).ptr; // https://developer.apple.com/library/ios/documentation/CoreFoundation/Reference/CFAllocatorRef/index.html#//apple_ref/doc/c_ref/CFAllocatorRetainCallBack //  typedef const void *(*CFAllocatorRetainCallBack) ( const void *info ); 
+	this.CFAllocatorReleaseCallBack = ctypes.FunctionType(this.CALLBACK_ABI, this.void, [this.void.ptr]).ptr; // https://developer.apple.com/library/ios/documentation/CoreFoundation/Reference/CFAllocatorRef/index.html#//apple_ref/doc/c_ref/CFAllocatorReleaseCallBack //  typedef void (*CFAllocatorReleaseCallBack) ( const void *info ); 
 	this.CFArrayCopyDescriptionCallBack = ctypes.FunctionType(this.CALLBACK_ABI, this.CFStringRef, [this.void.ptr]).ptr;
 	this.CFArrayEqualCallBack = ctypes.FunctionType(this.CALLBACK_ABI, this.Boolean, [this.void.ptr, this.void.ptr]).ptr;
 	this.CFArrayReleaseCallBack = ctypes.FunctionType(this.CALLBACK_ABI, this.void, [this.CFAllocatorRef, this.void.ptr]).ptr;
 	this.CFArrayRetainCallBack = ctypes.FunctionType(this.CALLBACK_ABI, this.void.ptr, [this.CFAllocatorRef, this.void.ptr]).ptr;
+	this.CFRunLoopTimerCallBack = ctypes.FunctionType(this.CALLBACK_ABI, this.void, [this.CFRunLoopTimerRef, this.void.ptr]).ptr; // https://developer.apple.com/library/ios/documentation/CoreFoundation/Reference/CFRunLoopTimerRef/index.html#//apple_ref/doc/c_ref/CFRunLoopTimerCallBack
 	this.EventHandlerProcPtr = ctypes.FunctionType(this.CALLBACK_ABI, this.OSStatus, [this.EventHandlerCallRef, this.EventRef, this.void.ptr]).ptr;
 	this.FSEventStreamCallback = ctypes.FunctionType(this.CALLBACK_ABI, this.void, [this.ConstFSEventStreamRef, this.void.ptr, this.size_t, this.void.ptr, this.FSEventStreamEventFlags.ptr, this.FSEventStreamEventId.ptr]).ptr;
 	this.ModalFilterProcPtr = ctypes.FunctionType(this.CALLBACK_ABI, this.Boolean, [this.DialogRef, this.EventRecord.ptr, this.DialogItemIndex.ptr]).ptr;
@@ -250,6 +253,13 @@ var macTypes = function() {
 		{ release: this.CFArrayReleaseCallBack },
 		{ copyDescription: this.CFArrayCopyDescriptionCallBack },
 		{ equal: this.CFArrayEqualCallBack }
+	]);
+	this.CFRunLoopTimerContext = ctypes.StructType('CFRunLoopTimerContext', [ // https://developer.apple.com/library/ios/documentation/CoreFoundation/Reference/CFRunLoopTimerRef/index.html#//apple_ref/c/tdef/CFRunLoopTimerContext
+		{ version: this.CFIndex },
+		{ info: this.void.ptr },
+		{ retain: this.CFAllocatorRetainCallBack },
+		{ release: this.CFAllocatorReleaseCallBack },
+		{ copyDescription: this.CFAllocatorCopyDescriptionCallBack }
 	]);
 	this.FSEventStreamContext = ctypes.StructType('FSEventStreamContext', [
 		{version: this.CFIndex},
@@ -794,15 +804,39 @@ var macInit = function() {
 				self.TYPE.CFStringRef
 			);
 		},
+		CFRunLoopAddTimer: function() {
+			/* https://developer.apple.com/library/ios/documentation/CoreFoundation/Reference/CFRunLoopRef/index.html#//apple_ref/c/func/CFRunLoopAddTimer
+			 * void CFRunLoopAddTimer (
+			 *   CFRunLoopRef rl,
+			 *   CFRunLoopTimerRef timer,
+			 *   CFStringRef mode
+			 * ); 
+			 */
+			return lib('CoreFoundation').declare('CFRunLoopAddTimer', self.TYPE.ABI,
+				self.TYPE.void,					// return
+				self.TYPE.CFRunLoopRef,			// rl
+				self.TYPE.CFRunLoopTimerRef,	// timer
+				self.TYPE.CFStringRef			// mode
+			);
+		},
 		CFRunLoopGetCurrent: function() {
 			return lib('CoreFoundation').declare('CFRunLoopGetCurrent', self.TYPE.ABI,
 				self.TYPE.CFRunLoopRef
 			);
 		},
-		CFRunLoopSourceInvalidate: function() {
-			return lib('CoreFoundation').declare('CFRunLoopSourceInvalidate', self.TYPE.ABI,
-				self.TYPE.VOID,
-				self.TYPE.CFRunLoopSourceRef
+		CFRunLoopRemoveTimer: function() {
+			/* https://developer.apple.com/library/ios/documentation/CoreFoundation/Reference/CFRunLoopRef/index.html#//apple_ref/c/func/CFRunLoopRemoveTimer
+			 * void CFRunLoopRemoveTimer (
+			 *   CFRunLoopRef rl,
+			 *   CFRunLoopTimerRef timer,
+			 *   CFStringRef mode
+			 * );
+			 */
+			return lib('CoreFoundation').declare('CFRunLoopRemoveTimer', self.TYPE.ABI,
+				self.TYPE.void,					// return
+				self.TYPE.CFRunLoopRef,			// rl
+				self.TYPE.CFRunLoopTimerRef,	// timer
+				self.TYPE.CFStringRef			// mode
 			);
 		},
 		CFRunLoopRemoveSource: function() {
@@ -830,12 +864,41 @@ var macInit = function() {
 				self.TYPE.Boolean
 			);
 		},
+		CFRunLoopSourceInvalidate: function() {
+			return lib('CoreFoundation').declare('CFRunLoopSourceInvalidate', self.TYPE.ABI,
+				self.TYPE.VOID,
+				self.TYPE.CFRunLoopSourceRef
+			);
+		},
 		CFRunLoopStop: function() {
 			/* https://developer.apple.com/library/ios/documentation/CoreFoundation/Reference/CFRunLoopRef/index.html#//apple_ref/c/func/CFRunLoopStop
 			*/
 			return lib('CoreFoundation').declare('CFRunLoopStop', self.TYPE.ABI,
 				self.TYPE.VOID,
 				self.TYPE.CFRunLoopRef
+			);
+		},
+		CFRunLoopTimerCreate: function() {
+			/* https://developer.apple.com/library/ios/documentation/CoreFoundation/Reference/CFRunLoopTimerRef/index.html#//apple_ref/c/func/CFRunLoopTimerCreate
+			 * CFRunLoopTimerRef CFRunLoopTimerCreate (
+			 *   CFAllocatorRef allocator,
+			 *   CFAbsoluteTime fireDate,
+			 *   CFTimeInterval interval,
+			 *   CFOptionFlags flags,
+			 *   CFIndex order,
+			 *   CFRunLoopTimerCallBack callout,
+			 *   CFRunLoopTimerContext *context
+			 * ); 
+			 */
+			return lib('CoreFoundation').declare('CFRunLoopTimerCreate', self.TYPE.ABI,
+				self.TYPE.CFRunLoopTimerRef,		// return
+				self.TYPE.CFAllocatorRef,			// allocator
+				self.TYPE.CFAbsoluteTime,			// fireDate
+				self.TYPE.CFTimeInterval,			// interval
+				self.TYPE.CFOptionFlags,			// flags
+				self.TYPE.CFIndex,					// order
+				self.TYPE.CFRunLoopTimerCallBack,	// callout
+				self.TYPE.CFRunLoopTimerContext.ptr	// *context
 			);
 		},
 		CFStringCreateWithCharacters: function() {
