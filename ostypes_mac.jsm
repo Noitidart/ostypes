@@ -766,6 +766,16 @@ var macInit = function() {
 				self.TYPE.float					// time
 			);
 		},
+		CFAbsoluteTimeGetCurrent: function() {
+			/* https://developer.apple.com/library/mac/documentation/CoreFoundation/Reference/CFTimeUtils/index.html#//apple_ref/c/func/CFAbsoluteTimeGetCurrent
+			 * CFAbsoluteTime CFAbsoluteTimeGetCurrent (
+			 *   void
+			 * );
+			 */
+			return lib('CoreFoundation').decalre('CFAbsoluteTimeGetCurrent', self.TYPE.ABI,
+				self.TYPE.CFAbsoluteTime	// return
+			);
+		},
 		CFArrayCreate: function() {
 			return lib('CoreFoundation').declare('CFArrayCreate', self.TYPE.ABI,
 				self.TYPE.CFArrayRef,
@@ -899,6 +909,17 @@ var macInit = function() {
 				self.TYPE.CFIndex,					// order
 				self.TYPE.CFRunLoopTimerCallBack,	// callout
 				self.TYPE.CFRunLoopTimerContext.ptr	// *context
+			);
+		},
+		CFRunLoopTimerInvalidate: function() {
+			/* https://developer.apple.com/library/ios/documentation/CoreFoundation/Reference/CFRunLoopTimerRef/index.html#//apple_ref/c/func/CFRunLoopTimerInvalidate
+			 * void CFRunLoopTimerInvalidate (
+			 *   CFRunLoopTimerRef timer
+			 * );
+			 */
+			return lib('CoreFoundation').declare('CFRunLoopTimerInvalidate', self.TYPE.ABI,
+				self.TYPE.void,					// return
+				self.TYPE.CFRunLoopTimerRef		// timer
 			);
 		},
 		CFStringCreateWithCharacters: function() {
