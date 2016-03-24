@@ -511,7 +511,9 @@ var winInit = function() {
 		WT_EXECUTEDEFAULT: 0x00000000,
 
 		ERROR_BROKEN_PIPE: 0x6D,
-		ERROR_OPERATION_ABORTED: 0x3E3
+		ERROR_OPERATION_ABORTED: 0x3E3,
+		
+		WM_TIMER: 0x0113
 	};
 
 	var _lib = {}; // cache for lib
@@ -885,7 +887,7 @@ var winInit = function() {
 			 *   __in_ const MSG *lpmsg
 			 * );
 			 */
-			return lib('user32').declare('DestroyWindow', self.TYPE.ABI,
+			return lib('user32').declare(ifdef_UNICODE ? 'DispatchMessageW' : 'DispatchMessageA', self.TYPE.ABI,
 				self.TYPE.LRESULT,	// return
 				self.TYPE.MSG.ptr	// *lpmsg
 			);
