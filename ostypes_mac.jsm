@@ -772,7 +772,7 @@ var macInit = function() {
 			 *   void
 			 * );
 			 */
-			return lib('CoreFoundation').decalre('CFAbsoluteTimeGetCurrent', self.TYPE.ABI,
+			return lib('CoreFoundation').declare('CFAbsoluteTimeGetCurrent', self.TYPE.ABI,
 				self.TYPE.CFAbsoluteTime	// return
 			);
 		},
