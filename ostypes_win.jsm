@@ -513,7 +513,8 @@ var winInit = function() {
 		ERROR_BROKEN_PIPE: 0x6D,
 		ERROR_OPERATION_ABORTED: 0x3E3,
 		
-		WM_TIMER: 0x0113
+		WM_TIMER: 0x0113,
+		WM_APP: 0x8000
 	};
 
 	var _lib = {}; // cache for lib
