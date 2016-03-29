@@ -158,6 +158,14 @@ var winTypes = function() {
 	  { 'Data3': this.USHORT },
 	  { 'Data4': this.BYTE.array(8) }
 	]);
+	this.MOUSEINPUT = ctypes.StructType('tagMOUSEINPUT', [ // https://msdn.microsoft.com/en-us/library/windows/desktop/ms646273%28v=vs.85%29.aspx
+        { 'dx': this.LONG },
+        { 'dy': this.LONG },
+        { 'mouseData': this.DWORD },
+        { 'dwFlags': this.DWORD },
+        { 'time': this.ULONG_PTR },
+        { 'dwExtraInfo': this.DWORD }
+    ]);
 	this.OVERLAPPED = ctypes.StructType('_OVERLAPPED', [ // https://msdn.microsoft.com/en-us/library/windows/desktop/ms684342%28v=vs.85%29.aspx
 		{ Internal: this.ULONG_PTR },
 		{ InternalHigh: this.ULONG_PTR },
@@ -268,6 +276,10 @@ var winTypes = function() {
 		{ 'dmPanningHeight': this.DWORD }
 	]);
 	this.IID = this.GUID;
+    this.INPUT = ctypes.StructType('tagINPUT', [
+        {'type': this.DWORD},
+        {'mi': this.MOUSEINPUT} // union, pick which one you want, i picked mouse
+    ]);
 	this.LPOVERLAPPED = this.OVERLAPPED.ptr;
 	this.LPSECURITY_ATTRIBUTES = this.SECURITY_ATTRIBUTES.ptr;
 	this.MONITORINFOEX = ctypes.StructType('tagMONITORINFOEX', [
@@ -333,6 +345,7 @@ var winTypes = function() {
 		{ bV5ProfileSize:	this.DWORD },
 		{ bV5Reserved:		this.DWORD }
 	]);
+	this.LPINPUT = this.INPUT.ptr;
 	this.LPMONITORINFOEX = this.MONITORINFOEX.ptr;
 	this.LPMSG = this.MSG.ptr;
 	this.PMSG = this.MSG.ptr
@@ -514,7 +527,12 @@ var winInit = function() {
 		ERROR_OPERATION_ABORTED: 0x3E3,
 		
 		WM_TIMER: 0x0113,
-		WM_APP: 0x8000
+		WM_APP: 0x8000,
+
+		INPUT_MOUSE: 0,
+		MOUSEEVENTF_LEFTDOWN: 2,
+		MOUSEEVENTF_LEFTUP: 4,
+		MOUSEEVENTF_ABSOLUTE: 0x8000
 	};
 
 	var _lib = {}; // cache for lib
@@ -1440,6 +1458,21 @@ var winInit = function() {
 				self.TYPE.HGDIOBJ, //return
 				self.TYPE.HDC, // hdc
 				self.TYPE.HGDIOBJ // hgdiobj
+			);
+		},
+		SendInput: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms646310(v=vs.85).aspx
+			 * UINT WINAPI SendInput(
+			 *   __in_ UINT    nInputs,
+			 *   __in_ LPINPUT pInputs,
+			 *   __in_ int     cbSize
+			 * );
+			 */
+			return lib('user32').declare('SendInput', self.TYPE.ABI,
+				self.TYPE.UINT,			// return
+				self.TYPE.UINT,			// nInputs
+				self.TYPE.LPINPUT,		// pInputs
+				self.TYPE.int			// cbSize
 			);
 		},
 		SetForegroundWindow: function() {
