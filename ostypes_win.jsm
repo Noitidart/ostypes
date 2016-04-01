@@ -789,6 +789,21 @@ var winInit = function() {
 				self.TYPE.HANDLE					// hTemplateFile
 			);
 		},
+		CreateSymbolicLink: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/aa363866%28v=vs.85%29.aspx
+			 * BOOLEAN WINAPI CreateSymbolicLink(
+			 *   __in_ LPTSTR lpSymlinkFileName,
+			 *   __in_ LPTSTR lpTargetFileName,
+			 *   __in_ DWORD  dwFlags
+			 * );
+			 */
+			return lib('kernel32').declare(ifdef_UNICODE ? 'CreateSymbolicLinkW' : 'CreateSymbolicLinkA', self.TYPE.ABI,
+				self.TYPE.BOOLEAN,	// return
+				self.TYPE.LPTSTR,	// lpSymlinkFileName
+				self.TYPE.LPTSTR,	// lpTargetFileName
+				self.TYPE.DWORD		// dwFlags
+			);
+		},
 		CreateTimerQueueTimer: function() {
 			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms682485(v=vs.85).aspx
 				 BOOL WINAPI CreateTimerQueueTimer(
