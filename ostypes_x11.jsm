@@ -1531,7 +1531,7 @@ var x11Init = function() {
 			/* http://linux.die.net/man/3/xsync
 			 * int XSync(Display *display, Bool discard);
 			 */
-			return lib('x11').declare('XSync', self.TYPE.ABI
+			return lib('x11').declare('XSync', self.TYPE.ABI,
 				self.TYPE.int,				// return
 				self.TYPE.Display.ptr,		// *display
 				self.TYPE.Bool				// discard
