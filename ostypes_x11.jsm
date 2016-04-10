@@ -912,7 +912,7 @@ var x11Init = function() {
 			 * );
 			 */
 			return lib('x11').declare('XAllowEvents', self.TYPE.ABI,
-				self.TYPE.unsigned_long,	// return
+				self.TYPE.int,				// return
 				self.TYPE.Display.ptr,		// *display
 				self.TYPE.int,				// event_mode
 				self.TYPE.Time				// time

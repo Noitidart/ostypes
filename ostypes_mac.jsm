@@ -298,6 +298,14 @@ var macTypes = function() {
 		{ reserved: this.unsigned_long_long },
 		{ size: this.unsigned_long_long }
 	]);
+	this.NSPoint = ctypes.StructType('_NSPoint', [
+		{ 'x': this.CGFloat },
+		{ 'y': this.CGFloat }
+	]);
+	this.NSSize = ctypes.StructType('_NSSize', [
+		{ 'width': this.CGFloat },
+		{ 'height': this.CGFloat }
+	]);
 	
 	// ADV OBJC STRUCTS
 	this.Block_literal_1 = ctypes.StructType('Block_literal_1', [
@@ -306,6 +314,10 @@ var macTypes = function() {
 		{ reserved: this.int32_t },
 		{ invoke: this.void.ptr },
 		{ descriptor: this.Block_descriptor_1.ptr }
+	]);
+	this.NSRect = ctypes.StructType('_NSRect', [
+		{ 'origin': this.NSPoint },
+		{ 'size': this.NSSize }
 	]);
 	
 	// FUNC OBJC TYPES
