@@ -1527,6 +1527,16 @@ var x11Init = function() {
 				self.TYPE.XEvent.ptr	// *event_sent
 			); 
 		},
+		XSync: function() {
+			/* http://linux.die.net/man/3/xsync
+			 * int XSync(Display *display, Bool discard);
+			 */
+			return lib('x11').declare('XSync', self.TYPE.ABI
+				self.TYPE.int,				// return
+				self.TYPE.Display.ptr,		// *display
+				self.TYPE.Bool				// discard
+			);
+		},
 		XTranslateCoordinates: function() {
 			/* http://www.xfree86.org/4.4.0/XTranslateCoordinates.3.html
 			 * Bool XTranslateCoordinates(
