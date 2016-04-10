@@ -1849,7 +1849,15 @@ var x11Init = function() {
 			 *   GdkDrawable *drawable
 			 * );
 			 */
-			return lib(parseInt(core.firefox.version) <= 45 ? 'gdk2' : 'gdk3').declare('gdk_x11_drawable_get_xid', self.TYPE.ABI,
+			if (parseInt(core.firefox.version) <= 45) {
+				// can use gdk2 ok good
+			} else {
+				console.error('not available in gdk3 and this version of firefox cant use gdk2')
+				throw new Error('not available in gdk3 and this version of firefox cant use gdk2')
+			}
+			// return lib(parseInt(core.firefox.version) <= 45 ? 'gdk2' : 'gdk3').declare('gdk_x11_drawable_get_xid', self.TYPE.ABI,
+			// this is only available in gdk2
+			return lib('gdk2').declare('gdk_x11_drawable_get_xid', self.TYPE.ABI,
 				self.TYPE.XID,				// return
 				self.TYPE.GdkDrawable.ptr	// *drawable
 			);
