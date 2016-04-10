@@ -2065,6 +2065,30 @@ var x11Init = function() {
 				self.TYPE.uint8_t					// keyboard_mode
 			);
 		},
+		xcb_grab_key_checked: function() {
+			// https://github.com/emmanueldenloye/firefox-pentadactyl/blob/52bcaf3a49f81350110210a90552690b2db332a0/unused_plugins/fix-focus.js#L240
+			/* http://www.x.org/releases/X11R7.7/doc/man/man3/xcb_grab_key.3.xhtml
+			 * xcb_void_cookie_t xcb_grab_key(
+			 *   xcb_connection_t *conn,
+			 *   uint8_t owner_events,
+			 *   xcb_window_t grab_window,
+			 *   uint16_t modifiers,
+			 *   xcb_keycode_t key,
+			 *   uint8_t pointer_mode,
+			 *   uint8_t keyboard_mode
+			 * );
+			 */
+			return lib('xcbkey').declare('xcb_grab_key_checked', self.TYPE.ABI,
+				self.TYPE.xcb_void_cookie_t,		// return
+				self.TYPE.xcb_connection_t.ptr,		// *conn
+				self.TYPE.uint8_t,					// owner_events
+				self.TYPE.xcb_window_t,				// grab_window
+				self.TYPE.uint16_t,					// modifiers
+				self.TYPE.xcb_keycode_t,			// key
+				self.TYPE.uint8_t,					// pointer_mode
+				self.TYPE.uint8_t					// keyboard_mode
+			);
+		},
 		xcb_key_symbols_alloc: function() {
 			/* http://www.opensource.apple.com/source/X11libs/X11libs-60/xcb-util/xcb-util-0.3.6/keysyms/xcb_keysyms.h
 			 * xcb_key_symbols_t *xcb_key_symbols_alloc        (xcb_connection_t         *c);
