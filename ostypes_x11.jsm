@@ -1377,6 +1377,19 @@ var x11Init = function() {
 				self.TYPE.Window		// w
 			);
 		},
+		XMapRaised: function() {
+			/* http://www.x.org/archive/X11R7.5/doc/man/man3/XMapRaised.3.html
+			 * int XMapRaised (
+			 *   Display *display,
+			 *   Window w
+			 * );
+			 */
+			return lib('x11').declare('XMapRaised', self.TYPE.ABI,
+				self.TYPE.int,			// return
+				self.TYPE.Display.ptr,	// *display
+				self.TYPE.Window		// w
+			);
+		},
 		XMaskEvent: function() {
 			/* https://tronche.com/gui/x/xlib/event-handling/manipulating-event-queue/XMaskEvent.html
 			 * int XMaskEvent(
