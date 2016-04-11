@@ -1862,6 +1862,25 @@ var x11Init = function() {
 				self.TYPE.GdkDrawable.ptr	// *drawable
 			);
 		},
+		gdk_x11_window_get_xid: function() {
+			/* https://developer.gnome.org/gdk3/stable/gdk3-X-Window-System-Interaction.html#gdk-x11-window-get-xid
+			 * Window gdk_x11_window_get_xid (
+			 *   GdkWindow *window
+			 * );
+			 */
+			if (parseInt(core.firefox.version) <= 45) {
+				console.error('not available in gdk2 and this version of firefox cant use gdk3')
+				throw new Error('not available in gdk2 and this version of firefox cant use gdk3')
+			} else {
+				// can use gdk3 ok good
+			}
+			// return lib(parseInt(core.firefox.version) <= 45 ? 'gdk2' : 'gdk3').declare('gdk_x11_drawable_get_xid', self.TYPE.ABI,
+			// this is only available in gdk2
+			return lib('gdk3').declare('gdk_x11_window_get_xid', self.TYPE.ABI,
+				self.TYPE.Window,				// return
+				self.TYPE.GdkWindow.ptr	// *drawable
+			);
+		},
 		gdk_x11_window_lookup_for_display: function() {
 			/* https://developer.gnome.org/gdk2/stable/gdk2-X-Window-System-Interaction.html#gdk-x11-window-lookup-for-display
 			 * GdkWindow *gdk_x11_window_lookup_for_display (
@@ -2281,8 +2300,15 @@ var x11Init = function() {
 	
 	this.HELPER = {
 		gdkWinPtrToXID: function(aGDKWindowPtr) {
-			var GdkDrawPtr = ctypes.cast(aGDKWindowPtr, self.TYPE.GdkDrawable.ptr);
-			var xidOfWin = self.API('gdk_x11_drawable_get_xid')(GdkDrawPtr);
+			var xidOfWin;
+			if (parseInt(core.firefox.version) <= 45) {
+				// use gdk2
+				var GdkDrawPtr = ctypes.cast(aGDKWindowPtr, self.TYPE.GdkDrawable.ptr);
+				xidOfWin = self.API('gdk_x11_drawable_get_xid')(GdkDrawPtr);
+			} else {
+				// use gdk3
+				xidOfWin = self.API('gdk_x11_window_get_xid')(aGDKWindowPtr);
+			}
 			return xidOfWin;
 		},
 		gdkWinPtrToGtkWinPtr: function(aGDKWindowPtr) {
