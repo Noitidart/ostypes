@@ -180,8 +180,8 @@ var xlibTypes = function() {
 	// ADVANCED STRUCTS
 	// XEvent is one huge union, js-ctypes doesnt have union so i just set it to what I use for my addon
 	this.XEvent = ctypes.StructType('_XEvent', [ // http://tronche.com/gui/x/xlib/events/structures.html
-		// { xclient: this.XClientMessageEvent }
-		{ xbutton: this.XButtonEvent }
+		{ xclient: this.XClientMessageEvent }
+		// { xbutton: this.XButtonEvent }
 		// { xkey: this.XKeyEvent }
 	]);
 	
@@ -1487,25 +1487,6 @@ var x11Init = function() {
 				self.TYPE.int				// screen_number
 			);			
 		},
-		XSendEvent: function() {
-			/* http://www.xfree86.org/4.4.0/XSendEvent.3.html
-			 * Status XSendEvent(
-			 *   Display *display,
-			 *   Window w,
-			 *   Bool propagate,
-			 *   long event_mask,
-			 *   XEvent *event_send
-			 * ); 
-			 */
-			return lib('x11').declare('XSendEvent', self.TYPE.ABI,
-				self.TYPE.Status,		// return
-				self.TYPE.Display.ptr,	// *display
-				self.TYPE.Window,		// w
-				self.TYPE.Bool,			// propagate
-				self.TYPE.long,			// event_mask
-				self.TYPE.XEvent.ptr	// *event_sent
-			); 
-		},
 		XSelectInput: function() {
 			/* http://www.x.org/releases/X11R7.6/doc/man/man3/XSelectInput.3.xhtml
 			 * int XSelectInput(
@@ -1877,8 +1858,8 @@ var x11Init = function() {
 			// return lib(parseInt(core.firefox.version) <= 45 ? 'gdk2' : 'gdk3').declare('gdk_x11_drawable_get_xid', self.TYPE.ABI,
 			// this is only available in gdk2
 			return lib('gdk3').declare('gdk_x11_window_get_xid', self.TYPE.ABI,
-				self.TYPE.Window,				// return
-				self.TYPE.GdkWindow.ptr	// *drawable
+				self.TYPE.Window,			// return
+				self.TYPE.GdkWindow.ptr		// *window
 			);
 		},
 		gdk_x11_window_lookup_for_display: function() {
