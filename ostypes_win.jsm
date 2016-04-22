@@ -110,7 +110,7 @@ var winTypes = function() {
 	this.HCURSOR = this.HICON;
 	this.HMODULE = this.HINSTANCE;
 	this.WNDENUMPROC = ctypes.FunctionType(this.CALLBACK_ABI, this.BOOL, [this.HWND, this.LPARAM]); // "super advanced type" because its highest type is `this.HWND` which is "advanced type"
-
+	
 	// inaccrurate types - i know these are something else but setting them to voidptr_t or something just works and all the extra work isnt needed
 	this.MONITOR_DPI_TYPE = ctypes.unsigned_int;
 	this.PCIDLIST_ABSOLUTE = ctypes.voidptr_t; // https://github.com/west-mt/ssbrowser/blob/452e21d728706945ad00f696f84c2f52e8638d08/chrome/content/modules/WindowsShortcutService.jsm#L115
@@ -122,7 +122,9 @@ var winTypes = function() {
 	// consts for structures
 	var struct_const = {
 		CCHDEVICENAME: 32,
-		CCHFORMNAME: 32
+		CCHFORMNAME: 32,
+		LF_FACESIZE: 32,
+		LF_FULLFACESIZE: 64
 	};
 
 	// SIMPLE STRUCTS // based on any of the types above
@@ -158,6 +160,22 @@ var winTypes = function() {
 	  { 'Data3': this.USHORT },
 	  { 'Data4': this.BYTE.array(8) }
 	]);
+	this.LOGFONT = ctypes.StructType('tagLOGFONT', [
+		{ lfHeight: this.LONG },
+		{ lfWidth: this.LONG },
+		{ lfEscapement: this.LONG },
+		{ lfOrientation: this.LONG },
+		{ lfWeight: this.LONG },
+		{ lfItalic: this.BYTE },
+		{ lfUnderline: this.BYTE },
+		{ lfStrikeOut: this.BYTE },
+		{ lfCharSet: this.BYTE },
+		{ lfOutPrecision: this.BYTE },
+		{ lfClipPrecision: this.BYTE },
+		{ lfQuality: this.BYTE },
+		{ lfPitchAndFamily: this.BYTE },
+		{ lfFaceName: this.TCHAR.array(struct_const.LF_FACESIZE) }
+	]);
 	this.MOUSEINPUT = ctypes.StructType('tagMOUSEINPUT', [ // https://msdn.microsoft.com/en-us/library/windows/desktop/ms646273%28v=vs.85%29.aspx
         { 'dx': this.LONG },
         { 'dy': this.LONG },
@@ -166,6 +184,32 @@ var winTypes = function() {
         { 'time': this.ULONG_PTR },
         { 'dwExtraInfo': this.DWORD }
     ]);
+	this.NEWTEXTMETRIC = ctypes.StructType('tagNEWTEXTMETRIC', [
+		{ tmHeight: this.LONG },
+		{ tmAscent: this.LONG },
+		{ tmDescent: this.LONG },
+		{ tmInternalLeading: this.LONG },
+		{ tmExternalLeading: this.LONG },
+		{ tmAveCharWidth: this.LONG },
+		{ tmMaxCharWidth: this.LONG },
+		{ tmWeight: this.LONG },
+		{ tmOverhang: this.LONG },
+		{ tmDigitizedAspectX: this.LONG },
+		{ tmDigitizedAspectY: this.LONG },
+		{ tmFirstChar: this.TCHAR },
+		{ tmLastChar: this.TCHAR },
+		{ tmDefaultChar: this.TCHAR },
+		{ tmBreakChar: this.TCHAR },
+		{ tmItalic: this.BYTE },
+		{ tmUnderlined: this.BYTE },
+		{ tmStruckOut: this.BYTE },
+		{ tmPitchAndFamily: this.BYTE },
+		{ tmCharSet: this.BYTE },
+		{ ntmFlags: this.DWORD },
+		{ ntmSizeEM: this.UINT },
+		{ ntmCellHeight: this.UINT },
+		{ ntmAvgWidth: this.UINT }
+	]);
 	this.OVERLAPPED = ctypes.StructType('_OVERLAPPED', [ // https://msdn.microsoft.com/en-us/library/windows/desktop/ms684342%28v=vs.85%29.aspx
 		{ Internal: this.ULONG_PTR },
 		{ InternalHigh: this.ULONG_PTR },
@@ -275,12 +319,18 @@ var winTypes = function() {
 		{ 'dmPanningWidth': this.DWORD },
 		{ 'dmPanningHeight': this.DWORD }
 	]);
+	this.ENUMLOGFONT = ctypes.StructType('tagENUMLOGFONT', [ // https://msdn.microsoft.com/en-us/library/windows/desktop/dd162626%28v=vs.85%29.aspx
+		{ elfLogFont: this.LOGFONT },
+		{ elfFullName: this.TCHAR.array(struct_const.LF_FULLFACESIZE) },
+		{ elfStyle: this.TCHAR.array(struct_const.LF_FACESIZE) }
+	]);
 	this.IID = this.GUID;
     this.INPUT = ctypes.StructType('tagINPUT', [
-        {'type': this.DWORD},
-        {'mi': this.MOUSEINPUT} // union, pick which one you want, i picked mouse
+        { 'type': this.DWORD },
+        { 'mi': this.MOUSEINPUT } // union, pick which one you want, i picked mouse
     ]);
 	this.LPOVERLAPPED = this.OVERLAPPED.ptr;
+	this.LPLOGFONT = this.LOGFONT.ptr;
 	this.LPSECURITY_ATTRIBUTES = this.SECURITY_ATTRIBUTES.ptr;
 	this.MONITORINFOEX = ctypes.StructType('tagMONITORINFOEX', [
 		{ cbSize:		this.DWORD },
@@ -354,6 +404,7 @@ var winTypes = function() {
 	this.PBITMAPINFO = this.BITMAPINFO.ptr;
 
 	// FUNCTION TYPES
+	this.EnumFontFamProc = ctypes.FunctionType(this.CALLBACK_ABI, this.int, [this.ENUMLOGFONT.ptr, this.NEWTEXTMETRIC.ptr, this.DWORD, this.LPARAM]); // https://msdn.microsoft.com/en-us/library/windows/desktop/dd162621%28v=vs.85%29.aspx
 	this.MONITORENUMPROC = ctypes.FunctionType(this.CALLBACK_ABI, this.BOOL, [this.HMONITOR, this.HDC, this.LPRECT, this.LPARAM]);
 	this.LowLevelMouseProc = ctypes.FunctionType(this.CALLBACK_ABI, this.LRESULT, [this.INT, this.WPARAM, this.LPARAM]);
 	this.WNDPROC = ctypes.FunctionType(this.CALLBACK_ABI, this.LRESULT, [
@@ -375,6 +426,7 @@ var winTypes = function() {
   this.LPOVERLAPPED_COMPLETION_ROUTINE = this.OVERLAPPED_COMPLETION_ROUTINE.ptr;
 
 	// ADV FUNC TYPES
+	this.FONTENUMPROC = this.EnumFontFamProc.ptr;
 	this.HOOKPROC = this.LowLevelMouseProc.ptr; // not a guess really, as this is the hook type i use, so yeah it has to be a pointer to it
 
 	// STRUCTS USING FUNC TYPES
@@ -545,7 +597,9 @@ var winInit = function() {
 		MOUSEEVENTF_HWHEEL: 0x01000,
 		
 		SYMBOLIC_LINK_FLAG_FILE: 0x0,
-		SYMBOLIC_LINK_FLAG_DIRECTORY: 0x1
+		SYMBOLIC_LINK_FLAG_DIRECTORY: 0x1,
+		
+		DEFAULT_CHARSET: 1
 	};
 
 	var _lib = {}; // cache for lib
@@ -988,6 +1042,25 @@ var winInit = function() {
 			    self.TYPE.DEVMODE.ptr	// *lpDevMode
 			);
 		},
+		EnumFontFamiliesEx: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/dd162620%28v=vs.85%29.aspx
+			 * int EnumFontFamiliesEx(
+			 *   __in_ HDC          hdc,
+			 *   __in_ LPLOGFONT    lpLogfont,
+			 *   __in_ FONTENUMPROC lpEnumFontFamExProc,
+			 *   __in_ LPARAM       lParam,
+			 *   __in_ DWORD        dwFlags
+			 * );
+			 */
+			return lib('gdi32').declare(ifdef_UNICODE ? 'EnumFontFamiliesExW' : 'EnumFontFamiliesExA', self.TYPE.ABI,
+				self.TYPE.int,			// return
+				self.TYPE.HDC,			// hdc
+				self.TYPE.LPLOGFONT,	// lpLogfont
+				self.TYPE.FONTENUMPROC,	// lpEnumFontFamExProc
+				self.TYPE.LPARAM,		// lParam
+				self.TYPE.DWORD			// dwFlags
+			);
+		},
 		EnumWindows: function() {
 			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms633497%28v=vs.85%29.aspx
 			 * BOOL WINAPI EnumWindows(
@@ -1010,6 +1083,14 @@ var winInit = function() {
 			return lib('kernel32').declare('FlushFileBuffers', self.TYPE.ABI,
 				self.TYPE.BOOL,		// return
 				self.TYPE.HANDLE	// hFile
+			);
+		},
+		GetActiveWindow: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms646292%28v=vs.85%29.aspx
+			 * HWND WINAPI GetActiveWindow(void);
+			 */
+			return lib('user32').declare('GetActiveWindow', self.TYPE.ABI,
+				self.TYPE.HWND	// return
 			);
 		},
 		GetClientRect: function() {

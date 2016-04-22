@@ -2087,8 +2087,7 @@ var x11Init = function() {
 			);
 		},
 		xcb_grab_key_checked: function() {
-			// https://github.com/emmanueldenloye/firefox-pentadactyl/blob/52bcaf3a49f81350110210a90552690b2db332a0/unused_plugins/fix-focus.js#L240
-			/* http://www.x.org/releases/X11R7.7/doc/man/man3/xcb_grab_key.3.xhtml
+			/* http://libxcb.sourcearchive.com/documentation/1.1/group__XCB____API_gc0b5bb243475091e33be64bd2db95f14.html#gc0b5bb243475091e33be64bd2db95f14
 			 * xcb_void_cookie_t xcb_grab_key(
 			 *   xcb_connection_t *conn,
 			 *   uint8_t owner_events,
@@ -2160,6 +2159,44 @@ var x11Init = function() {
 			return lib('xcb').declare('xcb_screen_next', self.TYPE.ABI,
 				self.TYPE.void,							// return
 				self.TYPE.xcb_screen_iterator_t.ptr
+			);
+		},
+		xcb_send_event: function() {
+			/* http://libxcb.sourcearchive.com/documentation/1.1/group__XCB____API_g8f8291858b47fd9c88f07d96720fbd7c.html#g8f8291858b47fd9c88f07d96720fbd7c
+			 * xcb_void_cookie_t xcb_send_event(
+			 xcb_connection_t *conn,
+			 uint8_t propagate,
+			 xcb_window_t destination,
+			 uint32_t event_mask,
+			 const char *event
+			 );
+			 */
+			return lib('xcb').declare('xcb_send_event', self.TYPE.ABI,
+				self.TYPE.xcb_void_cookie_t,	// return
+				self.TYPE.xcb_connection_t.ptr,	// *conn
+				self.TYPE.uint8_t,				// propagate
+				self.TYPE.xcb_window_t,			// destination
+				self.TYPE.uint32_t,				// event_mask
+				self.TYPE.char.ptr				// *event
+			);
+		},
+		xcb_send_event_checked: function() {
+			/* http://libxcb.sourcearchive.com/documentation/1.1/group__XCB____API_gb052d5d58e37346d947e03eeac64c071.html#gb052d5d58e37346d947e03eeac64c071
+			 * xcb_void_cookie_t xcb_send_event_checked(
+			 *   xcb_connection_t *conn,
+			 *   uint8_t propagate,
+			 *   xcb_window_t destination,
+			 *   uint32_t event_mask,
+			 *   const char *event
+			 * );
+			 */
+			return lib('xcb').declare('xcb_send_event_checked', self.TYPE.ABI,
+				self.TYPE.xcb_void_cookie_t,	// return
+				self.TYPE.xcb_connection_t.ptr,	// *conn
+				self.TYPE.uint8_t,				// propagate
+				self.TYPE.xcb_window_t,			// destination
+				self.TYPE.uint32_t,				// event_mask
+				self.TYPE.char.ptr				// *event
 			);
 		},
 		xcb_request_check: function() {
