@@ -1651,6 +1651,21 @@ var winInit = function() {
 				self.TYPE.UINT				// uFlags
 			);
 		},
+		SetWindowLongPtr: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms644898%28v=vs.85%29.aspx
+			 * LONG_PTR WINAPI SetWindowLongPtr(
+			 *   _In_ HWND     hWnd,
+			 *   _In_ int      nIndex,
+			 *   _In_ LONG_PTR dwNewLong
+			 * );
+			 */
+			return lib('user32').declare(is64bit ? (ifdef_UNICODE ? 'SetWindowLongPtrW' : 'SetWindowLongPtrA') : (ifdef_UNICODE ? 'SetWindowLongW' : 'SetWindowLongA'), self.TYPE.ABI,
+				is64bit ? self.TYPE.LONG_PTR : self.TYPE.LONG,	// return
+				self.TYPE.HWND,									// hWnd
+				self.TYPE.int,									// nIndex
+				is64bit ? self.TYPE.LONG_PTR : self.TYPE.LONG	// dwNewLong
+			);
+		},
 		SHFileOperation: function() {
 			/* https://msdn.microsoft.com/en-us/library/windows/desktop/bb762164%28v=vs.85%29.aspx
 			 * int SHFileOperation(
