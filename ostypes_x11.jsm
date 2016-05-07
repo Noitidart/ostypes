@@ -315,6 +315,7 @@ var xlibTypes = function() {
 	/////////////// XCB stuff
 	// SIMPLE TYPES
 	// lots of types i cant find out there are found here file:///C:/Users/Vayeate/Downloads/xcb%20types/libxcb-1.9/doc/tutorial/index.html BUT this i am realizing is just from xproto.h - https://github.com/netzbasis/openbsd-xenocara/blob/e6500f41b55e38013ac9b489f66fe49df6b8b68c/lib/libxcb/src/xproto.h#L453
+	this.xcb_atom_t = this.uint32_t;
 	this.xcb_colormap_t = this.uint32_t;
 	this.xcb_drawable_t = this.uint32_t;
 	this.xcb_keycode_t = this.uint8_t;
@@ -327,6 +328,11 @@ var xlibTypes = function() {
 	this.xcb_window_t = this.uint32_t;
 	
 	// SIMPLE STRUCTS
+	this.xcb_client_message_data_t = ctypes.StructType('xcb_client_message_data_t', [ // union - https://xcb.freedesktop.org/manual/xproto_8h_source.html#l01151
+		// { data8: this.uint8_t.array(20) }
+		// { data32: this.uint16_t.array(10) }
+		{ data32: this.uint32_t.array(5) }
+	]);
 	this.xcb_connection_t = ctypes.StructType('xcb_connection_t');
 	this.xcb_generic_error_t = ctypes.StructType('xcb_generic_error_t', [
 		{ response_type: this.uint8_t },
@@ -346,8 +352,18 @@ var xlibTypes = function() {
 		{ pad: this.uint32_t.array(7) },
 		{ full_sequence: this.uint32_t }
 	]);
-	this.xcb_get_image_cookie_t = ctypes.StructType('xcb_get_image_cookie_t', [
-		{ sequence: this.unsigned_int }
+	this.xcb_get_geometry_reply_t = ctypes.StructType('xcb_get_geometry_reply_t', [
+		{ response_type: this.uint8_t },
+		{ depth: this.uint8_t },
+		{ sequence: this.uint16_t },
+		{ length: this.uint32_t },
+		{ root: this.xcb_window_t },
+		{ x: this.int16_t },
+		{ y: this.int16_t },
+		{ width: this.uint16_t },
+		{ height: this.uint16_t },
+		{ border_width: this.uint16_t },
+		{ pad0: this.uint8_t.array(2) }
 	]);
 	this.xcb_get_image_request_t = ctypes.StructType('xcb_get_image_request_t', [
 		{ major_opcode: this.uint8_t },
@@ -367,6 +383,16 @@ var xlibTypes = function() {
 		{ length: this.uint32_t },
 		{ visual: this.xcb_visualid_t },
 		{ pad0: this.uint8_t.array(20) }
+	]);
+	this.xcb_get_property_reply_t = ctypes.StructType('xcb_get_property_reply_t', [
+		{ response_type: this.uint8_t },
+		{ format: this.uint8_t },
+		{ sequence: this.uint16_t },
+		{ length: this.uint32_t },
+		{ type: this.xcb_atom_t },
+		{ bytes_after: this.uint32_t },
+		{ value_len: this.uint32_t },
+		{ pad0: this.uint8_t.array(12) }
 	]);
 	this.xcb_get_window_attributes_reply_t = ctypes.StructType('xcb_get_window_attributes_reply_t', [ // http://www.linuxhowtos.org/manpages/3/xcb_get_window_attributes_unchecked.htm
 		{ response_type: this.uint8_t },
@@ -389,8 +415,12 @@ var xlibTypes = function() {
 		{ do_not_propagate_mask: this.uint16_t },
 		{ pad0: this.uint8_t.array(2) }
 	]);
-	this.xcb_get_window_attributes_cookie_t = ctypes.StructType('xcb_get_window_attributes_cookie_t', [
-		{ sequence: this.unsigned_int }
+	this.xcb_intern_atom_reply_t = ctypes.StructType('xcb_intern_atom_reply_t', [
+		{ response_type: this.uint8_t },
+		{ pad0: this.uint8_t },
+		{ sequence: this.uint16_t },
+		{ length: this.uint32_t },
+		{ atom: this.xcb_atom_t }
 	]);
 	this.xcb_key_press_event_t = ctypes.StructType('xcb_key_press_event_t', [ // https://github.com/netzbasis/openbsd-xenocara/blob/e6500f41b55e38013ac9b489f66fe49df6b8b68c/lib/libxcb/src/xproto.h#L523
 		{ response_type: this.uint8_t },
@@ -409,9 +439,22 @@ var xlibTypes = function() {
 		{ pad0: this.uint8_t }
 	]);
 	this.xcb_key_symbols_t = ctypes.StructType('_XCBKeySymbols');
-	this.xcb_randr_get_crtc_info_cookie_t = ctypes.StructType('xcb_randr_get_crtc_info_cookie_t',
-		{ sequence: this.unsigned_int }
-	);
+	this.xcb_query_tree_reply_t = ctypes.StructType('xcb_query_tree_reply_t', [
+		{ response_type: this.uint8_t },
+		{ pad0: this.uint8_t },
+		{ sequence: this.uint16_t },
+		{ length: this.uint32_t },
+		{ root: this.xcb_window_t },
+		{ parent: this.xcb_window_t },
+		{ children_len: this.uint16_t },
+		{ pad1: this.uint8_t.array(14) }
+	]);
+	this.xcb_query_tree_request_t = ctypes.StructType('xcb_query_tree_request_t', [
+		 { major_opcode: this.uint8_t },
+		 { pad0: this.uint8_t },
+		 { length: this.uint16_t },
+		 { window: this.xcb_window_t }
+	]);
 	this.xcb_randr_get_crtc_info_reply_t = ctypes.StructType('xcb_randr_get_crtc_info_reply_t', [ // http://www.linuxhowtos.org/manpages/3/xcb_randr_get_crtc_info_reply.htm
 		{ response_type: this.uint8_t },
 		{ status: this.uint8_t },
@@ -428,12 +471,6 @@ var xlibTypes = function() {
 		{ num_outputs: this.uint16_t },
 		{ num_possible_outputs: this.uint16_t }
 	]);
-	this.xcb_randr_get_output_info_cookie_t = ctypes.StructType('xcb_randr_get_output_info_cookie_t',
-		{ sequence: this.unsigned_int }
-	);
-	this.xcb_randr_get_screen_resources_current_cookie_t = ctypes.StructType('xcb_randr_get_screen_resources_current_cookie_t',
-		{ sequence: this.unsigned_int }
-	);
 	this.xcb_randr_get_screen_resources_current_reply_t = ctypes.StructType('xcb_randr_get_screen_resources_current_reply_t', [ // http://www.linuxhowtos.org/manpages/3/xcb_randr_get_screen_resources_current_outputs_length.htm
 		{ response_type: this.uint8_t },
 		{ pad0: this.uint8_t },
@@ -522,6 +559,46 @@ var xlibTypes = function() {
 	this.xcb_void_cookie_t = ctypes.StructType('xcb_void_cookie_t', [
 		{ sequence: this.unsigned_int }
 	]);
+	
+	// cookies
+	/*
+	this.xcb_get_image_cookie_t = ctypes.StructType('xcb_get_image_cookie_t', [
+		{ sequence: this.unsigned_int }
+	]);
+	this.xcb_get_window_attributes_cookie_t = ctypes.StructType('xcb_get_window_attributes_cookie_t', [
+		{ sequence: this.unsigned_int }
+	]);
+	this.xcb_randr_get_crtc_info_cookie_t = ctypes.StructType('xcb_randr_get_crtc_info_cookie_t',
+		{ sequence: this.unsigned_int }
+	);
+	this.xcb_randr_get_output_info_cookie_t = ctypes.StructType('xcb_randr_get_output_info_cookie_t',
+		{ sequence: this.unsigned_int }
+	);
+	this.xcb_randr_get_screen_resources_current_cookie_t = ctypes.StructType('xcb_randr_get_screen_resources_current_cookie_t',
+		{ sequence: this.unsigned_int }
+	);
+	*/
+	// i should do cookies like in the commented out section, however its just the same, so im just setting them equal to xcb_void_cookie_t
+	this.xcb_get_geometry_cookie_t = this.xcb_void_cookie_t;
+	this.xcb_get_image_cookie_t = this.xcb_void_cookie_t;
+	this.xcb_get_property_cookie_t = this.xcb_void_cookie_t;
+	this.xcb_get_window_attributes_cookie_t = this.xcb_void_cookie_t;
+	this.xcb_intern_atom_cookie_t = this.xcb_void_cookie_t;
+	this.xcb_query_tree_cookie_t = this.xcb_void_cookie_t;
+	this.xcb_randr_get_crtc_info_cookie_t = this.xcb_void_cookie_t;
+	this.xcb_randr_get_output_info_cookie_t = this.xcb_void_cookie_t;
+	this.xcb_randr_get_screen_resources_current_cookie_t = this.xcb_void_cookie_t;
+	
+	// ADVANCED STRUCTS
+	this.xcb_client_message_event_t = ctypes.StructType('xcb_client_message_event_t', self.TYPE.ABI, // http://www.linuxhowtos.org/manpages/3/xcb_client_message_event_t.htm // ftp://www.x.org/pub/X11R7.7/doc/man/man3/xcb_client_message_event_t.3.xhtml
+		{ response_type: self.TYPE.uint8_t },
+		{ format: self.TYPE.uint8_t },
+		{ sequence: self.TYPE.uint16_t },
+		{ window: self.TYPE.xcb_window_t },
+		{ type: self.TYPE.xcb_atom_t },
+		{ data: self.TYPE.xcb_client_message_data_t }
+	);
+	
 	// end - xcb
 };
 
@@ -2149,15 +2226,6 @@ var x11Init = function() {
 		},
 		// end - libc
 		// start - xcb
-		// :todo:
-		// xcb_intern_atom - http://libxcb.sourcearchive.com/documentation/1.1/group__XCB____API_g5c9806a2cfa188c38ed35bff51c60410.html#g5c9806a2cfa188c38ed35bff51c60410
-		// xcb_get_geometry - http://libxcb.sourcearchive.com/documentation/1.1/group__XCB____API_gca34d15705234d06d09f16513d640dfe.html#gca34d15705234d06d09f16513d640dfe
-		// xcb_get_geometry_reply - http://libxcb.sourcearchive.com/documentation/1.1/group__XCB____API_g6727f2bfb24769655e52d1f1c50f58fe.html#g6727f2bfb24769655e52d1f1c50f58fe
-		// xcb_get_property - http://libxcb.sourcearchive.com/documentation/1.1/group__XCB____API_g86312758f2d011c375ae23ac2c063b7d.html#g86312758f2d011c375ae23ac2c063b7d
-		// xcb_client_message_event_t - ftp://www.x.org/pub/X11R7.7/doc/man/man3/xcb_client_message_event_t.3.xhtml
-		// xcb_send_event - http://libxcb.sourcearchive.com/documentation/1.1/group__XCB____API_g8f8291858b47fd9c88f07d96720fbd7c.html#g8f8291858b47fd9c88f07d96720fbd7c - http://stackoverflow.com/q/27817480/1828637 - http://www.linuxhowtos.org/manpages/3/xcb_send_event.htm
-		// xcb_query_tree - http://libxcb.sourcearchive.com/documentation/1.1/group__XCB____API_g4d0136b27bbab9642aa65d2a3edbc03c.html#g4d0136b27bbab9642aa65d2a3edbc03c
-		// :todo:
 		free: function() {
 			// ???
 			return lib('xcb').declare('free', self.TYPE.ABI,
@@ -2321,6 +2389,36 @@ var x11Init = function() {
 				self.TYPE.xcb_connection_t.ptr	// *c
 			);
 		},
+		xcb_get_geometry: function() {
+			/* http://libxcb.sourcearchive.com/documentation/1.1/group__XCB____API_gca34d15705234d06d09f16513d640dfe.html#gca34d15705234d06d09f16513d640dfe
+			 * http://www.linuxhowtos.org/manpages/3/xcb_get_geometry.htm
+			 * xcb_get_geometry_cookie_t xcb_get_geometry(
+			 *   xcb_connection_t *conn,
+			 *   xcb_drawable_t drawable
+			 * ); 
+			 */
+			return lib('xcb').declare('xcb_get_geometry', self.TYPE.ABI,
+				self.TYPE.xcb_get_geometry_cookie_t,		// return
+				self.TYPE.xcb_connection_t.ptr,				// *conn
+				self.TYPE.xcb_drawable_t					// drawable
+			);
+		},
+		xcb_get_geometry_reply: function() {
+			/* http://libxcb.sourcearchive.com/documentation/1.1/group__XCB____API_g6727f2bfb24769655e52d1f1c50f58fe.html#g6727f2bfb24769655e52d1f1c50f58fe
+			 * http://www.linuxhowtos.org/manpages/3/xcb_get_geometry.htm
+			 * xcb_get_geometry_reply_t *xcb_get_geometry_reply(
+			 *   xcb_connection_t *conn,
+			 *   xcb_get_geometry_cookie_t cookie,
+			 *   xcb_generic_error_t **e
+			 * );
+			 */
+			return lib('xcb').declare('xcb_get_geometry_reply', self.TYPE.ABI,
+				self.TYPE.xcb_get_geometry_reply_t.ptr,		// return
+				self.TYPE.xcb_connection_t.ptr,				// *conn
+				self.TYPE.xcb_get_geometry_cookie_t,		// cookie
+				self.TYPE.xcb_generic_error_t.ptr.ptr		// **e
+			);
+		},
 		xcb_get_image: function() {
 			/* http://www.unix.com/man-page/centos/3/xcb_get_image/
 			 * xcb_get_image_cookie_t xcb_get_image(
@@ -2370,6 +2468,46 @@ var x11Init = function() {
 				self.TYPE.xcb_connection_t.ptr,				// *conn
 				self.TYPE.xcb_get_image_cookie_t,			// cookie
 				self.TYPE.xcb_generic_error_t.ptr.ptr		// **e
+			);
+		},
+		xcb_get_property: function() {
+			/* http://libxcb.sourcearchive.com/documentation/1.1/group__XCB____API_g86312758f2d011c375ae23ac2c063b7d.html#g86312758f2d011c375ae23ac2c063b7d
+			 * http://www.linuxhowtos.org/manpages/3/xcb_get_property.htm
+			 * xcb_get_property_cookie_t xcb_get_property(
+			 *   xcb_connection_t *conn,
+			 *   uint8_t _delete,
+			 *   xcb_window_t window,
+			 *   xcb_atom_t property,
+			 *   xcb_atom_t type,
+			 *   uint32_t long_offset,
+			 *   uint32_t long_length
+			 * );
+			 */
+			return lib('xcb').declare('xcb_get_property', self.TYPE.ABI,
+				self.TYPE.xcb_get_property_cookie_t,		// return
+				self.TYPE.xcb_connection_t.ptr,				// *conn
+				self.TYPE.uint8_t,							// _delete
+				self.TYPE.xcb_window_t,						// window
+				self.TYPE.xcb_atom_t,						// property
+				self.TYPE.xcb_atom_t,						// type
+				self.TYPE.uint32_t,							// long_offset
+				self.TYPE.uint32_t							// long_length
+			);
+		},
+		xcb_get_property_reply: function() {
+			/* http://libxcb.sourcearchive.com/documentation/1.1/group__XCB____API_g86312758f2d011c375ae23ac2c063b7d.html#g86312758f2d011c375ae23ac2c063b7d
+			 * http://www.linuxhowtos.org/manpages/3/xcb_get_property.htm
+			 * xcb_get_property_reply_t *xcb_get_property_reply(
+			 *   xcb_connection_t *conn,
+			 *   xcb_get_property_cookie_t cookie,
+			 *   xcb_generic_error_t **e
+			 * );
+			 */
+			return lib('xcb').declare('xcb_get_property_reply', self.TYPE.ABI,
+				self.TYPE.xcb_get_property_reply_t,		// return
+				self.TYPE.xcb_connection_t.ptr,			// *conn
+				self.TYPE.xcb_get_property_cookie_t,	// cookie
+				self.TYPE.xcb_generic_error_t.ptr.ptr	// **e
 			);
 		},
 		xcb_get_setup: function() {
@@ -2454,6 +2592,40 @@ var x11Init = function() {
 				self.TYPE.uint8_t					// keyboard_mode
 			);
 		},
+		xcb_intern_atom: function() {
+			/* http://libxcb.sourcearchive.com/documentation/1.1/group__XCB____API_g5c9806a2cfa188c38ed35bff51c60410.html#g5c9806a2cfa188c38ed35bff51c60410
+			 * http://www.linuxhowtos.org/manpages/3/xcb_intern_atom.htm
+			 * xcb_intern_atom_cookie_t xcb_intern_atom(
+			 *   xcb_connection_t *conn,
+			 *   uint8_t only_if_exists,
+			 *   uint16_t name_len,
+			 *   const char *name
+			 * ); 
+			 */
+			return lib('xcb').declare('xcb_intern_atom', self.TYPE.ABI,
+				self.TYPE.xcb_intern_atom_cookie_t,		// return
+				self.TYPE.xcb_connection_t.ptr,			// *conn
+				self.TYPE.uint8_t,						// only_if_exists
+				self.TYPE.uint16_t,						// name_len
+				self.TYPE.char.ptr						// *name
+			);
+		},
+		xcb_intern_atom_reply: function() {
+			/* http://libxcb.sourcearchive.com/documentation/1.1/group__XCB____API_g235521be24c5a1c5f267150cfe175cca.html#g235521be24c5a1c5f267150cfe175cca
+			 * http://www.linuxhowtos.org/manpages/3/xcb_intern_atom.htm
+			 * xcb_intern_atom_reply_t *xcb_intern_atom_reply(
+			 *   xcb_connection_t *conn,
+			 *   xcb_intern_atom_cookie_t cookie,
+			 *   xcb_generic_error_t **e
+			 * ); 
+			 */
+			return lib('xcb').declare('xcb_intern_atom_reply', self.TYPE.ABI,
+				self.TYPE.xcb_intern_atom_reply_t.ptr,	// return
+				self.TYPE.xcb_connection_t.ptr,			// *conn
+				self.TYPE.xcb_intern_atom_cookie_t,		// cookie
+				self.TYPE.xcb_generic_error_t.ptr.ptr	// **e
+			);
+		},
 		xcb_key_symbols_alloc: function() {
 			/* http://www.opensource.apple.com/source/X11libs/X11libs-60/xcb-util/xcb-util-0.3.6/keysyms/xcb_keysyms.h
 			 * xcb_key_symbols_t *xcb_key_symbols_alloc        (xcb_connection_t         *c);
@@ -2497,6 +2669,58 @@ var x11Init = function() {
 			return lib('xcb').declare('xcb_poll_for_event', self.TYPE.ABI,
 				self.TYPE.xcb_generic_event_t.ptr,		// return
 				self.TYPE.xcb_connection_t.ptr			// *c 
+			);
+		},
+		xcb_query_tree: function() {
+			/* http://libxcb.sourcearchive.com/documentation/1.1/group__XCB____API_g4d0136b27bbab9642aa65d2a3edbc03c.html#g4d0136b27bbab9642aa65d2a3edbc03c
+			 * http://www.linuxhowtos.org/manpages/3/xcb_query_tree.htm
+			 * xcb_query_tree_cookie_t xcb_query_tree(
+			 *   xcb_connection_t *conn,
+			 *   xcb_window_t window
+			 * );
+			 */
+			return lib('xcb').declare('xcb_query_tree', self.TYPE.ABI,
+				self.TYPE.xcb_query_tree_cookie_t,		// return
+				self.TYPE.xcb_connection_t.ptr,			// *conn
+				self.TYPE.xcb_window_t					// window
+			);
+		},
+		xcb_query_tree_children: function() {
+			/* http://www.linuxhowtos.org/manpages/3/xcb_query_tree.htm
+			 * xcb_window_t *xcb_query_tree_children(
+			 *   const xcb_query_tree_request_t *reply
+			 * ); 
+			 */
+			return lib('xcb').declare('xcb_query_tree_children', self.TYPE.ABI,
+				self.TYPE.xcb_window_t.ptr,				// return
+				self.TYPE.xcb_query_tree_request_t.ptr	// *reply
+			);
+		},
+		xcb_query_tree_children_length: function() {
+			/* http://www.linuxhowtos.org/manpages/3/xcb_query_tree.htm
+			 * int xcb_query_tree_children_length(
+			 *   const xcb_query_tree_reply_t *reply
+			 * );
+			 */
+			return lib('xcb').declare('xcb_query_tree_children_length', self.TYPE.ABI,
+				self.TYPE.int,							// return
+				self.TYPE.xcb_query_tree_reply_t.ptr	// *reply
+			);
+		},
+		xcb_query_tree_reply: function() {
+			/* 
+			 * http://www.linuxhowtos.org/manpages/3/xcb_query_tree.htm
+			 * xcb_query_tree_reply_t *xcb_query_tree_reply(
+			 *   xcb_connection_t *conn,
+			 *   xcb_query_tree_cookie_t cookie,
+			 *   xcb_generic_error_t **e
+			 * );
+			 */
+			return lib('xcb').declare('xcb_query_tree_reply', self.TYPE.ABI,
+				self.TYPE.xcb_query_tree_reply_t.ptr,		// return
+				self.TYPE.xcb_connection_t.ptr,				// *conn
+				self.TYPE.xcb_query_tree_cookie_t,			// cookie
+				self.TYPE.xcb_generic_error_t.ptr.ptr		// **e
 			);
 		},
 		xcb_randr_get_crtc_info: function() {
@@ -2782,6 +3006,7 @@ var x11Init = function() {
 	
 	this._cache = {};
 	this._cacheAtoms = {};
+	this._cacheXCBAtoms = {};
 	
 	this.HELPER = {
 		gdkWinPtrToXID: function(aGDKWindowPtr) {
@@ -2890,7 +3115,7 @@ var x11Init = function() {
 			// aAtomName is self.TYPE.char.ptr but im pretty sure you can just pass in a jsStr
 			// returns self.TYPE.Atom
 
-			if (!(aAtomName in self._cacheAtoms)) {		
+			if (!(aAtomName in self._cacheAtoms) || refreshCache) {		
 				var atom = self.API('XInternAtom')(self.HELPER.cachedXOpenDisplay(), aAtomName, createAtomIfDne ? self.CONST.False : self.CONST.True); //passing 3rd arg of false, means even if atom doesnt exist it returns a created atom, this can be used with GetProperty to see if its supported etc, this is how Chromium does it
 				if (!createAtomIfDne) {
 					if (atom == self.CONST.None) { // if i pass 3rd arg as False, it will will never equal self.CONST.None it gets creatd if it didnt exist on line before
@@ -2903,7 +3128,35 @@ var x11Init = function() {
 			return self._cacheAtoms[aAtomName];
 		},
 		cachedXCBAtom: function(aAtomName, createAtomIfDne, refreshCache) {
+			// createAtomIfDne is jsBool, true or false. if set to true/1 then the atom is creatd if it doesnt exist. if set to false/0, then an error is thrown when atom does not exist
+			// default behavior is throw when atom doesnt exist
 			
+			// aAtomName is self.TYPE.char.ptr but im pretty sure you can just pass in a jsStr
+			// returns self.TYPE.Atom
+
+			if (!(aAtomName in self._cacheXCBAtoms) || refreshCache) {		
+				var atom_cookie = self.API('xcb_intern_atom')(self.HELPER.cachedXCBConn(), createAtomIfDne ? 1 : 0, aAtomName.length, aAtomName);
+				
+				var atom_reply = self.API('xcb_intern_atom_reply')(self.HELPER.cachedXCBConn(), atom_cookie, null);
+				
+				if (atom_reply.isNull()) {
+					throw new Error('failed to get atom reply');
+				} else {
+
+					var atom = atom_reply.atom;
+					if (!createAtomIfDne) {
+						if (atom == self.CONST.None) { // if i pass 3rd arg as False, it will will never equal self.CONST.None it gets creatd if it didnt exist on line before
+							console.error('No atom with name:', aAtomName, 'return val of atom:', atom, atom_reply);
+							throw new Error('No atom with name "' + aAtomName + '"), return val of atom:"' +  atom.toString() + '"');
+						}
+					}
+					
+					self._cacheXCBAtoms[aAtomName] = atom;
+					
+					self.API('free')(atom_reply);
+				}
+			}
+			return self._cacheXCBAtoms[aAtomName];
 		},
 		getWinProp_ReturnStatus: function(devUserRequestedType, funcReturnedType, funcReturnedFormat, funcBytesAfterReturned, dontThrowOnDevTypeMismatch) {
 			// devUserRequestedType is req_type arg passed to XGetWindowProperty
