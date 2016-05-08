@@ -591,12 +591,12 @@ var xlibTypes = function() {
 	
 	// ADVANCED STRUCTS
 	this.xcb_client_message_event_t = ctypes.StructType('xcb_client_message_event_t', self.TYPE.ABI, // http://www.linuxhowtos.org/manpages/3/xcb_client_message_event_t.htm // ftp://www.x.org/pub/X11R7.7/doc/man/man3/xcb_client_message_event_t.3.xhtml
-		{ response_type: self.TYPE.uint8_t },
-		{ format: self.TYPE.uint8_t },
-		{ sequence: self.TYPE.uint16_t },
-		{ window: self.TYPE.xcb_window_t },
-		{ type: self.TYPE.xcb_atom_t },
-		{ data: self.TYPE.xcb_client_message_data_t }
+		{ response_type: this.uint8_t },
+		{ format: this.uint8_t },
+		{ sequence: this.uint16_t },
+		{ window: this.xcb_window_t },
+		{ type: this.xcb_atom_t },
+		{ data: this.xcb_client_message_data_t }
 	);
 	
 	// end - xcb
