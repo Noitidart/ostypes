@@ -322,7 +322,7 @@ var xlibTypes = function() {
 	this.xcb_keysym_t = this.uint32_t; // https://github.com/netzbasis/openbsd-xenocara/blob/e6500f41b55e38013ac9b489f66fe49df6b8b68c/lib/libxcb/src/xproto.h#L159
 	this.xcb_randr_crtc_t = this.uint32_t;
 	this.xcb_randr_mode_t = this.uint32_t;
-	this.xcb_randr_output_t = this.xcb_randr_output_t;
+	this.xcb_randr_output_t = this.uint32_t;
 	this.xcb_timestamp_t = this.uint32_t;
 	this.xcb_visualid_t = this.uint32_t;
 	this.xcb_window_t = this.uint32_t;
@@ -3145,8 +3145,9 @@ var x11Init = function() {
 				} else {
 
 					var atom = atom_reply.atom;
+					console.log('atom:', atom, 'name:', aAtomName);
 					if (!createAtomIfDne) {
-						if (atom == self.CONST.None) { // if i pass 3rd arg as False, it will will never equal self.CONST.None it gets creatd if it didnt exist on line before
+						if (cutils.jscEqual(atom, self.CONST.XCB_NONE)) { // if i pass 3rd arg as False, it will will never equal self.CONST.None it gets creatd if it didnt exist on line before
 							console.error('No atom with name:', aAtomName, 'return val of atom:', atom, atom_reply);
 							throw new Error('No atom with name "' + aAtomName + '"), return val of atom:"' +  atom.toString() + '"');
 						}
