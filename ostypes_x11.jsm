@@ -2451,8 +2451,9 @@ var x11Init = function() {
 			 * );
 			 */
 			return lib('xcb').declare('xcb_get_image_data', self.TYPE.ABI,
-				self.TYPE.uint8_t.ptr,					// return
-				self.TYPE.xcb_get_image_request_t.ptr	// *reply
+				self.TYPE.uint8_t.ptr,						// return
+				// self.TYPE.xcb_get_image_request_t.ptr	// *reply
+				self.TYPE.xcb_get_image_cookie_t			// forcing it wrongly *reply
 			);
 		},
 		xcb_get_image_reply: function() {
