@@ -755,6 +755,12 @@ var x11Init = function() {
 		XCB_CONFIGURE_REQUEST: 23,
 		XCB_GRAVITY_NOTIFY: 24,
 		
+		// enum xcb_input_focus_t
+		XCB_INPUT_FOCUS_NONE: 0,
+		XCB_INPUT_FOCUS_POINTER_ROOT: 1,
+		XCB_INPUT_FOCUS_PARENT: 2,
+		XCB_INPUT_FOCUS_FOLLOW_KEYBOARD: 3,
+		
 		// enum xcb_prop_mode_t {
 		XCB_PROP_MODE_REPLACE: 0,
     	XCB_PROP_MODE_PREPEND: 1,
