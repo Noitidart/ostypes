@@ -2818,8 +2818,9 @@ var x11Init = function() {
 			 * );
 			 */
 			return lib('xcbrandr').declare('xcb_randr_get_screen_resources_current_outputs', self.TYPE.ABI,
-				self.TYPE.xcb_randr_output_t.ptr,								// return
-				self.TYPE.xcb_randr_get_screen_resources_current_request_t.ptr	// *reply
+				self.TYPE.xcb_randr_output_t.ptr,									// return
+				// self.TYPE.xcb_randr_get_screen_resources_current_request_t.ptr	// *reply
+				self.TYPE.xcb_randr_get_screen_resources_current_reply_t.ptr		// im forcing it wrongly // *reply
 			);
 		},
 		xcb_randr_get_screen_resources_current_outputs_length: function() {
