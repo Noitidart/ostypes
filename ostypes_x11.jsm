@@ -590,14 +590,14 @@ var xlibTypes = function() {
 	this.xcb_randr_get_screen_resources_current_cookie_t = this.xcb_void_cookie_t;
 	
 	// ADVANCED STRUCTS
-	this.xcb_client_message_event_t = ctypes.StructType('xcb_client_message_event_t', self.TYPE.ABI, // http://www.linuxhowtos.org/manpages/3/xcb_client_message_event_t.htm // ftp://www.x.org/pub/X11R7.7/doc/man/man3/xcb_client_message_event_t.3.xhtml
+	this.xcb_client_message_event_t = ctypes.StructType('xcb_client_message_event_t', [// http://www.linuxhowtos.org/manpages/3/xcb_client_message_event_t.htm // ftp://www.x.org/pub/X11R7.7/doc/man/man3/xcb_client_message_event_t.3.xhtml
 		{ response_type: this.uint8_t },
 		{ format: this.uint8_t },
 		{ sequence: this.uint16_t },
 		{ window: this.xcb_window_t },
 		{ type: this.xcb_atom_t },
 		{ data: this.xcb_client_message_data_t }
-	);
+	]);
 	
 	// end - xcb
 };
