@@ -814,6 +814,13 @@ var x11Init = function() {
 	    XCB_CONFIG_WINDOW_SIBLING: 32,
 		XCB_CONFIG_WINDOW_STACK_MODE: 64,
 
+		// enum xcb_stack_mode_t
+		XCB_STACK_MODE_ABOVE: 0,
+		XCB_STACK_MODE_BELOW: 1,
+		XCB_STACK_MODE_TOP_IF: 2,
+		XCB_STACK_MODE_BOTTOM_IF: 3,
+		XCB_STACK_MODE_OPPOSITE: 4,
+		
 		// enum xcb_cw_t
 	    XCB_CW_BACK_PIXMAP: 1,
 	    XCB_CW_BACK_PIXEL: 2,
