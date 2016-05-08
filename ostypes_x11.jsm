@@ -415,6 +415,12 @@ var xlibTypes = function() {
 		{ do_not_propagate_mask: this.uint16_t },
 		{ pad0: this.uint8_t.array(2) }
 	]);
+	this.xcb_grab_keyboard_reply_t = ctypes.StructType('xcb_grab_keyboard_reply_t', [
+		{ response_type: this.uint8_t },
+		{ status: this.uint8_t },
+		{ sequence: this.uint16_t },
+		{ length: this.uint32_t }
+	]);
 	this.xcb_intern_atom_reply_t = ctypes.StructType('xcb_intern_atom_reply_t', [
 		{ response_type: this.uint8_t },
 		{ pad0: this.uint8_t },
@@ -583,6 +589,7 @@ var xlibTypes = function() {
 	this.xcb_get_image_cookie_t = this.xcb_void_cookie_t;
 	this.xcb_get_property_cookie_t = this.xcb_void_cookie_t;
 	this.xcb_get_window_attributes_cookie_t = this.xcb_void_cookie_t;
+	this.xcb_grab_keyboard_cookie_t = this.xcb_void_cookie_t;
 	this.xcb_intern_atom_cookie_t = this.xcb_void_cookie_t;
 	this.xcb_query_tree_cookie_t = this.xcb_void_cookie_t;
 	this.xcb_randr_get_crtc_info_cookie_t = this.xcb_void_cookie_t;
@@ -2575,6 +2582,42 @@ var x11Init = function() {
 				self.TYPE.xcb_keycode_t,			// key
 				self.TYPE.uint8_t,					// pointer_mode
 				self.TYPE.uint8_t					// keyboard_mode
+			);
+		},
+		xcb_grab_keyboard: function() {
+			/* http://www.unix.com/man-page/centos/3/xcb_grab_keyboard/
+			 * xcb_grab_keyboard_cookie_t xcb_grab_keyboard(
+			 *   xcb_connection_t *conn,
+			 *   uint8_t owner_events,
+			 *   xcb_window_t grab_window,
+			 *   xcb_timestamp_t time,
+			 *   uint8_t pointer_mode,
+			 *   uint8_t keyboard_mode
+			 * );
+			 */
+			return lib('xcb').declare('xcb_grab_keyboard', self.TYPE.ABI,
+				self.TYPE.xcb_grab_keyboard_cookie_t,	// return
+				self.TYPE.xcb_connection_t.ptr,		// *conn
+				self.TYPE.uint8_t,					// owner_events
+				self.TYPE.xcb_window_t,				// grab_window
+				self.TYPE.xcb_timestamp_t,			// time
+				self.TYPE.uint8_t,					// pointer_mode
+				self.TYPE.uint8_t					// keyboard_mode
+			);
+		},
+		xcb_grab_keyboard_reply: function() {
+			/* http://www.unix.com/man-page/centos/3/xcb_grab_keyboard/
+			 * xcb_grab_keyboard_reply_t *xcb_grab_keyboard_reply(
+			 *   xcb_connection_t *conn,
+			 *   xcb_grab_keyboard_cookie_t cookie,
+			 *   xcb_generic_error_t **e
+			 * );
+			 */
+			return lib('xcb').declare('xcb_grab_keyboard_reply_t', self.TYPE.ABI,
+				self.TYPE.xcb_grab_keyboard_reply_t.ptr,	// return
+				self.TYPE.xcb_connection_t.ptr,				// *conn
+				self.TYPE.xcb_grab_keyboard_cookie_t,		// cookie
+				self.TYPE.xcb_generic_error_t.ptr.ptr	// **e
 			);
 		},
 		xcb_grab_key_checked: function() {
