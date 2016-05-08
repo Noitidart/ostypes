@@ -1127,7 +1127,7 @@ var x11Init = function() {
 					break;
 				case 'xcbrandr':
 					
-						var possibles = ['libxcb-randr.so.0];
+						var possibles = ['libxcb-randr.so.0'];
 						var preferred;
 						// all values of preferred MUST exist in possibles reason is link123543939
 						switch (core.os.name) {
