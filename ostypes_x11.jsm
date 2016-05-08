@@ -365,17 +365,6 @@ var xlibTypes = function() {
 		{ border_width: this.uint16_t },
 		{ pad0: this.uint8_t.array(2) }
 	]);
-	this.xcb_get_image_request_t = ctypes.StructType('xcb_get_image_request_t', [
-		{ major_opcode: this.uint8_t },
-		{ format: this.uint8_t },
-		{ length: this.uint16_t },
-		{ drawable: this.xcb_drawable_t },
-		{ x: this.int16_t },
-		{ y: this.int16_t },
-		{ width: this.uint16_t },
-		{ height: this.uint16_t },
-		{ plane_mask: this.uint32_t }
-	]);
 	this.xcb_get_image_reply_t = ctypes.StructType('xcb_get_image_reply_t', [
 		{ response_type: this.uint8_t },
 		{ depth: this.uint8_t },
@@ -455,12 +444,6 @@ var xlibTypes = function() {
 		{ children_len: this.uint16_t },
 		{ pad1: this.uint8_t.array(14) }
 	]);
-	this.xcb_query_tree_request_t = ctypes.StructType('xcb_query_tree_request_t', [
-		 { major_opcode: this.uint8_t },
-		 { pad0: this.uint8_t },
-		 { length: this.uint16_t },
-		 { window: this.xcb_window_t }
-	]);
 	this.xcb_randr_get_crtc_info_reply_t = ctypes.StructType('xcb_randr_get_crtc_info_reply_t', [ // http://www.linuxhowtos.org/manpages/3/xcb_randr_get_crtc_info_reply.htm
 		{ response_type: this.uint8_t },
 		{ status: this.uint8_t },
@@ -489,12 +472,6 @@ var xlibTypes = function() {
 		{ num_modes: this.uint16_t },
 		{ names_len: this.uint16_t },
 		{ pad1: this.uint8_t.array(8) }
-	]);
-	this.xcb_randr_get_screen_resources_current_request_t = ctypes.StructType('xcb_randr_get_screen_resources_current_request_t', [
-		{ major_opcode: this.uint8_t },
-		{ minor_opcode: this.uint8_t },
-		{ length: this.uint16_t },
-		{ window: this.xcb_window_t }
 	]);
 	this.xcb_randr_get_output_info_reply_t = ctypes.StructType('xcb_randr_get_screen_resources_current_reply_t', [ // http://www.linuxhowtos.org/manpages/3/xcb_randr_get_output_info_reply.htm
 		{ response_type: this.uint8_t },
@@ -2465,15 +2442,16 @@ var x11Init = function() {
 			);
 		},
 		xcb_get_image_data: function() {
-			/* http://www.unix.com/man-page/centos/3/xcb_get_image_data/
+			/* http://www.unix.com/man-page/centos/3/xcb_get_image_data/// documentation error - http://stackoverflow.com/a/37097747/1828637
+			 * https://xcb.freedesktop.org/manual/xproto_8h_source.html#l09587
 			 * uint8_t *xcb_get_image_data(
-			 *   const xcb_get_image_request_t *reply
+			 *   const xcb_get_image_reply_t *reply
 			 * );
 			 */
 			return lib('xcb').declare('xcb_get_image_data', self.TYPE.ABI,
 				self.TYPE.uint8_t.ptr,						// return
-				// self.TYPE.xcb_get_image_request_t.ptr	// *reply
-				self.TYPE.xcb_get_image_reply_t.ptr			// forcing it wrongly *reply
+				// self.TYPE.xcb_get_image_request_t.ptr	// *reply // documentation error - http://stackoverflow.com/a/37097747/1828637
+				self.TYPE.xcb_get_image_reply_t.ptr			// *reply
 			);
 		},
 		xcb_get_image_reply: function() {
@@ -2743,14 +2721,16 @@ var x11Init = function() {
 			);
 		},
 		xcb_query_tree_children: function() {
-			/* http://www.linuxhowtos.org/manpages/3/xcb_query_tree.htm
+			/* http://www.linuxhowtos.org/manpages/3/xcb_query_tree.htm // documentation error - http://stackoverflow.com/a/37097747/1828637
+			 * https://xcb.freedesktop.org/manual/xproto_8h_source.html#l06177
 			 * xcb_window_t *xcb_query_tree_children(
-			 *   const xcb_query_tree_request_t *reply
+			 *   const xcb_query_tree_reply_t *reply
 			 * ); 
 			 */
 			return lib('xcb').declare('xcb_query_tree_children', self.TYPE.ABI,
 				self.TYPE.xcb_window_t.ptr,				// return
-				self.TYPE.xcb_query_tree_request_t.ptr	// *reply
+				// self.TYPE.xcb_query_tree_request_t.ptr	// *reply // documentation error - http://stackoverflow.com/a/37097747/1828637
+				self.TYPE.xcb_query_tree_reply_t.ptr	// *reply
 			);
 		},
 		xcb_query_tree_children_length: function() {
@@ -2869,15 +2849,16 @@ var x11Init = function() {
 			);
 		},
 		xcb_randr_get_screen_resources_current_outputs: function() {
-			/* http://www.linuxhowtos.org/manpages/3/xcb_randr_get_screen_resources_current_outputs.htm
+			/* http://www.linuxhowtos.org/manpages/3/xcb_randr_get_screen_resources_current_outputs.htm // documentation error - http://stackoverflow.com/a/37097747/1828637
+			 * https://xcb.freedesktop.org/manual/randr_8h_source.html#l02972
 			 * xcb_randr_output_t *xcb_randr_get_screen_resources_current_outputs(
-			 *   const xcb_randr_get_screen_resources_current_request_t *reply
+			 *   const xcb_randr_get_screen_resources_current_reply_t *reply
 			 * );
 			 */
 			return lib('xcbrandr').declare('xcb_randr_get_screen_resources_current_outputs', self.TYPE.ABI,
 				self.TYPE.xcb_randr_output_t.ptr,									// return
-				// self.TYPE.xcb_randr_get_screen_resources_current_request_t.ptr	// *reply
-				self.TYPE.xcb_randr_get_screen_resources_current_reply_t.ptr		// im forcing it wrongly // *reply
+				// self.TYPE.xcb_randr_get_screen_resources_current_request_t.ptr	// *reply // documentation error - http://stackoverflow.com/a/37097747/1828637
+				self.TYPE.xcb_randr_get_screen_resources_current_reply_t.ptr		// *reply
 			);
 		},
 		xcb_randr_get_screen_resources_current_outputs_length: function() {
