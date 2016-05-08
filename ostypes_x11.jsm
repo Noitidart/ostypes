@@ -2807,6 +2807,7 @@ var x11Init = function() {
 			return lib('xcbrandr').declare('xcb_randr_get_screen_resources_current_reply', self.TYPE.ABI,
 				self.TYPE.xcb_randr_get_screen_resources_current_reply_t.ptr,	// return
 				self.TYPE.xcb_connection_t.ptr,									// *conn
+				self.TYPE.xcb_randr_get_screen_resources_current_cookie_t,		// cookie
 				self.TYPE.xcb_generic_error_t.ptr.ptr							// **e
 			);
 		},
