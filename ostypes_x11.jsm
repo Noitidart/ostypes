@@ -2897,6 +2897,23 @@ var x11Init = function() {
 				self.TYPE.char.ptr				// *event
 			);
 		},
+		xcb_set_input_focus: function() {
+			/* https://www.x.org/releases/current/doc/man/man3/xcb_set_input_focus.3.xhtml
+			 * xcb_void_cookie_t xcb_set_input_focus(
+			 *   xcb_connection_t *conn,
+			 *   uint8_t revert_to,
+			 *   xcb_window_t focus,
+			 *   xcb_timestamp_t time
+			 * );
+			 */
+			return lib('xcb').declare('xcb_set_input_focus', self.TYPE.ABI,
+				self.TYPE.xcb_void_cookie_t,		// return
+				self.TYPE.xcb_connection_t.ptr,		// *conn
+				self.TYPE.uint8_t,					// revert_to
+				self.TYPE.xcb_window_t,				// focus
+				self.TYPE.xcb_timestamp_t			// time
+			);
+		},
 		xcb_setup_roots_iterator: function() {
 			// https://github.com/netzbasis/openbsd-xenocara/blob/e6500f41b55e38013ac9b489f66fe49df6b8b68c/lib/libxcb/src/xproto.h#L5409
 			// xcb_screen_iterator_t xcb_setup_roots_iterator (xcb_setup_t *R);
