@@ -2613,7 +2613,7 @@ var x11Init = function() {
 			 *   xcb_generic_error_t **e
 			 * );
 			 */
-			return lib('xcb').declare('xcb_grab_keyboard_reply_t', self.TYPE.ABI,
+			return lib('xcb').declare('xcb_grab_keyboard_reply', self.TYPE.ABI,
 				self.TYPE.xcb_grab_keyboard_reply_t.ptr,	// return
 				self.TYPE.xcb_connection_t.ptr,				// *conn
 				self.TYPE.xcb_grab_keyboard_cookie_t,		// cookie
