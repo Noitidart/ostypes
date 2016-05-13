@@ -122,7 +122,10 @@ var winTypes = function() {
 	this.HCURSOR = this.HICON;
 	this.HMODULE = this.HINSTANCE;
 	this.PHKEY = this.HKEY.ptr;
-	this.WNDENUMPROC = ctypes.FunctionType(this.CALLBACK_ABI, this.BOOL, [this.HWND, this.LPARAM]); // "super advanced type" because its highest type is `this.HWND` which is "advanced type"
+	this.EnumWindowsProc = ctypes.FunctionType(this.CALLBACK_ABI, this.BOOL, [this.HWND, this.LPARAM]); // "super advanced type" because its highest type is `this.HWND` which is "advanced type"
+	
+	// SUPER DEE DUPER ADVANCED TYPES
+	this.WNDENUMPROC = this.EnumWindowsProc.ptr;
 	
 	// inaccrurate types - i know these are something else but setting them to voidptr_t or something just works and all the extra work isnt needed
 	this.LPUNKNOWN = ctypes.voidptr_t; // ctypes.StructType('LPUNKNOWN'); // public typedef IUnknown* LPUNKNOWN; // i dont use the full struct so just leave it like this, actually lets just make it voidptr_t
@@ -1737,6 +1740,21 @@ var winInit = function() {
 				self.TYPE.DWORD			// dwFlags
 			);
 		},
+		EnumThreadWindows: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms633495(v=vs.85).aspx
+			 * BOOL WINAPI EnumThreadWindows(
+			 *   __in_ DWORD       dwThreadId,
+			 *   __in_ WNDENUMPROC lpfn,
+			 *   __in_ LPARAM      lParam
+			 * );
+			 */
+			return lib('user32').declare('EnumThreadWindows', self.TYPE.ABI,
+				self.TYPE.BOOL,			// return
+				self.TYPE.DWORD,		// dwThreadId
+				self.TYPE.WNDENUMPROC,	// lpfn
+				self.TYPE.LPARAM		// lParam
+			);
+		},
 		EnumWindows: function() {
 			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms633497%28v=vs.85%29.aspx
 			 * BOOL WINAPI EnumWindows(
@@ -1745,9 +1763,9 @@ var winInit = function() {
 			 * );
 			 */
 			return lib('user32').declare('EnumWindows', self.TYPE.ABI,
-				self.TYPE.BOOL,				// return
-				self.TYPE.WNDENUMPROC.ptr,	// lpEnumFunc
-				self.TYPE.LPARAM			// lParam
+				self.TYPE.BOOL,			// return
+				self.TYPE.WNDENUMPROC,	// lpEnumFunc
+				self.TYPE.LPARAM		// lParam
 			);
 		},
 		FindWindow: function() {
