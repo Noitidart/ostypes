@@ -1145,7 +1145,10 @@ var winInit = function() {
 		SYMBOLIC_LINK_FLAG_FILE: 0x0,
 		SYMBOLIC_LINK_FLAG_DIRECTORY: 0x1,
 		
-		DEFAULT_CHARSET: 1
+		DEFAULT_CHARSET: 1,
+		
+		SW_HIDE: 0,
+		SW_SHOW: 5
 	};
 
 	var _lib = {}; // cache for lib
@@ -2942,6 +2945,17 @@ var winInit = function() {
 			  GUID_or_IID.Data4[i] = parseInt(piece34.substr(i*2,2), 16);
 			};
 
+			return GUID_or_IID;
+		},
+		CLSIDFromArr: function(aArr) {
+			// aArr should be like this:
+			// [0x56fdf344,0xfd6d,0x11d0,[0x95,0x8a,0x0,0x60,0x97,0xc9,0xa0,0x90]]
+			var GUID_or_IID = self.TYPE.GUID();
+			GUID_or_IID.Data1 = aArr[0];
+			GUID_or_IID.Data2 = aArr[1];
+			GUID_or_IID.Data3 = aArr[2];
+			GUID_or_IID.Data4 = self.TYPE.BYTE.array()(aArr[3]);
+			
 			return GUID_or_IID;
 		},
 		IPropertyStore_SetValue: function(vtblPpsPtr, pps/*IPropertyStore*/, pkey/*REFPROPERTYKEY*/, pszValue/*PCWSTR*/) {
