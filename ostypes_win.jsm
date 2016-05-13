@@ -1156,7 +1156,11 @@ var winInit = function() {
 		GW_HWNDPREV: 3,
 		GW_OWNER: 4,
 		GW_CHILD: 5,
-		GW_ENABLEDPOPUP: 6
+		GW_ENABLEDPOPUP: 6,
+		
+		GA_PARENT: 1,
+		GA_ROOT: 2,
+		GA_ROOTOWNER: 3
 	};
 
 	var _lib = {}; // cache for lib
@@ -1821,6 +1825,19 @@ var winInit = function() {
 				self.TYPE.HWND	// return
 			);
 		},
+		GetAncestor: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms633502(v=vs.85).aspx
+			 * HWND WINAPI GetAncestor(
+			 *   __in_ HWND hwnd,
+			 *   __in_ UINT gaFlags
+			 * );
+			 */
+			return lib('user32').declare('GetAncestor', self.TYPE.ABI,
+				self.TYPE.HWND,		// return
+				self.TYPE.HWND,		// hWnd
+				self.TYPE.UINT 		// gaFlags
+			);
+		},
 		GetClientRect: function() {
 			/* http://msdn.microsoft.com/en-us/library/windows/desktop/ms633503%28v=vs.85%29.aspx
 			 * BOOL WINAPI GetClientRect(
@@ -1994,6 +2011,17 @@ var winInit = function() {
 				 self.TYPE.LPDWORD,				// lpNumberOfBytesTransferred
 				 self.TYPE.BOOL					// bWait
 			 );
+		},
+		GetParent: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms633510(v=vs.85).aspx
+			 * HWND WINAPI GetParent(
+			 *   __in_ HWND hWnd
+			 * );
+			 */
+			return lib('user32').declare('GetParent', self.TYPE.ABI,
+				self.TYPE.HWND,		// return
+				self.TYPE.HWND		// hWnd
+			);
 		},
 		GetPixel: function() {
 			/* http://msdn.microsoft.com/en-us/library/windows/desktop/dd144909%28v=vs.85%29.aspx
