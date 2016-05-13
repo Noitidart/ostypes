@@ -2021,6 +2021,19 @@ var winInit = function() {
 				self.TYPE.UINT			// cbSizeHeader
 			);
 		},
+		GetWindow: function() {
+			/* GetWindow
+			 * HWND WINAPI GetWindow(
+			 *   __in_ HWND hWnd,
+			 *   __in_ UINT uCmd
+			 * );
+			 */
+			return lib('user32').declare('GetWindow', self.TYPE.ABI,
+				self.TYPE.HWND,		// return
+				self.TYPE.HWND,		// hWnd
+				self.TYPE.UINT		// uCmd
+			);
+		},
 		GetWindowLongPtr: function() {
 			/* http://msdn.microsoft.com/en-us/library/windows/desktop/ms633585%28v=vs.85%29.aspx
 			 *	LONG_PTR WINAPI GetWindowLongPtr(
