@@ -1929,7 +1929,7 @@ var winInit = function() {
 			 *   _In_  int    cchMaxCount
 			 * );
 			 */
-			return lib('user32').delcare(ifdef_UNICODE ? 'GetClipboardFormatNameW' : 'GetClipboardFormatNameA', self.TYPE.ABI,
+			return lib('user32').declare(ifdef_UNICODE ? 'GetClipboardFormatNameW' : 'GetClipboardFormatNameA', self.TYPE.ABI,
 				self.TYPE.int,		// return
 				self.TYPE.UINT,		// format
 				self.TYPE.LPTSTR,	// lpszFormatName
