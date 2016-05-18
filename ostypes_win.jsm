@@ -95,6 +95,7 @@ var winTypes = function() {
 	this.HBITMAP = this.HANDLE;
 	this.HBRUSH = this.HANDLE;
 	this.HDC = this.HANDLE;
+	this.HDROP = this.HANDLE;
 	this.HFONT = this.HANDLE;
 	this.HGDIOBJ = this.HANDLE;
 	this.HGLOBAL = this.HANDLE;
@@ -1654,6 +1655,23 @@ var winInit = function() {
 			return lib('user32').declare(ifdef_UNICODE ? 'DispatchMessageW' : 'DispatchMessageA', self.TYPE.ABI,
 				self.TYPE.LRESULT,	// return
 				self.TYPE.MSG.ptr	// *lpmsg
+			);
+		},
+		DragQueryFile: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/bb776408(v=vs.85).aspx
+			 * UINT DragQueryFile(
+			 *   _In_  HDROP  hDrop,
+			 *   _In_  UINT   iFile,
+			 *   _Out_ LPTSTR lpszFile,
+			 *   UINT   cch
+			 * );
+			 */
+			return lib('shell32').declare(ifdef_UNICODE ? 'DragQueryFileW' : 'DragQueryFileA', self.TYPE.ABI,
+				self.TYPE.UINT,		// return
+				self.TYPE.HDROP,	// hDrop
+				self.TYPE.UINT,		// iFile
+				self.TYPE.LPTSTR,	// lpszFile
+				self.TYPE.UINT		// cch
 			);
 		},
 		DuplicateHandle: function() {
