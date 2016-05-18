@@ -46,7 +46,7 @@ var winTypes = function() {
 	this.LPCVOID = ctypes.voidptr_t;
 	this.LPVOID = ctypes.voidptr_t;
 	this.NTSTATUS = ctypes.long; // https://msdn.microsoft.com/en-us/library/cc230357.aspx // typedef long NTSTATUS;
-		this.OBJECT_INFORMATION_CLASS = ctypes.int; // im guessing its in, it is an enum though for sure
+	this.OBJECT_INFORMATION_CLASS = ctypes.int; // im guessing its in, it is an enum though for sure
 	this.PVOID = ctypes.voidptr_t;
 	this.RM_APP_TYPE = ctypes.unsigned_int; // i dont know im just guessing, i cant find a typedef that makes sense to me: https://msdn.microsoft.com/en-us/library/windows/desktop/aa373670%28v=vs.85%29.aspx
 	this.SHORT = ctypes.short;
@@ -1325,6 +1325,16 @@ var winInit = function() {
 				self.TYPE.LPOVERLAPPED	// lpOverlapped
 			);
 		},
+		CloseClipboard: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms649035(v=vs.85).aspx
+			 * BOOL WINAPI CloseClipboard(
+			 *   void
+			 * );
+			 */
+			return lib('user32').declare('CloseClipboard', self.TYPE.ABI,
+				self.TYPE.BOOL		// return
+			);
+		},
 		CloseHandle: function() {
 			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms724211%28v=vs.85%29.aspx?f=255&MSPPError=-2147217396
 			 * BOOL WINAPI CloseHandle(
@@ -1366,6 +1376,16 @@ var winInit = function() {
 				self.TYPE.HRESULT,	// result
 				self.TYPE.LPVOID,	// pvReserved
 				self.TYPE.DWORD		// dwCoInit
+			);
+		},
+		CountClipboardFormats: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms649036(v=vs.85).aspx
+			 * int WINAPI CountClipboardFormats(
+			 *   void
+			 * );
+			 */
+			return lib('user32').declare('CountClipboardFormats', self.TYPE.ABI,
+				self.TYPE.int
 			);
 		},
 		CoUninitialize: function() {
@@ -1659,6 +1679,16 @@ var winInit = function() {
 				self.TYPE.DWORD			// dwOptions
 			);
 		},
+		EmptyClipboard: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms649037(v=vs.85).aspx
+			 * BOOL WINAPI EmptyClipboard(
+			 *   void
+			 * );
+			 */
+			return lib('user32').declare('EmptyClipboard', self.TYPE.ABI,
+				self.TYPE.BOOL		// return
+			);
+		},
 		EndUpdateResource: function() {
 			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms648032%28v=vs.85%29.aspx
 			 * BOOL WINAPI EndUpdateResource(
@@ -1670,6 +1700,17 @@ var winInit = function() {
 				self.TYPE.BOOL,		// return
 				self.TYPE.HANDLE,	// hUpdate
 				self.TYPE.BOOL		// fDiscard
+			);
+		},
+		EnumClipboardFormats: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms649038(v=vs.85).aspx
+			 * UINT WINAPI EnumClipboardFormats(
+			 *   _In_ UINT format
+			 * );
+			 */
+			return lib('user32').declare('EnumClipboardFormats', self.TYPE.ABI,
+				self.TYPE.UINT,		// return
+				self.TYPE.UINT		// format
 			);
 		},
 		EnumDisplayDevices: function() {
@@ -1867,6 +1908,32 @@ var winInit = function() {
 				self.TYPE.BOOL, //return
 				self.TYPE.HWND, // hWnd
 				self.TYPE.LPRECT // lpRec
+			);
+		},
+		GetClipboardData: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms649039(v=vs.85).aspx
+			 * HANDLE WINAPI GetClipboardData(
+			 *   _In_ UINT uFormat
+			 * );
+			 */
+			return lib('user32').declare('GetClipboardData', self.TYPE.ABI,
+				self.TYPE.HANDLE,		// return
+				self.TYPE.UINT			// uFormat
+			);
+		},
+		GetClipboardFormatName: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms649040(v=vs.85).aspx
+			 * int WINAPI GetClipboardFormatName(
+			 *   _In_  UINT   format,
+			 *   _Out_ LPTSTR lpszFormatName,
+			 *   _In_  int    cchMaxCount
+			 * );
+			 */
+			return lib('user32').delcare(ifdef_UNICODE ? 'GetClipboardFormatNameW' : 'GetClipboardFormatNameA', self.TYPE.ABI,
+				self.TYPE.int,		// return
+				self.TYPE.UINT,		// format
+				self.TYPE.LPTSTR,	// lpszFormatName
+				self.TYPE.int		// cchMaxCount
 			);
 		},
 		GetCurrentProcess: function() {
@@ -2155,6 +2222,17 @@ var winInit = function() {
 				self.TYPE.LPDWORD	// lpdwProcessId
 			);
 		},
+		IsClipboardFormatAvailable: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms649047(v=vs.85).aspx
+			 * BOOL WINAPI IsClipboardFormatAvailable(
+			 *   _In_ UINT format
+			 * );
+			 */
+			return lib('user32').declare('IsClipboardFormatAvailable', self.TYPE.ABI,
+				self.TYPE.BOOL,		// return
+				self.TYPE.UINT		// format
+			);
+		},
 		IsIconic: function() {
 			/* http://msdn.microsoft.com/en-us/library/windows/desktop/ms633507%28v=vs.85%29.aspx
 			 * BOOL WINAPI IsIconic(
@@ -2248,6 +2326,17 @@ var winInit = function() {
 			return lib('kernel32').declare('LockResource', self.TYPE.ABI,
 				self.TYPE.LPVOID,	// return
 				self.TYPE.HGLOBAL	// hResData
+			);
+		},
+		OpenClipboard: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms649048(v=vs.85).aspx
+			 * BOOL WINAPI OpenClipboard(
+			 * _In_opt_ HWND hWndNewOwner
+			 * );
+			 */
+			return lib('user32').declare('OpenClipboard', self.TYPE.ABI,
+				self.TYPE.BOOL,		// return
+				self.TYPE.HWND		// hWndNewOwner
 			);
 		},
 		OpenProcess: function() {
