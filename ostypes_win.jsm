@@ -79,6 +79,8 @@ var winTypes = function() {
 	this.LPSTR = this.CHAR.ptr;
 	this.LPWSTR = this.WCHAR.ptr;
 	this.LRESULT = this.LONG_PTR;
+	this.MMRESULT = this.UINT;
+	this.MMVERSION = this.UINT;
 	this.OLECHAR = this.WCHAR; // typedef WCHAR OLECHAR; // https://github.com/wine-mirror/wine/blob/bdeb761357c87d41247e0960f71e20d3f05e40e6/include/wtypes.idl#L286
 	this.PCZZSTR = ifdef_UNICODE ? this.WCHAR.ptr : this.CHAR.ptr; // EDUCATED GUESS BASED ON TYPEDEF FROM --> // ansi / unicode - https://github.com/wine-mirror/wine/blob/b1ee60f22fbd6b854c3810a89603458ec0585369/include/winnt.h#L483 ---
 	this.PLONG = this.LONG.ptr;
@@ -107,6 +109,7 @@ var winTypes = function() {
 	this.HMONITOR = this.HANDLE;
 	this.HRAWINPUT = this.HANDLE;
 	this.HRSRC = this.HANDLE;
+	this.HWAVEIN = this.HANDLE;
 	this.HWND = this.HANDLE;
 	this.LPCOLESTR = this.OLECHAR.ptr; // typedef [string] const OLECHAR *LPCOLESTR; // https://github.com/wine-mirror/wine/blob/bdeb761357c87d41247e0960f71e20d3f05e40e6/include/wtypes.idl#L288
 	this.LPCTSTR = ifdef_UNICODE ? this.LPCWSTR : this.LPCSTR;
@@ -118,16 +121,17 @@ var winTypes = function() {
 	this.PCZZTSTR = this.PCZZSTR; // double null terminated from msdn docs // typedef from https://github.com/wine-mirror/wine/blob/b1ee60f22fbd6b854c3810a89603458ec0585369/include/winnt.h#L535
 	this.PWSTR = this.LPWSTR; // PWSTR and LPWSTR are the same. The L in LPWSTR stands for "long/far pointer" and it is a leftover from 16 bit when pointers were "far" or "near". Such a distinction no longer exists on 32/64 bit, all pointers have the same size. SOURCE: https://social.msdn.microsoft.com/Forums/vstudio/en-US/52ab8d94-f8f8-427f-ad66-5b38db9a61c9/difference-between-lpwstr-and-pwstr?forum=vclanguage
 	this.REGSAM = this.ACCESS_MASK; // https://github.com/wine-mirror/wine/blob/9bd963065b1fb7b445d010897d5f84967eadf75b/include/winreg.h#L53
-		
+
 	// SUPER DUPER ADVANCED TYPES // defined by "super advanced types"
 	this.HCURSOR = this.HICON;
 	this.HMODULE = this.HINSTANCE;
+	this.LPHWAVEIN = this.HWAVEIN.ptr;
 	this.PHKEY = this.HKEY.ptr;
 	this.EnumWindowsProc = ctypes.FunctionType(this.CALLBACK_ABI, this.BOOL, [this.HWND, this.LPARAM]); // "super advanced type" because its highest type is `this.HWND` which is "advanced type"
-	
+
 	// SUPER DEE DUPER ADVANCED TYPES
 	this.WNDENUMPROC = this.EnumWindowsProc.ptr;
-	
+
 	// inaccrurate types - i know these are something else but setting them to voidptr_t or something just works and all the extra work isnt needed
 	this.LPUNKNOWN = ctypes.voidptr_t; // ctypes.StructType('LPUNKNOWN'); // public typedef IUnknown* LPUNKNOWN; // i dont use the full struct so just leave it like this, actually lets just make it voidptr_t
 	this.MONITOR_DPI_TYPE = ctypes.unsigned_int;
@@ -142,7 +146,8 @@ var winTypes = function() {
 		CCHDEVICENAME: 32,
 		CCHFORMNAME: 32,
 		LF_FACESIZE: 32,
-		LF_FULLFACESIZE: 64
+		LF_FULLFACESIZE: 64,
+		MAXPNAMELEN: 32
 	};
 
 	// SIMPLE STRUCTS // based on any of the types above
@@ -362,6 +367,35 @@ var winTypes = function() {
 		{ 'MaximumLength': this.USHORT },
 		{ 'Buffer': this.PWSTR }
 	]);
+	this.WAVEFORMATEX = ctypes.StructType('tWAVEFORMATEX', [ // https://msdn.microsoft.com/en-us/library/windows/desktop/dd390970(v=vs.85).aspx
+		{ wFormatTag: this.WORD },
+	    { nChannels: this.WORD },
+	    { nSamplesPerSec: this.DWORD },
+	    { nAvgBytesPerSec: this.DWORD },
+	    { nBlockAlign: this.WORD },
+	    { wBitsPerSample: this.WORD },
+	    { cbSize: this.WORD }
+	]);
+	this.WAVEHDR = ctypes.StructType('wavehdr_tag');
+	this.WAVEHDR.define([ // https://msdn.microsoft.com/en-us/library/windows/desktop/dd743837(v=vs.85).aspx
+		{ lpData: this.LPSTR },
+	    { dwBufferLength: this.DWORD },
+	    { dwBytesRecorded: this.DWORD },
+	    { dwUser: this.DWORD_PTR },
+	    { dwFlags: this.DWORD },
+	    { dwLoops: this.DWORD },
+	    { lpNext: this.WAVEHDR.ptr },
+	    { reserved: this.DWORD_PTR }
+	]);
+	this.WAVEINCAPS = ctypes.StructType('tagWAVEINCAPS', [ // https://msdn.microsoft.com/en-us/library/windows/desktop/dd743839(v=vs.85).aspx
+		{ wMid: this.WORD },
+	    { wPid: this.WORD },
+	    { vDriverVersion: this.MMVERSION },
+	    { szPname: this.TCHAR.array(struct_const.MAXPNAMELEN) },
+	    { dwFormats: this.DWORD },
+	    { wChannels: this.WORD },
+	    { wReserved1: this.WORD }
+	]);
 
 	// ADVANCED STRUCTS // based on "simple structs" to be defined first
 	this.BITMAPINFO = ctypes.StructType('BITMAPINFO', [
@@ -419,9 +453,12 @@ var winTypes = function() {
         { 'type': this.DWORD },
         { 'mi': this.MOUSEINPUT } // union, pick which one you want, i picked mouse
     ]);
+	this.LPCWAVEFORMATEX = this.WAVEFORMATEX.ptr;
 	this.LPOVERLAPPED = this.OVERLAPPED.ptr;
 	this.LPLOGFONT = this.LOGFONT.ptr;
 	this.LPSECURITY_ATTRIBUTES = this.SECURITY_ATTRIBUTES.ptr;
+	this.LPWAVEHDR = this.WAVEHDR.ptr;
+	this.LPWAVEINCAPS = this.WAVEINCAPS.ptr;
 	this.MONITORINFOEX = ctypes.StructType('tagMONITORINFOEX', [
 		{ cbSize:		this.DWORD },
 		{ rcMonitor:	this.RECT },
@@ -611,9 +648,9 @@ var winTypes = function() {
 		{ lpszMenuName: this.LPCTSTR },
 		{ lpszClassName: this.LPCTSTR }
 	]);
-	
+
 	// VTABLE's
-	
+
 	// IPersistFile - https://msdn.microsoft.com/en-us/library/windows/desktop/ms687223(v=vs.85).aspx
 	var IPersistFileVtbl = ctypes.StructType('IPersistFileVtbl');
 	this.IPersistFile = ctypes.StructType('IPersistFile',[{
@@ -677,7 +714,7 @@ var winTypes = function() {
 				]).ptr
 		}
 	]);
-	
+
 	// IPropertyStore - https://msdn.microsoft.com/en-us/library/windows/desktop/bb761474(v=vs.85).aspx
 	var IPropertyStoreVtbl = ctypes.StructType('IPropertyStoreVtbl');
 	this.IPropertyStore = ctypes.StructType('IPropertyStore', [{
@@ -736,7 +773,7 @@ var winTypes = function() {
 				]).ptr
 		}]
 	);
-	
+
 	// IShellLinkW - https://msdn.microsoft.com/en-us/library/windows/desktop/bb774950(v=vs.85).aspx
 	var IShellLinkWVtbl = ctypes.StructType('IShellLinkWVtbl');
 	this.IShellLinkW = ctypes.StructType('IShellLinkW', [{
@@ -882,7 +919,7 @@ var winTypes = function() {
 				]).ptr
 		}]
 	);
-	
+
 	// ITaskbarList - https://msdn.microsoft.com/en-us/library/windows/desktop/bb774652(v=vs.85).aspx
 	var ITaskbarListVtbl = ctypes.StructType('ITaskbarListVtbl');
 	this.ITaskbarList = ctypes.StructType('ITaskbarList',[{
@@ -915,30 +952,30 @@ var winTypes = function() {
 		}, {
 			'AddTab': ctypes.FunctionType(this.CALLBACK_ABI,
 				this.HRESULT, [
-					this.ITaskbarList.ptr,	
+					this.ITaskbarList.ptr,
 					this.HWND				// hWnd
 				]).ptr
 		}, {
 			'DeleteTab': ctypes.FunctionType(this.CALLBACK_ABI,
 				this.HRESULT, [
-					this.ITaskbarList.ptr,	
+					this.ITaskbarList.ptr,
 					this.HWND				// hWnd
 				]).ptr
 		}, {
 			'ActivateTab': ctypes.FunctionType(this.CALLBACK_ABI,
 				this.HRESULT, [
-					this.ITaskbarList.ptr,	
+					this.ITaskbarList.ptr,
 					this.HWND				// hWnd
 				]).ptr
 		}, {
 			'SetActiveAlt': ctypes.FunctionType(this.CALLBACK_ABI,
 				this.HRESULT, [
-					this.ITaskbarList.ptr,	
+					this.ITaskbarList.ptr,
 					this.HWND				// hWnd
 				]).ptr
-		} //end inherit from ITaskbarList 
+		} //end inherit from ITaskbarList
 	]);
-	
+
 }
 
 var winInit = function() {
@@ -1045,55 +1082,55 @@ var winInit = function() {
 		RI_MOUSE_HORIZONTAL_WHEEL: 0x0800,
 		XBUTTON1: 0x0001,
 		XBUTTON2: 0x0002,
-		
+
 		CLSCTX_INPROC_SERVER: 0x1,
 		COINIT_APARTMENTTHREADED: 0x2,
 
 		VARIANT_FALSE: 0, // http://blogs.msdn.com/b/oldnewthing/archive/2004/12/22/329884.aspx
 		VARIANT_TRUE: -1, // http://blogs.msdn.com/b/oldnewthing/archive/2004/12/22/329884.aspx
 		VT_LPWSTR: 0x001F, // 31
-		
+
 		SW_SHOWNORMAL: 1,
-		
+
 		STATUS_SUCCESS: 0x00000000,
 		STATUS_BUFFER_TOO_SMALL: 0xC0000023 >> 0, // link847456312312132 - need the >> 0
 		STATUS_INFO_LENGTH_MISMATCH: 0xC0000004 >> 0, // link847456312312132 - need the >> 0 otherwise cutils.jscGetDeepest of return of NtQuerySystemInformation is -1073741820 and jscGetDeepest of CONST.STATUS_INFO_LENGTH_MISMATCH is 3221225476
-		
+
 		SystemProcessInformation: 5, // https://github.com/wine-mirror/wine/blob/80ea5a01ef42b0e9e0b6c872f8f5bbbf393c0ae7/include/winternl.h#L771-L847
 		SystemHandleInformation: 16,
 		SystemExtendedHandleInformation: 64, // http://processhacker.sourceforge.net/doc/ntexapi_8h.html#ad5d815b48e8f4da1ef2eb7a2f18a54e0a6b30a1ad494061a4d95fd1d0b2c2e9b5 - as the wine repo shows it as unknown. process hacker has them listed out in order of enum which is just from ntextapi.h - http://processhacker.sourceforge.net/doc/ntexapi_8h_source.html --- and note that SystemBasicInformation is 0 so 64 lines below that is this, cool stuff
-		
+
 		SW_RESTORE: 9,
-		
+
 		SLGP_RAWPATH: 0x4,
-		
+
 		FileNameInformation: 9, // https://msdn.microsoft.com/en-us/library/windows/hardware/ff728840%28v=vs.85%29.aspx
-		
+
 		PROCESS_DUP_HANDLE: 0x0040,
 		PROCESS_QUERY_INFORMATION: 0x0400,
 		MAXIMUM_ALLOWED: 0x02000000,
 		DUPLICATE_SAME_ACCESS: 0x00000002,
-		
+
 		ObjectNameInformation: 1,
-		
+
 		HKEY_CURRENT_USER: self.TYPE.HKEY(0x80000001), // https://github.com/wine-mirror/wine/blob/9bd963065b1fb7b445d010897d5f84967eadf75b/include/winreg.h#L29
 		HKEY_LOCAL_MACHINE: self.TYPE.HKEY(0x80000002), // https://github.com/wine-mirror/wine/blob/9bd963065b1fb7b445d010897d5f84967eadf75b/include/winreg.h#L30
 		KEY_QUERY_VALUE: 0x00000001,
-		
+
 		ERROR_SUCCESS: 0x00000000,
 		ERROR_FILE_NOT_FOUND: 0x00000002,
-		
+
 		RT_ICON: '3', // https://github.com/wine-mirror/wine/blob/c266d373deb417abef4883f59daa5d517b77e76c/include/winuser.h#L761
 		RT_GROUP_ICON: '14', // https://github.com/wine-mirror/wine/blob/c266d373deb417abef4883f59daa5d517b77e76c/include/winuser.h#L771
-		
+
 		LANG_ENGLISH: 0x0C09,
 		SUBLANG_DEFAULT: 0x01,
-		
+
 		CP_ACP: 0,
-		
+
 		GCLP_HICON: -14,
 		GCLP_HICONSM: -34,
-		
+
 		IMAGE_ICON: 1,
 		LR_DEFAULTSIZE: 0x00000040,
 		LR_LOADFROMFILE: 16,
@@ -1127,11 +1164,11 @@ var winInit = function() {
 
 		ERROR_BROKEN_PIPE: 0x6D,
 		ERROR_OPERATION_ABORTED: 0x3E3,
-		
+
 		WM_TIMER: 0x0113,
 		WM_APP: 0x8000,
 
-		INPUT_MOUSE: 0,		
+		INPUT_MOUSE: 0,
 		MOUSEEVENTF_ABSOLUTE: 0x8000,
 		MOUSEEVENTF_LEFTDOWN: 0x0002,
 		MOUSEEVENTF_LEFTUP: 0x0004,
@@ -1145,15 +1182,15 @@ var winInit = function() {
 		MOUSEEVENTF_XUP: 0x0100,
 		MOUSEEVENTF_WHEEL: 0x0800,
 		MOUSEEVENTF_HWHEEL: 0x01000,
-		
+
 		SYMBOLIC_LINK_FLAG_FILE: 0x0,
 		SYMBOLIC_LINK_FLAG_DIRECTORY: 0x1,
-		
+
 		DEFAULT_CHARSET: 1,
-		
+
 		SW_HIDE: 0,
 		SW_SHOW: 5,
-		
+
 		GW_HWNDFIRST: 0,
 		GW_HWNDLAST: 1,
 		GW_HWNDNEXT: 2,
@@ -1161,7 +1198,7 @@ var winInit = function() {
 		GW_OWNER: 4,
 		GW_CHILD: 5,
 		GW_ENABLEDPOPUP: 6,
-		
+
 		GA_PARENT: 1,
 		GA_ROOT: 2,
 		GA_ROOTOWNER: 3
@@ -2932,7 +2969,7 @@ var winInit = function() {
 				self.TYPE.HRESULT,		// return
 				self.TYPE.LPCTSTR,		// pszSource
 				self.TYPE.LPTSTR.ptr	// *ppwsz
-			); 
+			);
 		},
 		SizeofResource: function() {
 			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms648048%28v=vs.85%29.aspx
@@ -3033,6 +3070,143 @@ var winInit = function() {
 				self.TYPE.BOOL		// bAlertable
 			);
 		},
+		waveInAddBuffer: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/dd743838(v=vs.85).aspx
+			 * MMRESULT waveInAddBuffer(
+			 *    HWAVEIN   hwi,
+			 *    LPWAVEHDR pwh,
+			 *    UINT      cbwh
+			 * );
+			 */
+			return lib('winmm').declare('waveInAddBuffer', self.TYPE.ABI,
+				self.TYPE.MMRESULT,		// return
+				self.TYPE.HWAVEIN,		// hwi
+				self.TYPE.LPWAVEHDR,	// pwh
+				self.TYPE.UINT			// cbwh
+			);
+		},
+		waveInClose: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/dd743840(v=vs.85).aspx
+			 * MMRESULT waveInClose(
+			 *    HWAVEIN hwi
+			 * );
+			 */
+			return lib('winmm').declare('waveInClose', self.TYPE.ABI,
+				self.TYPE.MMRESULT,		// return
+				self.TYPE.HWAVEIN		// hwi
+			);
+		},
+		waveInGetDevCaps: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/dd743841(v=vs.85).aspx
+			 * MMRESULT waveInGetDevCaps(
+			 *    UINT_PTR     uDeviceID,
+			 *    LPWAVEINCAPS pwic,
+			 *    UINT         cbwic
+			 * );
+			 */
+			return lib('winmm').delcare(ifdef_UNICODE ? 'waveInGetDevCapsW' : 'waveInGetDevCapsA', self.TYPE.ABI,
+				self.TYPE.MMRESULT,		// return
+				self.TYPE.UINT_PTR,		// uDeviceID
+				self.TYPE.LPWAVEINCAPS,	// pwic
+				self.TYPE.UINT_PTR		// cbwic
+			);
+		},
+		waveInGetErrorText: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/dd743842(v=vs.85).aspx
+			 * MMRESULT waveInGetErrorText(
+			 *    MMRESULT mmrError,
+			 *    LPTSTR   pszText,
+			 *    UINT     cchText
+			 * );
+			*/
+			return lib('winmm').declare(ifdef_UNICODE ? 'waveInGetErrorTextW' : 'waveInGetErrorTextA', self.TYPE.ABI,
+				self.TYPE.MMRESULT,		// return
+				self.TYPE.MMRESULT,		// mmrError
+				self.TYPE.LPTSTR,		// pszText
+				self.TYPE.UINT			// cchText
+			);
+		},
+		waveInGetNumDevs: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/dd743844(v=vs.85).aspx
+			 * UINT waveInGetNumDevs(void);
+			 */
+			return lib('winmm').declare('waveInGetNumDevs', self.TYPE.ABI,
+				self.TYPE.UINT		// return
+			);
+		},
+		waveInOpen: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/dd743847(v=vs.85).aspx
+			 * MMRESULT waveInOpen(
+			 *    LPHWAVEIN       phwi,
+			 *    UINT            uDeviceID,
+			 *    LPCWAVEFORMATEX pwfx,
+			 *    DWORD_PTR       dwCallback,
+			 *    DWORD_PTR       dwCallbackInstance,
+			 *    DWORD           fdwOpen
+			 * );
+			 */
+			return lib('winmm').declare('waveInOpen', self.TYPE.ABI,
+				self.TYPE.MMRESULT,			// return
+				self.TYPE.LPHWAVEIN,		// phwi
+				self.TYPE.UINT,				// uDeviceID
+				self.TYPE.LPCWAVEFORMATEX,	// pwfx
+				self.TYPE.DWORD_PTR,		// dwCallback
+				self.TYPE.DWORD_PTR,		// dwCallbackInstance
+				self.TYPE.DWORD				// fdwOpen
+			);
+		},
+		waveInPrepareHeader: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/dd743848(v=vs.85).aspx
+			 * MMRESULT waveInPrepareHeader(
+			 *    HWAVEIN   hwi,
+			 *    LPWAVEHDR pwh,
+			 *    UINT      cbwh
+			 * );
+			 */
+			return lib('winmm').declare('waveInPrepareHeader', self.TYPE.ABI,
+				self.TYPE.MMRESULT,		// return
+				self.TYPE.HWAVEIN,		// hwi
+				self.TYPE.LPWAVEHDR,	// pwh
+				self.TYPE.UINT			// cbwh
+			);
+		},
+		waveInStart: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/dd743851(v=vs.85).aspx
+			 * MMRESULT waveInStart(
+			 *    HWAVEIN hwi
+			 * );
+			 */
+			return lib('winmm').declare('waveInStart', self.TYPE.ABI,
+				self.TYPE.MMRESULT,		// return
+				self.TYPE.HWAVEIN		// hwi
+			);
+		},
+		waveInStop: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/dd743852(v=vs.85).aspx
+			 * MMRESULT waveInStop(
+			 *    HWAVEIN hwi
+			 * );
+			 */
+			return lib('winmm').declare('waveInStop', self.TYPE.ABI,
+				self.TYPE.MMRESULT,		// return
+				self.TYPE.HWAVEIN		// hwi
+			);
+		},
+		waveInUnprepareHeader: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/dd743853(v=vs.85).aspx
+			 * MMRESULT waveInUnprepareHeader(
+			 *    HWAVEIN   hwi,
+			 *    LPWAVEHDR pwh,
+			 *    UINT      cbwh
+			 * );
+			 */
+			return lib('winmm').declare('waveInUnprepareHeader', self.TYPE.ABI,
+				self.TYPE.MMRESULT,		// return
+				self.TYPE.HWAVEIN,		// hwi
+				self.TYPE.LPWAVEHDR,	// pwh
+				self.TYPE.UINT			// cbwh
+		 	);
+		},
 		WriteFile: function() {
 			/* https://msdn.microsoft.com/en-us/library/windows/desktop/aa365747%28v=vs.85%29.aspx
 			 * BOOL WINAPI WriteFile(
@@ -3129,14 +3303,14 @@ var winInit = function() {
 			GUID_or_IID.Data2 = aArr[1];
 			GUID_or_IID.Data3 = aArr[2];
 			GUID_or_IID.Data4 = self.TYPE.BYTE.array()(aArr[3]);
-			
+
 			return GUID_or_IID;
 		},
 		IPropertyStore_SetValue: function(vtblPpsPtr, pps/*IPropertyStore*/, pkey/*REFPROPERTYKEY*/, pszValue/*PCWSTR*/) {
 			// from: http://blogs.msdn.com/b/oldnewthing/archive/2011/06/01/10170113.aspx
 			// for strings!! InitPropVariantFromString
 			// returns hr of SetValue, but if hr of it failed it will throw, so i dont have to check the return value
-			
+
 			var ppropvar = self.TYPE.PROPVARIANT();
 
 			var hr_InitPropVariantFromString = self.HELPER.InitPropVariantFromString(pszValue, ppropvar.address());
@@ -3144,7 +3318,7 @@ var winInit = function() {
 
 			var hr_SetValue = pps.SetValue(vtblPpsPtr, pkey, ppropvar.address());
 			self.HELPER.checkHRESULT(hr_SetValue, 'IPropertyStore_SetValue');
-			
+
 			var rez_PropVariantClear = self.API('PropVariantClear')(ppropvar.address());
 			// console.info('rez_PropVariantClear:', rez_PropVariantClear, rez_PropVariantClear.toString(), uneval(rez_PropVariantClear));
 
@@ -3154,19 +3328,19 @@ var winInit = function() {
 			// currently setup for String propvariants only, meaning  key pwszVal is populated
 			// returns hr of GetValue if a ostypes.PROPVARIANT() is supplied as ppropvar arg
 			// returns jsstr if ppropvar arg is not supplied (creates a temp propvariant and clears it for function use)
-			
+
 			var ret_js = false;
 			if (!ppropvar) {
 				ppropvar = self.TYPE.PROPVARIANT();
 				ret_js = true;
 			}
-			
+
 			//console.info('pps.GetValue', pps.GetValue);
 			var hr_GetValue = pps.GetValue(vtblPpsPtr, pkey, ppropvar.address());
 			self.HELPER.checkHRESULT(hr_GetValue, 'IPropertyStore_GetValue');
-			
+
 			//console.info('ppropvar:', ppropvar.toString(), uneval(ppropvar));
-			
+
 			if (ret_js) {
 				//console.info('ppropvar.pwszVal:', ppropvar.pwszVal.toString(), uneval(ppropvar.pwszVal));
 				var jsstr;
@@ -3176,7 +3350,7 @@ var winInit = function() {
 				} else {
 					jsstr = ppropvar.pwszVal.readStringReplaceMalformed();
 				}
-				
+
 				var rez_PropVariantClear = self.API('PropVariantClear')(ppropvar.address());
 				//console.info('rez_PropVariantClear:', rez_PropVariantClear.toString(), uneval(rez_PropVariantClear));
 
@@ -3198,7 +3372,7 @@ var winInit = function() {
 			// SHStrDup uses CoTaskMemAlloc to allocate the strin so is true to the noe from MSDN
 			var hr_SHStrDup = self.API('SHStrDup')(psz, ppropvar.contents.pwszVal.address()); //note in PROPVARIANT defintion `pwszVal` is defined as `LPWSTR` and `SHStrDup` expects second arg as `LPTSTR.ptr` but both `LPTSTR` and `LPWSTR` are defined the same with `ctypes.jschar` so this should be no problem // after learnin that LPTSTR is wchar when ifdef_UNICODE and i have ifdef_UNICODE set to true so they are the same
 			// console.info('hr_SHStrDup:', hr_SHStrDup.toString(), uneval(hr_SHStrDup));
-			
+
 			// console.log('propvarPtr.contents.pwszVal', propvarPtr.contents.pwszVal);
 			self.HELPER.checkHRESULT(hr_SHStrDup, 'InitPropVariantFromString -> hr_SHStrDup'); // this will throw if HRESULT is bad
 
@@ -3209,23 +3383,23 @@ var winInit = function() {
 		MAKELANGID: function(p, s) {
 			// MACRO: https://github.com/wine-mirror/wine/blob/b1ee60f22fbd6b854c3810a89603458ec0585369/include/winnt.h#L2180
 			// #define MAKELANGID(p, s) ((((WORD)(s))<<10) | (WORD)(p))
-			
+
 			// p is js int
 			// s is js int
 			return ((((s))<<10) | (p));
 		}
 	};
-	
+
 	// ADVANCED HELPER CONST - constants that are defined by using HELPER functions and also SIMPLE constants
 
 	this.CONST.CLSID_SHELLLINK = this.HELPER.CLSIDFromString('00021401-0000-0000-C000-000000000046');
 	this.CONST.IID_ISHELLLINK = this.HELPER.CLSIDFromString('000214F9-0000-0000-C000-000000000046');
 	this.CONST.IID_IPERSISTFILE = this.HELPER.CLSIDFromString('0000010b-0000-0000-C000-000000000046');
 	this.CONST.IID_IPROPERTYSTORE = this.HELPER.CLSIDFromString('886d8eeb-8cf2-4446-8d02-cdba1dbdcf99');
-	
+
 	// formatID and propID are from https://msdn.microsoft.com/en-us/library/dd391569%28v=vs.85%29.aspx
 	this.CONST.FORMAT_ID_APPUSERMODEL = this.HELPER.CLSIDFromString('9F4C2855-9F79-4B39-A8D0-E1D42DE1D5F3');
-		
+
 	this.CONST.PKEY_APPUSERMODEL_ID = this.TYPE.PROPERTYKEY(this.CONST.FORMAT_ID_APPUSERMODEL, 5);
 	this.CONST.PKEY_APPUSERMODEL_RELAUNCHCOMMAND = this.TYPE.PROPERTYKEY(this.CONST.FORMAT_ID_APPUSERMODEL, 2);
 	this.CONST.PKEY_APPUSERMODEL_RELAUNCHDISPLAYNAMERESOURCE = this.TYPE.PROPERTYKEY(this.CONST.FORMAT_ID_APPUSERMODEL, 4);
