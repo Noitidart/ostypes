@@ -1047,7 +1047,7 @@ var winTypes = function() {
 				this.HRESULT, [
 					this.ICreateDevEnum.ptr,
 					this.REFCLSID,			// clsidDeviceClass
-					this.IEnumMoniker.ptr,	// **ppEnumMoniker
+					this.IEnumMoniker.ptr.ptr,	// **ppEnumMoniker
 					this.DWORD				// dwFlags
 				]).ptr
 		} //end inherit from ICreateDevEnum
