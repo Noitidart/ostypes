@@ -56,8 +56,6 @@ var winTypes = function() {
 	this.ULONGLONG = ctypes.unsigned_long_long;
 	this.ULONG_PTR = is64bit ? ctypes.uint64_t : ctypes.unsigned_long; // i left it at what i copied pasted it as, but i thought it was this: `ctypes.uintptr_t`
 	this.USHORT = ctypes.unsigned_short;
-	this.VARIANT = ctypes.void_t.ptr;
-	this.VARIANTARG = ctypes.void_t.ptr;
 	this.VARIANT_BOOL = ctypes.short;
 	this.VARTYPE = ctypes.unsigned_short;
 	this.VOID = ctypes.void_t;
@@ -369,6 +367,7 @@ var winTypes = function() {
 		{ 'MaximumLength': this.USHORT },
 		{ 'Buffer': this.PWSTR }
 	]);
+	this.VARIANT = ctypes.StructType('tagVARIANT'); // defined as opaque for now, as its a bunch of unions, i should .define it to be what I need
 	this.WAVEFORMATEX = ctypes.StructType('tWAVEFORMATEX', [ // https://msdn.microsoft.com/en-us/library/windows/desktop/dd390970(v=vs.85).aspx
 		{ wFormatTag: this.WORD },
 	    { nChannels: this.WORD },
@@ -523,6 +522,9 @@ var winTypes = function() {
 		{ ThreadState: this.ULONG },
 		{ WaitReason: this.KWAIT_REASON }
 	]);
+	this.VARIANTARG = this.VARIANT;
+	this.LPVARIANT = this.VARIANT.ptr;
+	this.LPVARIANTARG = this.VARIANT.ptr;
 	this.WIN32_FIND_DATA = ctypes.StructType('_WIN32_FIND_DATA', [ // https://msdn.microsoft.com/en-us/library/windows/desktop/aa365740%28v=vs.85%29.aspx
 		{ 'dwFileAttributes': this.DWORD },
 		{ 'ftCreationTime': this.FILETIME },
