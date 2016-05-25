@@ -1300,6 +1300,7 @@ var winInit = function() {
 		VT_EMPTY: 0,
 		VT_BSTR: 8,
 		VT_LPWSTR: 0x001F, // 31
+		VT_BYREF: 0x4000,
 
 		SW_SHOWNORMAL: 1,
 
