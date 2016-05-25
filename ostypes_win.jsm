@@ -649,7 +649,48 @@ var winTypes = function() {
 		{ lpszClassName: this.LPCTSTR }
 	]);
 
-	// VTABLE's
+	// SIMPLE VTABLE's
+
+	// IEnumMoniker - https://msdn.microsoft.com/en-us/library/windows/desktop/ms692852(v=vs.85).aspx
+	var IEnumMonikerVtbl = ctypes.StructType('IEnumMonikerVtbl');
+	this.IEnumMoniker = ctypes.StructType('IEnumMoniker',[{
+			'lpVtbl': IEnumMonikerVtbl.ptr
+		}]
+	);
+	IEnumMonikerVtbl.define(
+		[{ //start inherit from IUnknown
+			'QueryInterface': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IEnumMoniker.ptr,
+					this.REFIID,	// riid
+					this.VOID.ptr	// **ppvObject
+				]).ptr
+		}, {
+			'AddRef': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.ULONG, [
+					this.IEnumMoniker.ptr
+				]).ptr
+		}, {
+			'Release': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.ULONG, [
+					this.IEnumMoniker.ptr
+				]).ptr
+		}, { //end inherit from IUnknown // start IEnumMoniker - https://github.com/wine-mirror/wine/blob/47cf3fe36d4f5a2f83c0d48ee763c256cd6010c5/dlls/quartz/enummoniker.c#L204-L207
+			'Next': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IEnumMoniker.ptr,
+					this.ULONG,					// celt
+					this.IEnumMoniker.ptr,		// **rgelt
+					this.ULONG					// *pceltFetched
+				]).ptr
+		}, {
+			'Skip': ctypes.voidptr_t
+		}, {
+			'Reset': ctypes.voidptr_t
+		}, {
+			'Clone': ctypes.voidptr_t
+		} //end inherit from IEnumMoniker
+	]);
 
 	// IPersistFile - https://msdn.microsoft.com/en-us/library/windows/desktop/ms687223(v=vs.85).aspx
 	var IPersistFileVtbl = ctypes.StructType('IPersistFileVtbl');
@@ -976,6 +1017,42 @@ var winTypes = function() {
 		} //end inherit from ITaskbarList
 	]);
 
+	// ADVANCED VTABLE's
+	// ICreateDevEnum - https://msdn.microsoft.com/en-us/library/windows/desktop/dd406743(v=vs.85).aspx
+	var ICreateDevEnumVtbl = ctypes.StructType('ICreateDevEnumVtbl');
+	this.ICreateDevEnum = ctypes.StructType('ICreateDevEnum',[{
+			'lpVtbl': ICreateDevEnumVtbl.ptr
+		}]
+	);
+	ICreateDevEnumVtbl.define(
+		[{ //start inherit from IUnknown
+			'QueryInterface': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.ICreateDevEnum.ptr,
+					this.REFIID,	// riid
+					this.VOID.ptr	// **ppvObject
+				]).ptr
+		}, {
+			'AddRef': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.ULONG, [
+					this.ICreateDevEnum.ptr
+				]).ptr
+		}, {
+			'Release': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.ULONG, [
+					this.ICreateDevEnum.ptr
+				]).ptr
+		}, { //end inherit from IUnknown // start ICreateDevEnum
+			'CreateClassEnumerator': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.ICreateDevEnum.ptr,
+					this.REFCLSID,			// clsidDeviceClass
+					this.IEnumMoniker.ptr,	// **ppEnumMoniker
+					this.DWORD				// dwFlags
+				]).ptr
+		} //end inherit from ICreateDevEnum
+	]);
+
 }
 
 var winInit = function() {
@@ -1201,7 +1278,9 @@ var winInit = function() {
 
 		GA_PARENT: 1,
 		GA_ROOT: 2,
-		GA_ROOTOWNER: 3
+		GA_ROOTOWNER: 3,
+
+		MMSYSERR_NOERROR: 0
 	};
 
 	var _lib = {}; // cache for lib
