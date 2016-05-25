@@ -1022,6 +1022,8 @@ var winTypes = function() {
 		}, {
 			'GetSizeMax': ctypes.voidptr_t
 		}, { // end inherit from IPersistStream // start IMoniker
+			'BindToObject': ctypes.voidptr_t
+		}, {
 			'BindToStorage':  ctypes.FunctionType(this.CALLBACK_ABI,
 				this.HRESULT, [
 					this.IMoniker.ptr,
@@ -1098,6 +1100,7 @@ var winTypes = function() {
 
 	// SUPER ADVANCED VTABLE's
 	// IEnumMoniker - https://msdn.microsoft.com/en-us/library/windows/desktop/ms692852(v=vs.85).aspx
+	// Vtbl order - https://github.com/wine-mirror/wine/blob/47cf3fe36d4f5a2f83c0d48ee763c256cd6010c5/dlls/quartz/enummoniker.c#L204-L207
 	var IEnumMonikerVtbl = ctypes.StructType('IEnumMonikerVtbl');
 	this.IEnumMoniker = ctypes.StructType('IEnumMoniker', [
 		{ 'lpVtbl': IEnumMonikerVtbl.ptr }
@@ -1120,7 +1123,7 @@ var winTypes = function() {
 				this.ULONG, [
 					this.IEnumMoniker.ptr
 				]).ptr
-		}, { //end inherit from IUnknown // start IEnumMoniker - https://github.com/wine-mirror/wine/blob/47cf3fe36d4f5a2f83c0d48ee763c256cd6010c5/dlls/quartz/enummoniker.c#L204-L207
+		}, { //end inherit from IUnknown // start IEnumMoniker
 			'Next': ctypes.FunctionType(this.CALLBACK_ABI,
 				this.HRESULT, [
 					this.IEnumMoniker.ptr,
