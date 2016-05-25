@@ -56,6 +56,8 @@ var winTypes = function() {
 	this.ULONGLONG = ctypes.unsigned_long_long;
 	this.ULONG_PTR = is64bit ? ctypes.uint64_t : ctypes.unsigned_long; // i left it at what i copied pasted it as, but i thought it was this: `ctypes.uintptr_t`
 	this.USHORT = ctypes.unsigned_short;
+	this.VARIANT = ctypes.void_t.ptr;
+	this.VARIANTARG = ctypes.void_t.ptr;
 	this.VARIANT_BOOL = ctypes.short;
 	this.VARTYPE = ctypes.unsigned_short;
 	this.VOID = ctypes.void_t;
@@ -650,56 +652,25 @@ var winTypes = function() {
 	]);
 
 	// SIMPLE VTABLE's
+	// IBindCtx - https://msdn.microsoft.com/en-us/library/windows/desktop/ms693755(v=vs.85).aspx
+	var IBindCtxVtbl = ctypes.StructType('IBindCtxVtbl');
+	this.IBindCtx = ctypes.StructType('IBindCtx', [
+		{ 'lpVtbl': IBindCtxVtbl.ptr }
+	]);
 
-	// IEnumMoniker - https://msdn.microsoft.com/en-us/library/windows/desktop/ms692852(v=vs.85).aspx
-	var IEnumMonikerVtbl = ctypes.StructType('IEnumMonikerVtbl');
-	this.IEnumMoniker = ctypes.StructType('IEnumMoniker',[{
-			'lpVtbl': IEnumMonikerVtbl.ptr
-		}]
-	);
-	IEnumMonikerVtbl.define(
-		[{ //start inherit from IUnknown
-			'QueryInterface': ctypes.FunctionType(this.CALLBACK_ABI,
-				this.HRESULT, [
-					this.IEnumMoniker.ptr,
-					this.REFIID,	// riid
-					this.VOID.ptr	// **ppvObject
-				]).ptr
-		}, {
-			'AddRef': ctypes.FunctionType(this.CALLBACK_ABI,
-				this.ULONG, [
-					this.IEnumMoniker.ptr
-				]).ptr
-		}, {
-			'Release': ctypes.FunctionType(this.CALLBACK_ABI,
-				this.ULONG, [
-					this.IEnumMoniker.ptr
-				]).ptr
-		}, { //end inherit from IUnknown // start IEnumMoniker - https://github.com/wine-mirror/wine/blob/47cf3fe36d4f5a2f83c0d48ee763c256cd6010c5/dlls/quartz/enummoniker.c#L204-L207
-			'Next': ctypes.FunctionType(this.CALLBACK_ABI,
-				this.HRESULT, [
-					this.IEnumMoniker.ptr,
-					this.ULONG,						// celt
-					this.IEnumMoniker.ptr.ptr,		// **rgelt
-					this.ULONG.ptr					// *pceltFetched
-				]).ptr
-		}, {
-			'Skip': ctypes.voidptr_t
-		}, {
-			'Reset': ctypes.voidptr_t
-		}, {
-			'Clone': ctypes.voidptr_t
-		} //end inherit from IEnumMoniker
+	// IErrorLog - http://r.search.yahoo.com/_ylt=A86.J7olkUVXvRIAruAnnIlQ;_ylu=X3oDMTByb2lvbXVuBGNvbG8DZ3ExBHBvcwMxBHZ0aWQDBHNlYwNzcg--/RV=2/RE=1464205734/RO=10/RU=https%3a%2f%2fmsdn.microsoft.com%2fen-us%2flibrary%2faa768231%28v%3dvs.85%29.aspx/RK=0/RS=_VJfXBUFoV2nfguAS0bULeeeDrk-
+	var IErrorLogVtbl = ctypes.StructType('IErrorLogVtbl');
+	this.IErrorLog = ctypes.StructType('IErrorLog', [
+		{ 'lpVtbl': IErrorLogVtbl.ptr }
 	]);
 
 	// IPersistFile - https://msdn.microsoft.com/en-us/library/windows/desktop/ms687223(v=vs.85).aspx
 	var IPersistFileVtbl = ctypes.StructType('IPersistFileVtbl');
-	this.IPersistFile = ctypes.StructType('IPersistFile',[{
-			'lpVtbl': IPersistFileVtbl.ptr
-		}]
-	);
-	IPersistFileVtbl.define(
-		[{ //start inherit from IUnknown
+	this.IPersistFile = ctypes.StructType('IPersistFile', [
+		{ 'lpVtbl': IPersistFileVtbl.ptr }
+	]);
+	IPersistFileVtbl.define([
+		{ // start inherit from IUnknown
 			'QueryInterface': ctypes.FunctionType(this.CALLBACK_ABI,
 				this.HRESULT, [
 					this.IPersistFile.ptr,
@@ -716,13 +687,13 @@ var winTypes = function() {
 				this.ULONG, [
 					this.IPersistFile.ptr
 				]).ptr
-		}, { //end inherit from IUnknown //start inherit from IPersist
+		}, { // end inherit from IUnknown // start inherit from IPersist
 			'GetClassID': ctypes.FunctionType(this.CALLBACK_ABI,
 				this.HRESULT, [
 					this.IPersistFile.ptr,
 					this.CLSID.ptr	// *pClassID
 				]).ptr
-		}, { //end inherit from IPersist // start IPersistFile
+		}, { // end inherit from IPersist // start IPersistFile
 			'IsDirty': ctypes.FunctionType(this.CALLBACK_ABI,
 				this.HRESULT, [
 					this.IPersistFile.ptr,
@@ -758,12 +729,11 @@ var winTypes = function() {
 
 	// IPropertyStore - https://msdn.microsoft.com/en-us/library/windows/desktop/bb761474(v=vs.85).aspx
 	var IPropertyStoreVtbl = ctypes.StructType('IPropertyStoreVtbl');
-	this.IPropertyStore = ctypes.StructType('IPropertyStore', [{
-		'lpVtbl': IPropertyStoreVtbl.ptr
-	}]);
-	//this.IPropertyStorePtr = IPropertyStore.ptr;
-	IPropertyStoreVtbl.define(
-		[{ //start inherit from IUnknown
+	this.IPropertyStore = ctypes.StructType('IPropertyStore', [
+		{ 'lpVtbl': IPropertyStoreVtbl.ptr }
+	]);
+	IPropertyStoreVtbl.define([
+		{ //start inherit from IUnknown
 			'QueryInterface': ctypes.FunctionType(this.CALLBACK_ABI,
 				this.HRESULT, [
 					this.IPropertyStore.ptr,
@@ -812,14 +782,14 @@ var winTypes = function() {
 				this.HRESULT, [
 					this.IPropertyStore.ptr
 				]).ptr
-		}]
-	);
+		}
+	]);
 
 	// IShellLinkW - https://msdn.microsoft.com/en-us/library/windows/desktop/bb774950(v=vs.85).aspx
 	var IShellLinkWVtbl = ctypes.StructType('IShellLinkWVtbl');
-	this.IShellLinkW = ctypes.StructType('IShellLinkW', [{
-		'lpVtbl': IShellLinkWVtbl.ptr
-	}]);
+	this.IShellLinkW = ctypes.StructType('IShellLinkW', [
+		{ 'lpVtbl': IShellLinkWVtbl.ptr }
+	]);
 	//this.IShellLinkWPtr = new ctypes.PointerType(IShellLinkW);
 	IShellLinkWVtbl.define(
 		[{ //start inherit from IUnknown
@@ -958,17 +928,16 @@ var winTypes = function() {
 					this.IShellLinkW.ptr,
 					this.LPCTSTR	// pszFile
 				]).ptr
-		}]
-	);
+		}
+	]);
 
 	// ITaskbarList - https://msdn.microsoft.com/en-us/library/windows/desktop/bb774652(v=vs.85).aspx
 	var ITaskbarListVtbl = ctypes.StructType('ITaskbarListVtbl');
-	this.ITaskbarList = ctypes.StructType('ITaskbarList',[{
-			'lpVtbl': ITaskbarListVtbl.ptr
-		}]
-	);
-	ITaskbarListVtbl.define(
-		[{ //start inherit from IUnknown
+	this.ITaskbarList = ctypes.StructType('ITaskbarList', [
+		{ 'lpVtbl': ITaskbarListVtbl.ptr }
+	]);
+	ITaskbarListVtbl.define([
+		{ //start inherit from IUnknown
 			'QueryInterface': ctypes.FunctionType(this.CALLBACK_ABI,
 				this.HRESULT, [
 					this.ITaskbarList.ptr,
@@ -1014,18 +983,168 @@ var winTypes = function() {
 					this.ITaskbarList.ptr,
 					this.HWND				// hWnd
 				]).ptr
-		} //end inherit from ITaskbarList
+		}
 	]);
 
 	// ADVANCED VTABLE's
+	// IMoniker - https://msdn.microsoft.com/en-us/library/windows/desktop/ms679705(v=vs.85).aspx
+	// Vtbl order - https://github.com/wine-mirror/wine/blob/47cf3fe36d4f5a2f83c0d48ee763c256cd6010c5/dlls/itss/moniker.c#L324
+	var IMonikerVtbl = ctypes.StructType('IMonikerVtbl');
+	this.IMoniker = ctypes.StructType('IMoniker', [
+		{ 'lpVtbl': IMonikerVtbl.ptr }
+	});
+	IMonikerVtbl.define([
+		{ //start inherit from IUnknown
+			'QueryInterface': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IMoniker.ptr,
+					this.REFIID,	// riid
+					this.VOID.ptr	// **ppvObject
+				]).ptr
+		}, {
+			'AddRef': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.ULONG, [
+					this.IMoniker.ptr
+				]).ptr
+		}, {
+			'Release': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.ULONG, [
+					this.IMoniker.ptr
+				]).ptr
+		}, { // end inherit from IUnknown // start inherit from IPersist
+			'GetClassID': ctypes.voidptr_t
+		}, { // end inherit from IPersist // start inherit from IPersistStream
+			'IsDirty': ctypes.voidptr_t
+		}, {
+			'Load': ctypes.voidptr_t
+		}, {
+			'Save': ctypes.voidptr_t
+		}, {
+			'GetSizeMax': ctypes.voidptr_t
+		}, { // end inherit from IPersistStream // start IMoniker
+			'BindToStorage':  ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IMoniker.ptr,
+					this.IBindCtx.ptr,	// *pbc
+					this.IMoniker.ptr,	// *pmkToLeft
+					this.REFIID,		// riid
+					this.VOID.ptr		// **ppvObj
+				]).ptr
+		}, {
+			'Reduce': ctypes.voidptr_t
+		}, {
+			'ComposeWith': ctypes.voidptr_t
+		}, {
+			'Enum': ctypes.voidptr_t
+		}, {
+			'IsEqual': ctypes.voidptr_t
+		}, {
+			'Hash': ctypes.voidptr_t
+		}, {
+			'IsRunning': ctypes.voidptr_t
+		}, {
+			'GetTimeOfLastChange': ctypes.voidptr_t
+		}, {
+			'Inverse': ctypes.voidptr_t
+		}, {
+			'CommonPrefixWith': ctypes.voidptr_t
+		}, {
+			'RelativePathTo': ctypes.voidptr_t
+		}, {
+			'GetDisplayName': ctypes.voidptr_t
+		}, {
+			'ParseDisplayName': ctypes.voidptr_t
+		}, {
+			'IsSystemMoniker': ctypes.voidptr_t
+		}
+	]);
+
+	// IPropertyBag - https://msdn.microsoft.com/en-us/library/windows/desktop/aa768196(v=vs.85).aspx
+	// Vtbl order - https://github.com/wine-mirror/wine/blob/47cf3fe36d4f5a2f83c0d48ee763c256cd6010c5/dlls/mshtml/propbag.c#L191
+	var IPropertyBagVtbl = ctypes.StructType('IPropertyBagVtbl');
+	this.IPropertyBag = ctypes.StructType('IPropertyBag', [
+		{ 'lpVtbl': IPropertyBagVtbl.ptr }
+	]);
+	IPropertyBagVtbl.define([
+		{ // start inherit from IUnknown
+			'QueryInterface': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IPropertyBag.ptr,
+					this.REFIID,	// riid
+					this.VOID.ptr	// **ppvObject
+				]).ptr
+		}, {
+			'AddRef': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.ULONG, [
+					this.IPropertyBag.ptr
+				]).ptr
+		}, {
+			'Release': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.ULONG, [
+					this.IPropertyBag.ptr
+				]).ptr
+		}, { // end inherit from IUnknown // start IPropertyBag
+			'Read': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IPropertyBag.ptr,
+					this.LPCOLESTR,		// pszPropName
+					this.VARIANT.ptr,	// *pVar
+					this.IErrorLog.ptr	// *pErrorLog
+				]).ptr
+		}, {
+			'Write': ctypes.voidptr_t
+		}
+	]);
+
+	// SUPER ADVANCED VTABLE's
+	// IEnumMoniker - https://msdn.microsoft.com/en-us/library/windows/desktop/ms692852(v=vs.85).aspx
+	var IEnumMonikerVtbl = ctypes.StructType('IEnumMonikerVtbl');
+	this.IEnumMoniker = ctypes.StructType('IEnumMoniker', [
+		{ 'lpVtbl': IEnumMonikerVtbl.ptr }
+	]);
+	IEnumMonikerVtbl.define([
+		{ //start inherit from IUnknown
+			'QueryInterface': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IEnumMoniker.ptr,
+					this.REFIID,	// riid
+					this.VOID.ptr	// **ppvObject
+				]).ptr
+		}, {
+			'AddRef': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.ULONG, [
+					this.IEnumMoniker.ptr
+				]).ptr
+		}, {
+			'Release': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.ULONG, [
+					this.IEnumMoniker.ptr
+				]).ptr
+		}, { //end inherit from IUnknown // start IEnumMoniker - https://github.com/wine-mirror/wine/blob/47cf3fe36d4f5a2f83c0d48ee763c256cd6010c5/dlls/quartz/enummoniker.c#L204-L207
+			'Next': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IEnumMoniker.ptr,
+					this.ULONG,					// celt
+					this.IMoniker.ptr.ptr,		// **rgelt
+					this.ULONG.ptr				// *pceltFetched
+				]).ptr
+		}, {
+			'Skip': ctypes.voidptr_t
+		}, {
+			'Reset': ctypes.voidptr_t
+		}, {
+			'Clone': ctypes.voidptr_t
+		}
+	]);
+
+	// SUPER DUPER ADVANCED VTABLE's
 	// ICreateDevEnum - https://msdn.microsoft.com/en-us/library/windows/desktop/dd406743(v=vs.85).aspx
 	var ICreateDevEnumVtbl = ctypes.StructType('ICreateDevEnumVtbl');
-	this.ICreateDevEnum = ctypes.StructType('ICreateDevEnum',[{
-			'lpVtbl': ICreateDevEnumVtbl.ptr
-		}]
-	);
-	ICreateDevEnumVtbl.define(
-		[{ //start inherit from IUnknown
+	this.ICreateDevEnum = ctypes.StructType('ICreateDevEnum',[
+		{ 'lpVtbl': ICreateDevEnumVtbl.ptr }
+	]);
+	ICreateDevEnumVtbl.define([
+		{ //start inherit from IUnknown
 			'QueryInterface': ctypes.FunctionType(this.CALLBACK_ABI,
 				this.HRESULT, [
 					this.ICreateDevEnum.ptr,
@@ -1050,7 +1169,7 @@ var winTypes = function() {
 					this.IEnumMoniker.ptr.ptr,	// **ppEnumMoniker
 					this.DWORD					// dwFlags
 				]).ptr
-		} //end inherit from ICreateDevEnum
+		}
 	]);
 
 }
@@ -3132,6 +3251,28 @@ var winInit = function() {
 				self.TYPE.BOOL,		// return
 				self.TYPE.HWND,		// hWnd
 				self.TYPE.int		// id
+			);
+		},
+		VariantClear: function(variantPtr) {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms221165(v=vs.85).aspx
+			 * HRESULT VariantClear(
+			 *   _Inout_ VARIANTARG *pvarg
+			 * );
+			 */
+			return lib('oleaut32').declare('VariantClear', self.TYPE.ABI,
+				self.TYPE.HRESULT,			// return
+				self.TYPE.VARIANTARG.ptr	// *pvarg
+			);
+		},
+		VariantInit: function(variantPtr) {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms221402(v=vs.85).aspx
+			 * void VariantInit(
+			 *   _Out_ VARIANTARG *pvarg
+			 * );
+			 */
+			return lib('oleaut32').declare('VariantInit', self.TYPE.ABI,
+				self.TYPE.void,				// return
+				self.TYPE.VARIANTARG.ptr	// *pvarg
 			);
 		},
 		WaitForSingleObjectEx: function() {
