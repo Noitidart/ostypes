@@ -992,7 +992,7 @@ var winTypes = function() {
 	var IMonikerVtbl = ctypes.StructType('IMonikerVtbl');
 	this.IMoniker = ctypes.StructType('IMoniker', [
 		{ 'lpVtbl': IMonikerVtbl.ptr }
-	});
+	]);
 	IMonikerVtbl.define([
 		{ //start inherit from IUnknown
 			'QueryInterface': ctypes.FunctionType(this.CALLBACK_ABI,
