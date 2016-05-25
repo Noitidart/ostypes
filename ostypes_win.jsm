@@ -679,9 +679,9 @@ var winTypes = function() {
 			'Next': ctypes.FunctionType(this.CALLBACK_ABI,
 				this.HRESULT, [
 					this.IEnumMoniker.ptr,
-					this.ULONG,					// celt
-					this.IEnumMoniker.ptr,		// **rgelt
-					this.ULONG					// *pceltFetched
+					this.ULONG,						// celt
+					this.IEnumMoniker.ptr.ptr,		// **rgelt
+					this.ULONG.ptr					// *pceltFetched
 				]).ptr
 		}, {
 			'Skip': ctypes.voidptr_t
@@ -1046,9 +1046,9 @@ var winTypes = function() {
 			'CreateClassEnumerator': ctypes.FunctionType(this.CALLBACK_ABI,
 				this.HRESULT, [
 					this.ICreateDevEnum.ptr,
-					this.REFCLSID,			// clsidDeviceClass
+					this.REFCLSID,				// clsidDeviceClass
 					this.IEnumMoniker.ptr.ptr,	// **ppEnumMoniker
-					this.DWORD				// dwFlags
+					this.DWORD					// dwFlags
 				]).ptr
 		} //end inherit from ICreateDevEnum
 	]);
