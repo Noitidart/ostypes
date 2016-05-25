@@ -3482,6 +3482,20 @@ var winInit = function() {
 				throw new Error('HRESULT ' + hr + ' returned from function ' + funcName + ' getStrOfResult:' + JSON.stringify(self.HELPER.getStrOfResult(primitiveHR)));
 			} // else then it was success
 		},
+		checkHR: function(hr, str) {
+			// does not throw, just returns true if success, else false
+			var primitiveHR = parseInt(cutils.jscGetDeepest(hr))
+			if (primitiveHR === ostypes.CONST.S_OK) {
+				return true;
+			} else if (primitiveHR === ostypes.CONST.S_FALSE) {
+				// special fail result - meaning success possibly
+				console.warn('WARN - didnt succeed BUT didnt fail:', str + ':', hr, hr.toString(), self.HELPER.getStrOfResult(primitiveHR));
+				return true;
+			} else if (primitiveHR < 0) {
+				console.error(str + ':', hr, hr.toString(), self.HELPER.getStrOfResult(primitiveHR));
+				return false;
+			}
+		},
 		getStrOfResult: function(PrimitiveJS_RESULT) {
 			var rezObj = {}
 			PrimitiveJS_RESULT = PrimitiveJS_RESULT >>> 0;
