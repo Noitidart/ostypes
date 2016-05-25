@@ -94,6 +94,7 @@ var winTypes = function() {
 	this.WPARAM = this.UINT_PTR;
 
 	// SUPER ADVANCED TYPES // defined by "advanced types"
+	this.BSTR = this.OLECHAR.ptr;
 	this.HBITMAP = this.HANDLE;
 	this.HBRUSH = this.HANDLE;
 	this.HDC = this.HANDLE;
@@ -172,6 +173,13 @@ var winTypes = function() {
 	this.CLIENT_ID = ctypes.StructType('_CLIENT_ID', [ // http://processhacker.sourceforge.net/doc/struct___c_l_i_e_n_t___i_d.html
 		{ UniqueProcess: this.HANDLE },
 		{ UniqueThread: this.HANDLE }
+	]);
+	this.DECIMAL = ctypes.StructType('tagDEC', [
+		{ wReserved: this.USHORT },
+	    { scale: this.BYTE },
+	    { sign: this.BYTE },
+	    { Hi32: this.ULONG },
+		{ Lo64: this.ULONGLONG }
 	]);
 	this.DISPLAY_DEVICE = ctypes.StructType('_DISPLAY_DEVICE', [
 		{ cb:			this.DWORD },
@@ -367,7 +375,7 @@ var winTypes = function() {
 		{ 'MaximumLength': this.USHORT },
 		{ 'Buffer': this.PWSTR }
 	]);
-	this.VARIANT = ctypes.StructType('tagVARIANT'); // defined as opaque for now, as its a bunch of unions, i should .define it to be what I need
+	this.VARIANT = ctypes.StructType('tagVARIANT'); // defined as opaque for now, as its a bunch of unions, i should .define it to be what I need // https://msdn.microsoft.com/en-us/library/windows/desktop/ms221627(v=vs.85).aspx
 	this.WAVEFORMATEX = ctypes.StructType('tWAVEFORMATEX', [ // https://msdn.microsoft.com/en-us/library/windows/desktop/dd390970(v=vs.85).aspx
 		{ wFormatTag: this.WORD },
 	    { nChannels: this.WORD },
@@ -1289,6 +1297,8 @@ var winInit = function() {
 
 		VARIANT_FALSE: 0, // http://blogs.msdn.com/b/oldnewthing/archive/2004/12/22/329884.aspx
 		VARIANT_TRUE: -1, // http://blogs.msdn.com/b/oldnewthing/archive/2004/12/22/329884.aspx
+		VT_EMPTY: 0,
+		VT_BSTR: 8,
 		VT_LPWSTR: 0x001F, // 31
 
 		SW_SHOWNORMAL: 1,
@@ -3198,6 +3208,17 @@ var winInit = function() {
 				self.TYPE.DWORD,	// return
 				self.TYPE.DWORD,	// dwMilliseconds
 				self.TYPE.BOOL		// bAlertable
+			);
+		},
+		SysAllocString: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms221458(v=vs.85).aspx
+			 * BSTR SysAllocString(
+			 *   _In_opt_ const OLECHAR *psz
+			 * );
+			 */
+			return lib('oleaut32').declare('SysAllocString', self.TYPE.ABI,
+				self.TYPE.BSTR,		// return
+				self.TYPE.OLECHAR	// *psz
 			);
 		},
 		UpdateResource: function() {
