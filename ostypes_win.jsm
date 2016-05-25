@@ -3104,7 +3104,7 @@ var winInit = function() {
 			 *    UINT         cbwic
 			 * );
 			 */
-			return lib('winmm').delcare(ifdef_UNICODE ? 'waveInGetDevCapsW' : 'waveInGetDevCapsA', self.TYPE.ABI,
+			return lib('winmm').declare(ifdef_UNICODE ? 'waveInGetDevCapsW' : 'waveInGetDevCapsA', self.TYPE.ABI,
 				self.TYPE.MMRESULT,		// return
 				self.TYPE.UINT_PTR,		// uDeviceID
 				self.TYPE.LPWAVEINCAPS,	// pwic
