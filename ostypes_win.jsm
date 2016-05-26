@@ -375,7 +375,7 @@ var winTypes = function() {
 		{ 'MaximumLength': this.USHORT },
 		{ 'Buffer': this.PWSTR }
 	]);
-	this.VARIANT = ctypes.StructType('tagVARIANT'); // defined as opaque for now, as its a bunch of unions, i should .define it to be what I need // https://msdn.microsoft.com/en-us/library/windows/desktop/ms221627(v=vs.85).aspx
+	this.VARIANT = ctypes.void_t; // as only ptrs to this are used // ctypes.StructType('tagVARIANT'); // defined as opaque for now, as its a bunch of unions, i should .define it to be what I need // https://msdn.microsoft.com/en-us/library/windows/desktop/ms221627(v=vs.85).aspx
 	this.WAVEFORMATEX = ctypes.StructType('tWAVEFORMATEX', [ // https://msdn.microsoft.com/en-us/library/windows/desktop/dd390970(v=vs.85).aspx
 		{ wFormatTag: this.WORD },
 	    { nChannels: this.WORD },
