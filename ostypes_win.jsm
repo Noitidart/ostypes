@@ -375,7 +375,9 @@ var winTypes = function() {
 		{ 'MaximumLength': this.USHORT },
 		{ 'Buffer': this.PWSTR }
 	]);
-	this.VARIANT = ctypes.void_t; // as only ptrs to this are used // ctypes.StructType('tagVARIANT'); // defined as opaque for now, as its a bunch of unions, i should .define it to be what I need // https://msdn.microsoft.com/en-us/library/windows/desktop/ms221627(v=vs.85).aspx
+	this.VARIANT = ctypes.StructType('tagVARIANT', [ // so i set it to DECIMAL which i think is the biggest this union can be // cant do this either - i get cannot construct from void_t - ctypes.void_t; // as only ptrs to this are used // ctypes.StructType('tagVARIANT'); // defined as opaque for now, as its a bunch of unions, i should .define it to be what I need // https://msdn.microsoft.com/en-us/library/windows/desktop/ms221627(v=vs.85).aspx
+		{ decVal: this.DECIMAL }
+	]);
 	this.WAVEFORMATEX = ctypes.StructType('tWAVEFORMATEX', [ // https://msdn.microsoft.com/en-us/library/windows/desktop/dd390970(v=vs.85).aspx
 		{ wFormatTag: this.WORD },
 	    { nChannels: this.WORD },
