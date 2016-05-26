@@ -3512,14 +3512,14 @@ var winInit = function() {
 			} // else then it was success
 		},
 		checkHR: function(hr, str) {
-			// does not throw, just returns true if success, else false
+			// does not throw, just returns 1 if success, if success but not fail it returns -1, else 0
 			var primitiveHR = parseInt(cutils.jscGetDeepest(hr))
 			if (primitiveHR === ostypes.CONST.S_OK) {
 				return true;
 			} else if (primitiveHR === ostypes.CONST.S_FALSE) {
 				// special fail result - meaning success possibly
 				console.warn('WARN - didnt succeed BUT didnt fail:', str + ':', hr, hr.toString(), self.HELPER.getStrOfResult(primitiveHR));
-				return true;
+				return 0;
 			} else if (primitiveHR < 0) {
 				console.error(str + ':', hr, hr.toString(), self.HELPER.getStrOfResult(primitiveHR));
 				return false;
