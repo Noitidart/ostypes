@@ -3516,7 +3516,7 @@ var winInit = function() {
 			// does not throw, just returns 1 if success, if success but not fail it returns -1, else 0
 			var primitiveHR = parseInt(cutils.jscGetDeepest(hr))
 			if (primitiveHR === ostypes.CONST.S_OK) {
-				console.log('HR SUCCEEDED ::' , str + ':', hr, hr.toString(), self.HELPER.getStrOfResult(primitiveHR));
+				console.log('HR SUCCEEDED ::' , str + ':', 'S_OK');
 				return 1;
 			} else if (primitiveHR === ostypes.CONST.S_FALSE) {
 				// special fail result - meaning success possibly
