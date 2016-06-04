@@ -1294,6 +1294,7 @@ var winInit = function() {
 		XBUTTON1: 0x0001,
 		XBUTTON2: 0x0002,
 
+		COINIT_MULTITHREADED: 0x0,
 		CLSCTX_INPROC_SERVER: 0x1,
 		COINIT_APARTMENTTHREADED: 0x2,
 
@@ -3515,13 +3516,14 @@ var winInit = function() {
 			// does not throw, just returns 1 if success, if success but not fail it returns -1, else 0
 			var primitiveHR = parseInt(cutils.jscGetDeepest(hr))
 			if (primitiveHR === ostypes.CONST.S_OK) {
+				console.log('HR SUCCEEDED ::' , str + ':', hr, hr.toString(), self.HELPER.getStrOfResult(primitiveHR));
 				return 1;
 			} else if (primitiveHR === ostypes.CONST.S_FALSE) {
 				// special fail result - meaning success possibly
 				console.warn('WARN - didnt succeed BUT didnt fail:', str + ':', hr, hr.toString(), self.HELPER.getStrOfResult(primitiveHR));
 				return -1;
 			} else if (primitiveHR < 0) {
-				console.error(str + ':', hr, hr.toString(), self.HELPER.getStrOfResult(primitiveHR));
+				console.error('HR FAILED :: ', str + ':', hr, hr.toString(), self.HELPER.getStrOfResult(primitiveHR));
 				return 0;
 			}
 		},
