@@ -3997,10 +3997,10 @@ var winInit = function() {
 			// varName is my added argument, msdn doesnt, i do it for console.log purposes
 			if (ppT && !ppT.isNull()) { // make sure it is not undefined
 				var ref_cnt = ppT.contents.lpVtbl.contents.Release(ppT);
-				console.log(str + '->Release:', ref_cnt);
+				console.log(varName + '->Release:', ref_cnt);
 				ppT.address().contents = ppT.constructor(0);
 			}
-			if (ppT && ppT.isNull()) { console.warn(str + '->Release will not be done as it is isNull() - it was probably already released'); } // dev line, remove on production
+			if (ppT && ppT.isNull()) { console.warn(varName + '->Release will not be done as it is isNull() - it was probably already released'); } // dev line, remove on production
 		}
 	};
 
