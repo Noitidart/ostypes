@@ -810,7 +810,7 @@ var winTypes = function() {
 			'GetIDsOfNames': ctypes.voidptr_t
 		}, {
 			'Invoke': ctypes.voidptr_t
-		}, // end inherit from IDispatch // start IMediaControl
+		}, { // end inherit from IDispatch // start IMediaControl
 			'Run': ctypes.voidptr_t
 		}, {
 			'Pause': ctypes.voidptr_t
