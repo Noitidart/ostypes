@@ -666,7 +666,7 @@ var winTypes = function() {
 		{ lpszClassName: this.LPCTSTR }
 	]);
 
-	// SIMPLE VTABLE's
+	// VTABLE's - SIMPLE
 	// IBindCtx - https://msdn.microsoft.com/en-us/library/windows/desktop/ms693755(v=vs.85).aspx
 	var IBindCtxVtbl = ctypes.StructType('IBindCtxVtbl');
 	this.IBindCtx = ctypes.StructType('IBindCtx', [
@@ -835,11 +835,12 @@ var winTypes = function() {
 		}, {
 			'ConnectionMediaType': ctypes.voidptr_t
 		}, {
-			'QueryPinInfo': ctypes.FunctionType(this.CALLBACK_ABI,
-				this.HRESULT, [
-					this.IPin.ptr,
-					this.PIN_INFO.ptr		// *pInfo
-				]).ptr
+			'QueryPinInfo': ctypes.voidptr_t
+			// 'QueryPinInfo': ctypes.FunctionType(this.CALLBACK_ABI,
+			// 	this.HRESULT, [
+			// 		this.IPin.ptr,
+			// 		this.PIN_INFO.ptr		// *pInfo
+			// 	]).ptr
 		}, {
 			'QueryDirection': ctypes.FunctionType(this.CALLBACK_ABI,
 				this.HRESULT, [
@@ -1128,7 +1129,7 @@ var winTypes = function() {
 		}
 	]);
 
-	// ADVANCED VTABLE's
+	// VTABLE's - ADVANCED
 	// IBaseFilter - https://msdn.microsoft.com/en-us/library/windows/desktop/dd389526(v=vs.85).aspx
 	// method order - https://github.com/wine-mirror/wine/blob/47cf3fe36d4f5a2f83c0d48ee763c256cd6010c5/dlls/qcap/tests/qcap.c#L480
 	var IBaseFilterVtbl = ctypes.StructType('IBaseFilterVtbl');
@@ -1354,7 +1355,7 @@ var winTypes = function() {
 		}
 	]);
 
-	// SUPER ADVANCED VTABLE's
+	// VTABLE's - SUPER ADVANCED
 	// IEnumMoniker - https://msdn.microsoft.com/en-us/library/windows/desktop/ms692852(v=vs.85).aspx
 	// Vtbl order - https://github.com/wine-mirror/wine/blob/47cf3fe36d4f5a2f83c0d48ee763c256cd6010c5/dlls/quartz/enummoniker.c#L204-L207
 	var IEnumMonikerVtbl = ctypes.StructType('IEnumMonikerVtbl');
@@ -1463,9 +1464,7 @@ var winTypes = function() {
 
 	]);
 
-
-
-	// SUPER DUPER ADVANCED VTABLE's
+	// VTABLE's - SUPER DUPER ADVANCED
 	// ICreateDevEnum - https://msdn.microsoft.com/en-us/library/windows/desktop/dd406743(v=vs.85).aspx
 	var ICreateDevEnumVtbl = ctypes.StructType('ICreateDevEnumVtbl');
 	this.ICreateDevEnum = ctypes.StructType('ICreateDevEnum',[
@@ -1507,6 +1506,8 @@ var winTypes = function() {
 		{ achName: this.WCHAR.array(struct_const.MAX_PIN_NAME) }
 	]);
 
+	// VTABLE'S - WITH STRUCTS THAT USE VTABLES
+	// IPin needs to be here, but then this would push the "advanced" ones over IPin to "advanced" groups below here
 }
 
 var winInit = function() {
