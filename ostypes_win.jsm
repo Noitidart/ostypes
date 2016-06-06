@@ -1160,7 +1160,7 @@ var winTypes = function() {
 					this.IEnumPins.ptr,
 					this.ULONG,				// cPins
 					this.IPin.ptr.ptr,		// **ppPins
-					this.ULONG				// *pcFetched
+					this.ULONG.ptr			// *pcFetched
 				]).ptr
 		}, {
 			'Skip': ctypes.voidptr_t
@@ -1355,7 +1355,7 @@ var winTypes = function() {
 			'QueryVendorInfo': ctypes.voidptr_t
 		}
 	]);
-	
+
 	// IEnumMoniker - https://msdn.microsoft.com/en-us/library/windows/desktop/ms692852(v=vs.85).aspx
 	// Vtbl order - https://github.com/wine-mirror/wine/blob/47cf3fe36d4f5a2f83c0d48ee763c256cd6010c5/dlls/quartz/enummoniker.c#L204-L207
 	var IEnumMonikerVtbl = ctypes.StructType('IEnumMonikerVtbl');
