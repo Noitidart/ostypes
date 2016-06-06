@@ -3988,6 +3988,19 @@ var winInit = function() {
 			// p is js int
 			// s is js int
 			return ((((s))<<10) | (p));
+		},
+		SafeRelease: function(ppT, varName) {
+			// https://msdn.microsoft.com/en-us/library/windows/desktop/dd940435(v=vs.85).aspx
+			// this is my version, i nullify the ctypes pointer so i can future test it - as doing .Release does not nullify the pointer, which can cause me to think its alive and .Release on it again, which will cause it to crash
+			// the msdn version is just to avoid dangling pointer. but for me, because i do try-finally blocks i ensure not to double .Release to avoid crash, and its nice to know that it really is no longer there
+			// ppt is an inst. so like inst = ostypes.TYPE.ITaskbarList.ptr() so this means it has inst.contents.lpVtbl.contents
+			// varName is my added argument, msdn doesnt, i do it for console.log purposes
+			if (ppT && !ppT.isNull()) { // make sure it is not undefined
+				var ref_cnt = ppT.contents.lpVtbl.contents.Release(ppT);
+				console.log(str + '->Release:', ref_cnt);
+				ppT.address().contents = ppT.constructor(0);
+			}
+			if (ppT && ppT.isNull()) { console.warn(str + '->Release will not be done as it is isNull() - it was probably already released'); } // dev line, remove on production
 		}
 	};
 
