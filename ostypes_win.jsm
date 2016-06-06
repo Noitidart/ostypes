@@ -1376,33 +1376,34 @@ var winTypes = function() {
 		}
 	]);
 
-	// IFilterGraph - https://msdn.microsoft.com/en-us/library/windows/desktop/dd390016(v=vs.85).aspx
-	var IFilterGraphVtbl = ctypes.StructType('IFilterGraphVtbl');
-	this.IFilterGraph = ctypes.StructType('IFilterGraph', [
-		{ 'lpVtbl': IFilterGraphVtbl.ptr }
+	// IGraphBuilder - https://msdn.microsoft.com/en-us/library/windows/desktop/dd390016(v=vs.85).aspx
+	// vtbl order - https://github.com/wine-mirror/wine/blob/47cf3fe36d4f5a2f83c0d48ee763c256cd6010c5/dlls/qcap/tests/qcap.c#L328
+	var IGraphBuilderVtbl = ctypes.StructType('IGraphBuilderVtbl');
+	this.IGraphBuilder = ctypes.StructType('IGraphBuilder', [
+		{ 'lpVtbl': IGraphBuilderVtbl.ptr }
 	]);
-	IFilterGraphVtbl.define([
+	IGraphBuilderVtbl.define([
 		{ // start inherit from IUnknown
 			'QueryInterface': ctypes.FunctionType(this.CALLBACK_ABI,
 				this.HRESULT, [
-					this.IFilterGraph.ptr,
+					this.IGraphBuilder.ptr,
 					this.REFIID,	// riid
 					this.VOID.ptr	// **ppvObject
 				]).ptr
 		}, {
 			'AddRef': ctypes.FunctionType(this.CALLBACK_ABI,
 				this.ULONG, [
-					this.IFilterGraph.ptr
+					this.IGraphBuilder.ptr
 				]).ptr
 		}, {
 			'Release': ctypes.FunctionType(this.CALLBACK_ABI,
 				this.ULONG, [
-					this.IFilterGraph.ptr
+					this.IGraphBuilder.ptr
 				]).ptr
-		}, { // end inherit from IUnknown // start IFilterGraph
+		}, { // end inherit from IUnknown // start inherit from IFilterGraph
 			'AddFilter': ctypes.FunctionType(this.CALLBACK_ABI,
 				this.HRESULT, [
-					this.IFilterGraph.ptr,
+					this.IGraphBuilder.ptr,
 					this.IBaseFilter.ptr,			// *pFilter
 					this.LPCWSTR					// pName
 				]).ptr
@@ -1419,13 +1420,30 @@ var winTypes = function() {
 		}, {
 			'Disconnect': ctypes.FunctionType(this.CALLBACK_ABI,
 				this.HRESULT, [
-					this.IFilterGraph.ptr,
+					this.IGraphBuilder.ptr,
 					this.IPin.ptr				// *ppin
 				]).ptr
 		}, {
 			'SetDefaultSyncSource': ctypes.voidptr_t
+		}, { // end inherit from IFilterGraph // start IGraphBuilder
+			'Connect': ctypes.voidptr_t
+		}, {
+			'Render': ctypes.voidptr_t
+		}, {
+			'RenderFile': ctypes.voidptr_t
+		}, {
+			'AddSourceFilter': ctypes.voidptr_t
+		}, {
+			'SetLogFile': ctypes.voidptr_t
+		}, {
+			'Abort': ctypes.voidptr_t
+		}, {
+			'ShouldOperationContinue': ctypes.voidptr_t
 		}
+
 	]);
+
+
 
 	// SUPER DUPER ADVANCED VTABLE's
 	// ICreateDevEnum - https://msdn.microsoft.com/en-us/library/windows/desktop/dd406743(v=vs.85).aspx
