@@ -665,72 +665,6 @@ var winTypes = function() {
 	]);
 
 	// SIMPLE VTABLE's
-	// IBaseFilter - https://msdn.microsoft.com/en-us/library/windows/desktop/dd389526(v=vs.85).aspx
-	// method order - https://github.com/wine-mirror/wine/blob/47cf3fe36d4f5a2f83c0d48ee763c256cd6010c5/dlls/qcap/tests/qcap.c#L480
-	var IBaseFilterVtbl = ctypes.StructType('IBaseFilterVtbl');
-	this.IBaseFilter = ctypes.StructType('IBaseFilter', [
-		{ 'lpVtbl': IBaseFilterVtbl.ptr }
-	]);
-	IBaseFilterVtbl.define([
-		{ //start inherit from IUnknown
-			'QueryInterface': ctypes.FunctionType(this.CALLBACK_ABI,
-				this.HRESULT, [
-					this.IBaseFilter.ptr,
-					this.REFIID,	// riid
-					this.VOID.ptr	// **ppvObject
-				]).ptr
-		}, {
-			'AddRef': ctypes.FunctionType(this.CALLBACK_ABI,
-				this.ULONG, [
-					this.IBaseFilter.ptr
-				]).ptr
-		}, {
-			'Release': ctypes.FunctionType(this.CALLBACK_ABI,
-				this.ULONG, [
-					this.IBaseFilter.ptr
-				]).ptr
-		}, { // end inherit from IUnknown // start inherit from IPersist
-			'GetClassID': ctypes.voidptr_t
-		}, { // end inherit from IPersist // start inherit from IMediaFilter
-			'Stop': ctypes.FunctionType(this.CALLBACK_ABI,
-				this.HRESULT, [
-					this.IBaseFilter.ptr
-				]).ptr
-		}, {
-			'Pause': ctypes.voidptr_t
-		}, {
-			'Run': ctypes.FunctionType(this.CALLBACK_ABI,
-				this.HRESULT, [
-					this.IBaseFilter.ptr
-				]).ptr
-		}, {
-			'GetState': ctypes.voidptr_t
-		}, {
-			'SetSyncSource': ctypes.voidptr_t
-		}, {
-			'GetSyncSource': ctypes.voidptr_t
-		}, { // end inherit from IMediaFilter // start IBaseFilter
-			'EnumPins': ctypes.FunctionType(this.CALLBACK_ABI,
-				this.HRESULT, [
-					this.IBaseFilter.ptr,
-					this.IEnumPins.ptr.ptr	// **ppEnum	// TODO: move this its no longer simple due to this
-				]).ptr
-		}, {
-			'FindPin': ctypes.FunctionType(this.CALLBACK_ABI,
-				this.HRESULT, [
-					this.IBaseFilter.ptr,
-					this.LPCWSTR,		// Id
-					this.IPin.ptr.ptr	// **ppPin	// TODO: move this its no longer simple due to this
-				]).ptr
-		}, {
-			'QueryFilterInfo': ctypes.voidptr_t
-		}, {
-			'JoinFilterGraph': ctypes.voidptr_t
-		}, {
-			'QueryVendorInfo': ctypes.voidptr_t
-		}
-	]);
-
 	// IBindCtx - https://msdn.microsoft.com/en-us/library/windows/desktop/ms693755(v=vs.85).aspx
 	var IBindCtxVtbl = ctypes.StructType('IBindCtxVtbl');
 	this.IBindCtx = ctypes.StructType('IBindCtx', [
@@ -1216,54 +1150,69 @@ var winTypes = function() {
 	]);
 
 	// ADVANCED VTABLE's
-	// IFilterGraph - https://msdn.microsoft.com/en-us/library/windows/desktop/dd390016(v=vs.85).aspx
-	var IFilterGraphVtbl = ctypes.StructType('IFilterGraphVtbl');
-	this.IFilterGraph = ctypes.StructType('IFilterGraph', [
-		{ 'lpVtbl': IFilterGraphVtbl.ptr }
+	// IBaseFilter - https://msdn.microsoft.com/en-us/library/windows/desktop/dd389526(v=vs.85).aspx
+	// method order - https://github.com/wine-mirror/wine/blob/47cf3fe36d4f5a2f83c0d48ee763c256cd6010c5/dlls/qcap/tests/qcap.c#L480
+	var IBaseFilterVtbl = ctypes.StructType('IBaseFilterVtbl');
+	this.IBaseFilter = ctypes.StructType('IBaseFilter', [
+		{ 'lpVtbl': IBaseFilterVtbl.ptr }
 	]);
-	IFilterGraphVtbl.define([
-		{ // start inherit from IUnknown
+	IBaseFilterVtbl.define([
+		{ //start inherit from IUnknown
 			'QueryInterface': ctypes.FunctionType(this.CALLBACK_ABI,
 				this.HRESULT, [
-					this.IFilterGraphVtbl.ptr,
+					this.IBaseFilter.ptr,
 					this.REFIID,	// riid
 					this.VOID.ptr	// **ppvObject
 				]).ptr
 		}, {
 			'AddRef': ctypes.FunctionType(this.CALLBACK_ABI,
 				this.ULONG, [
-					this.IFilterGraphVtbl.ptr
+					this.IBaseFilter.ptr
 				]).ptr
 		}, {
 			'Release': ctypes.FunctionType(this.CALLBACK_ABI,
 				this.ULONG, [
-					this.IFilterGraphVtbl.ptr
+					this.IBaseFilter.ptr
 				]).ptr
-		}, { // end inherit from IUnknown // start IFilterGraph
-			'AddFilter': ctypes.FunctionType(this.CALLBACK_ABI,
+		}, { // end inherit from IUnknown // start inherit from IPersist
+			'GetClassID': ctypes.voidptr_t
+		}, { // end inherit from IPersist // start inherit from IMediaFilter
+			'Stop': ctypes.FunctionType(this.CALLBACK_ABI,
 				this.HRESULT, [
-					this.IFilterGraphVtbl.ptr,
-					this.IBaseFilter.ptr,			// *pFilter
-					this.LPCWSTR					// pName
+					this.IBaseFilter.ptr
 				]).ptr
 		}, {
-			'RemoveFilter': ctypes.voidptr_t
+			'Pause': ctypes.voidptr_t
 		}, {
-			'EnumFilters': ctypes.voidptr_t
-		}, {
-			'FindFilterByName': ctypes.voidptr_t
-		}, {
-			'ConnectDirect': ctypes.voidptr_t
-		}, {
-			'Reconnect': ctypes.voidptr_t
-		}, {
-			'Disconnect': ctypes.FunctionType(this.CALLBACK_ABI,
+			'Run': ctypes.FunctionType(this.CALLBACK_ABI,
 				this.HRESULT, [
-					this.IFilterGraphVtbl.ptr,
-					this.IPin.ptr				// *ppin
+					this.IBaseFilter.ptr
 				]).ptr
 		}, {
-			'SetDefaultSyncSource': ctypes.voidptr_t
+			'GetState': ctypes.voidptr_t
+		}, {
+			'SetSyncSource': ctypes.voidptr_t
+		}, {
+			'GetSyncSource': ctypes.voidptr_t
+		}, { // end inherit from IMediaFilter // start IBaseFilter
+			'EnumPins': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IBaseFilter.ptr,
+					this.IEnumPins.ptr.ptr	// **ppEnum	// TODO: move this its no longer simple due to this
+				]).ptr
+		}, {
+			'FindPin': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IBaseFilter.ptr,
+					this.LPCWSTR,		// Id
+					this.IPin.ptr.ptr	// **ppPin	// TODO: move this its no longer simple due to this
+				]).ptr
+		}, {
+			'QueryFilterInfo': ctypes.voidptr_t
+		}, {
+			'JoinFilterGraph': ctypes.voidptr_t
+		}, {
+			'QueryVendorInfo': ctypes.voidptr_t
 		}
 	]);
 
@@ -1424,6 +1373,57 @@ var winTypes = function() {
 			'Reset': ctypes.voidptr_t
 		}, {
 			'Clone': ctypes.voidptr_t
+		}
+	]);
+
+	// IFilterGraph - https://msdn.microsoft.com/en-us/library/windows/desktop/dd390016(v=vs.85).aspx
+	var IFilterGraphVtbl = ctypes.StructType('IFilterGraphVtbl');
+	this.IFilterGraph = ctypes.StructType('IFilterGraph', [
+		{ 'lpVtbl': IFilterGraphVtbl.ptr }
+	]);
+	IFilterGraphVtbl.define([
+		{ // start inherit from IUnknown
+			'QueryInterface': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IFilterGraphVtbl.ptr,
+					this.REFIID,	// riid
+					this.VOID.ptr	// **ppvObject
+				]).ptr
+		}, {
+			'AddRef': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.ULONG, [
+					this.IFilterGraphVtbl.ptr
+				]).ptr
+		}, {
+			'Release': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.ULONG, [
+					this.IFilterGraphVtbl.ptr
+				]).ptr
+		}, { // end inherit from IUnknown // start IFilterGraph
+			'AddFilter': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IFilterGraphVtbl.ptr,
+					this.IBaseFilter.ptr,			// *pFilter
+					this.LPCWSTR					// pName
+				]).ptr
+		}, {
+			'RemoveFilter': ctypes.voidptr_t
+		}, {
+			'EnumFilters': ctypes.voidptr_t
+		}, {
+			'FindFilterByName': ctypes.voidptr_t
+		}, {
+			'ConnectDirect': ctypes.voidptr_t
+		}, {
+			'Reconnect': ctypes.voidptr_t
+		}, {
+			'Disconnect': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IFilterGraphVtbl.ptr,
+					this.IPin.ptr				// *ppin
+				]).ptr
+		}, {
+			'SetDefaultSyncSource': ctypes.voidptr_t
 		}
 	]);
 
