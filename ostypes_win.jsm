@@ -673,47 +673,6 @@ var winTypes = function() {
 		{ 'lpVtbl': IBindCtxVtbl.ptr }
 	]);
 
-	// IEnumPins - https://msdn.microsoft.com/en-us/library/windows/desktop/dd376610(v=vs.85).aspx
-	// vtable order - https://github.com/wine-mirror/wine/blob/47cf3fe36d4f5a2f83c0d48ee763c256cd6010c5/dlls/strmbase/enumpins.c#L206
-	var IEnumPinsVtbl = ctypes.StructType('IEnumPinsVtbl');
-	this.IEnumPins = ctypes.StructType('IEnumPins', [
-		{ 'lpVtbl': IEnumPinsVtbl.ptr }
-	]);
-	IEnumPinsVtbl.define([
-		{ //start inherit from IUnknown
-			'QueryInterface': ctypes.FunctionType(this.CALLBACK_ABI,
-				this.HRESULT, [
-					this.IEnumPins.ptr,
-					this.REFIID,	// riid
-					this.VOID.ptr	// **ppvObject
-				]).ptr
-		}, {
-			'AddRef': ctypes.FunctionType(this.CALLBACK_ABI,
-				this.ULONG, [
-					this.IEnumPins.ptr
-				]).ptr
-		}, {
-			'Release': ctypes.FunctionType(this.CALLBACK_ABI,
-				this.ULONG, [
-					this.IEnumPins.ptr
-				]).ptr
-		}, { // end inherit from IUnknown // start IEnumPins
-			'Next': ctypes.FunctionType(this.CALLBACK_ABI,
-				this.HRESULT, [
-					this.IEnumPins.ptr,
-					this.ULONG,				// cPins
-					this.IPin.ptr.ptr,		// **ppPins
-					this.ULONG				// *pcFetched
-				]).ptr
-		}, {
-			'Skip': ctypes.voidptr_t
-		}, {
-			'Reset': ctypes.voidptr_t
-		}, {
-			'Clone': ctypes.voidptr_t
-		}
-	]);
-
 	// IErrorLog - http://r.search.yahoo.com/_ylt=A86.J7olkUVXvRIAruAnnIlQ;_ylu=X3oDMTByb2lvbXVuBGNvbG8DZ3ExBHBvcwMxBHZ0aWQDBHNlYwNzcg--/RV=2/RE=1464205734/RO=10/RU=https%3a%2f%2fmsdn.microsoft.com%2fen-us%2flibrary%2faa768231%28v%3dvs.85%29.aspx/RK=0/RS=_VJfXBUFoV2nfguAS0bULeeeDrk-
 	var IErrorLogVtbl = ctypes.StructType('IErrorLogVtbl');
 	this.IErrorLog = ctypes.StructType('IErrorLog', [
@@ -1236,6 +1195,47 @@ var winTypes = function() {
 		}
 	]);
 
+	// IEnumPins - https://msdn.microsoft.com/en-us/library/windows/desktop/dd376610(v=vs.85).aspx
+	// vtable order - https://github.com/wine-mirror/wine/blob/47cf3fe36d4f5a2f83c0d48ee763c256cd6010c5/dlls/strmbase/enumpins.c#L206
+	var IEnumPinsVtbl = ctypes.StructType('IEnumPinsVtbl');
+	this.IEnumPins = ctypes.StructType('IEnumPins', [
+		{ 'lpVtbl': IEnumPinsVtbl.ptr }
+	]);
+	IEnumPinsVtbl.define([
+		{ //start inherit from IUnknown
+			'QueryInterface': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IEnumPins.ptr,
+					this.REFIID,	// riid
+					this.VOID.ptr	// **ppvObject
+				]).ptr
+		}, {
+			'AddRef': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.ULONG, [
+					this.IEnumPins.ptr
+				]).ptr
+		}, {
+			'Release': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.ULONG, [
+					this.IEnumPins.ptr
+				]).ptr
+		}, { // end inherit from IUnknown // start IEnumPins
+			'Next': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IEnumPins.ptr,
+					this.ULONG,				// cPins
+					this.IPin.ptr.ptr,		// **ppPins
+					this.ULONG				// *pcFetched
+				]).ptr
+		}, {
+			'Skip': ctypes.voidptr_t
+		}, {
+			'Reset': ctypes.voidptr_t
+		}, {
+			'Clone': ctypes.voidptr_t
+		}
+	]);
+
 	// IMoniker - https://msdn.microsoft.com/en-us/library/windows/desktop/ms679705(v=vs.85).aspx
 	// Vtbl order - https://github.com/wine-mirror/wine/blob/47cf3fe36d4f5a2f83c0d48ee763c256cd6010c5/dlls/itss/moniker.c#L324
 	var IMonikerVtbl = ctypes.StructType('IMonikerVtbl');
@@ -1741,7 +1741,8 @@ var winInit = function() {
 		MMSYSERR_NOERROR: 0,
 
 		PINDIR_INPUT: 0,
-		PINDIR_OUTPUT: 1
+		PINDIR_OUTPUT: 1,
+		MAX_PIN_NAME: 128
 	};
 
 	var _lib = {}; // cache for lib
