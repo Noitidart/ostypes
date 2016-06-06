@@ -879,12 +879,20 @@ var winTypes = function() {
 			'QueryPinInfo': ctypes.FunctionType(this.CALLBACK_ABI,
 				this.HRESULT, [
 					this.IPin.ptr,
-					this.PIN_INFO		// *pInfo
+					this.PIN_INFO.ptr		// *pInfo
 				]).ptr
 		}, {
-			'QueryDirection': ctypes.voidptr_t
+			'QueryDirection': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IPin.ptr,
+					this.PIN_DIRECTION.ptr		// *pPinDir
+				]).ptr
 		}, {
-			'QueryId': ctypes.voidptr_t
+			'QueryId': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IPin.ptr,
+					this.LPWSTR.ptr		// *Id
+				]).ptr
 		}, {
 			'QueryAccept': ctypes.voidptr_t
 		}, {
@@ -1946,6 +1954,17 @@ var winInit = function() {
 				self.TYPE.HRESULT,	// result
 				self.TYPE.LPVOID,	// pvReserved
 				self.TYPE.DWORD		// dwCoInit
+			);
+		},
+		CoTaskMemFree: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms680722(v=vs.85).aspx
+			 * void CoTaskMemFree(
+			 *   _In_opt_ LPVOID pv
+			 * );
+			 */
+			return lib('ole32').declare('CoTaskMemFree', self.TYPE.ABI,
+				self.TYPE.void,		// return
+				self.TYPE.LPVOID	// pv
 			);
 		},
 		CountClipboardFormats: function() {
