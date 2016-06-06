@@ -1130,72 +1130,6 @@ var winTypes = function() {
 	]);
 
 	// VTABLE's - ADVANCED
-	// IBaseFilter - https://msdn.microsoft.com/en-us/library/windows/desktop/dd389526(v=vs.85).aspx
-	// method order - https://github.com/wine-mirror/wine/blob/47cf3fe36d4f5a2f83c0d48ee763c256cd6010c5/dlls/qcap/tests/qcap.c#L480
-	var IBaseFilterVtbl = ctypes.StructType('IBaseFilterVtbl');
-	this.IBaseFilter = ctypes.StructType('IBaseFilter', [
-		{ 'lpVtbl': IBaseFilterVtbl.ptr }
-	]);
-	IBaseFilterVtbl.define([
-		{ //start inherit from IUnknown
-			'QueryInterface': ctypes.FunctionType(this.CALLBACK_ABI,
-				this.HRESULT, [
-					this.IBaseFilter.ptr,
-					this.REFIID,	// riid
-					this.VOID.ptr	// **ppvObject
-				]).ptr
-		}, {
-			'AddRef': ctypes.FunctionType(this.CALLBACK_ABI,
-				this.ULONG, [
-					this.IBaseFilter.ptr
-				]).ptr
-		}, {
-			'Release': ctypes.FunctionType(this.CALLBACK_ABI,
-				this.ULONG, [
-					this.IBaseFilter.ptr
-				]).ptr
-		}, { // end inherit from IUnknown // start inherit from IPersist
-			'GetClassID': ctypes.voidptr_t
-		}, { // end inherit from IPersist // start inherit from IMediaFilter
-			'Stop': ctypes.FunctionType(this.CALLBACK_ABI,
-				this.HRESULT, [
-					this.IBaseFilter.ptr
-				]).ptr
-		}, {
-			'Pause': ctypes.voidptr_t
-		}, {
-			'Run': ctypes.FunctionType(this.CALLBACK_ABI,
-				this.HRESULT, [
-					this.IBaseFilter.ptr
-				]).ptr
-		}, {
-			'GetState': ctypes.voidptr_t
-		}, {
-			'SetSyncSource': ctypes.voidptr_t
-		}, {
-			'GetSyncSource': ctypes.voidptr_t
-		}, { // end inherit from IMediaFilter // start IBaseFilter
-			'EnumPins': ctypes.FunctionType(this.CALLBACK_ABI,
-				this.HRESULT, [
-					this.IBaseFilter.ptr,
-					this.IEnumPins.ptr.ptr	// **ppEnum	// TODO: move this its no longer simple due to this
-				]).ptr
-		}, {
-			'FindPin': ctypes.FunctionType(this.CALLBACK_ABI,
-				this.HRESULT, [
-					this.IBaseFilter.ptr,
-					this.LPCWSTR,		// Id
-					this.IPin.ptr.ptr	// **ppPin	// TODO: move this its no longer simple due to this
-				]).ptr
-		}, {
-			'QueryFilterInfo': ctypes.voidptr_t
-		}, {
-			'JoinFilterGraph': ctypes.voidptr_t
-		}, {
-			'QueryVendorInfo': ctypes.voidptr_t
-		}
-	]);
-
 	// IEnumPins - https://msdn.microsoft.com/en-us/library/windows/desktop/dd376610(v=vs.85).aspx
 	// vtable order - https://github.com/wine-mirror/wine/blob/47cf3fe36d4f5a2f83c0d48ee763c256cd6010c5/dlls/strmbase/enumpins.c#L206
 	var IEnumPinsVtbl = ctypes.StructType('IEnumPinsVtbl');
@@ -1356,6 +1290,72 @@ var winTypes = function() {
 	]);
 
 	// VTABLE's - SUPER ADVANCED
+	// IBaseFilter - https://msdn.microsoft.com/en-us/library/windows/desktop/dd389526(v=vs.85).aspx
+	// method order - https://github.com/wine-mirror/wine/blob/47cf3fe36d4f5a2f83c0d48ee763c256cd6010c5/dlls/qcap/tests/qcap.c#L480
+	var IBaseFilterVtbl = ctypes.StructType('IBaseFilterVtbl');
+	this.IBaseFilter = ctypes.StructType('IBaseFilter', [
+		{ 'lpVtbl': IBaseFilterVtbl.ptr }
+	]);
+	IBaseFilterVtbl.define([
+		{ //start inherit from IUnknown
+			'QueryInterface': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IBaseFilter.ptr,
+					this.REFIID,	// riid
+					this.VOID.ptr	// **ppvObject
+				]).ptr
+		}, {
+			'AddRef': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.ULONG, [
+					this.IBaseFilter.ptr
+				]).ptr
+		}, {
+			'Release': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.ULONG, [
+					this.IBaseFilter.ptr
+				]).ptr
+		}, { // end inherit from IUnknown // start inherit from IPersist
+			'GetClassID': ctypes.voidptr_t
+		}, { // end inherit from IPersist // start inherit from IMediaFilter
+			'Stop': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IBaseFilter.ptr
+				]).ptr
+		}, {
+			'Pause': ctypes.voidptr_t
+		}, {
+			'Run': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IBaseFilter.ptr
+				]).ptr
+		}, {
+			'GetState': ctypes.voidptr_t
+		}, {
+			'SetSyncSource': ctypes.voidptr_t
+		}, {
+			'GetSyncSource': ctypes.voidptr_t
+		}, { // end inherit from IMediaFilter // start IBaseFilter
+			'EnumPins': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IBaseFilter.ptr,
+					this.IEnumPins.ptr.ptr	// **ppEnum	// TODO: move this its no longer simple due to this
+				]).ptr
+		}, {
+			'FindPin': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IBaseFilter.ptr,
+					this.LPCWSTR,		// Id
+					this.IPin.ptr.ptr	// **ppPin	// TODO: move this its no longer simple due to this
+				]).ptr
+		}, {
+			'QueryFilterInfo': ctypes.voidptr_t
+		}, {
+			'JoinFilterGraph': ctypes.voidptr_t
+		}, {
+			'QueryVendorInfo': ctypes.voidptr_t
+		}
+	]);
+	
 	// IEnumMoniker - https://msdn.microsoft.com/en-us/library/windows/desktop/ms692852(v=vs.85).aspx
 	// Vtbl order - https://github.com/wine-mirror/wine/blob/47cf3fe36d4f5a2f83c0d48ee763c256cd6010c5/dlls/quartz/enummoniker.c#L204-L207
 	var IEnumMonikerVtbl = ctypes.StructType('IEnumMonikerVtbl');
