@@ -47,6 +47,7 @@ var winTypes = function() {
 	this.LPVOID = ctypes.voidptr_t;
 	this.NTSTATUS = ctypes.long; // https://msdn.microsoft.com/en-us/library/cc230357.aspx // typedef long NTSTATUS;
 	this.OBJECT_INFORMATION_CLASS = ctypes.int; // im guessing its in, it is an enum though for sure
+	this.PIN_DIRECTION = ctypes.int; // im guessing as its enum https://msdn.microsoft.com/en-us/library/windows/desktop/dd377427(v=vs.85).aspx
 	this.PVOID = ctypes.voidptr_t;
 	this.RM_APP_TYPE = ctypes.unsigned_int; // i dont know im just guessing, i cant find a typedef that makes sense to me: https://msdn.microsoft.com/en-us/library/windows/desktop/aa373670%28v=vs.85%29.aspx
 	this.SHORT = ctypes.short;
@@ -148,7 +149,8 @@ var winTypes = function() {
 		CCHFORMNAME: 32,
 		LF_FACESIZE: 32,
 		LF_FULLFACESIZE: 64,
-		MAXPNAMELEN: 32
+		MAXPNAMELEN: 32,
+		MAX_PIN_NAME: 128
 	};
 
 	// SIMPLE STRUCTS // based on any of the types above
@@ -696,7 +698,13 @@ var winTypes = function() {
 					this.IEnumPins.ptr
 				]).ptr
 		}, { // end inherit from IUnknown // start IEnumPins
-			'Next': ctypes.voidptr_t
+			'Next': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IEnumPins.ptr,
+					this.ULONG,				// cPins
+					this.IPin.ptr.ptr,		// **ppPins
+					this.ULONG				// *pcFetched
+				]).ptr
 		}, {
 			'Skip': ctypes.voidptr_t
 		}, {
@@ -868,7 +876,11 @@ var winTypes = function() {
 		}, {
 			'ConnectionMediaType': ctypes.voidptr_t
 		}, {
-			'QueryPinInfo': ctypes.voidptr_t
+			'QueryPinInfo': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IPin.ptr,
+					this.PIN_INFO		// *pInfo
+				]).ptr
 		}, {
 			'QueryDirection': ctypes.voidptr_t
 		}, {
@@ -1480,6 +1492,13 @@ var winTypes = function() {
 		}
 	]);
 
+	// STRUCTS USING VTABLES
+	this.PIN_INFO = ctypes.StructType('_PinInfo', [
+		{ pFilter: this.IBaseFilter.ptr },
+		{ dir: this.PIN_DIRECTION },
+		{ achName: this.WCHAR.array(struct_const.MAX_PIN_NAME) }
+	]);
+
 }
 
 var winInit = function() {
@@ -1711,7 +1730,10 @@ var winInit = function() {
 		GA_ROOT: 2,
 		GA_ROOTOWNER: 3,
 
-		MMSYSERR_NOERROR: 0
+		MMSYSERR_NOERROR: 0,
+
+		PINDIR_INPUT: 0,
+		PINDIR_OUTPUT: 1
 	};
 
 	var _lib = {}; // cache for lib
