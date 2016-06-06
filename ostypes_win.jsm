@@ -1385,24 +1385,24 @@ var winTypes = function() {
 		{ // start inherit from IUnknown
 			'QueryInterface': ctypes.FunctionType(this.CALLBACK_ABI,
 				this.HRESULT, [
-					this.IFilterGraphVtbl.ptr,
+					this.IFilterGraph.ptr,
 					this.REFIID,	// riid
 					this.VOID.ptr	// **ppvObject
 				]).ptr
 		}, {
 			'AddRef': ctypes.FunctionType(this.CALLBACK_ABI,
 				this.ULONG, [
-					this.IFilterGraphVtbl.ptr
+					this.IFilterGraph.ptr
 				]).ptr
 		}, {
 			'Release': ctypes.FunctionType(this.CALLBACK_ABI,
 				this.ULONG, [
-					this.IFilterGraphVtbl.ptr
+					this.IFilterGraph.ptr
 				]).ptr
 		}, { // end inherit from IUnknown // start IFilterGraph
 			'AddFilter': ctypes.FunctionType(this.CALLBACK_ABI,
 				this.HRESULT, [
-					this.IFilterGraphVtbl.ptr,
+					this.IFilterGraph.ptr,
 					this.IBaseFilter.ptr,			// *pFilter
 					this.LPCWSTR					// pName
 				]).ptr
@@ -1419,7 +1419,7 @@ var winTypes = function() {
 		}, {
 			'Disconnect': ctypes.FunctionType(this.CALLBACK_ABI,
 				this.HRESULT, [
-					this.IFilterGraphVtbl.ptr,
+					this.IFilterGraph.ptr,
 					this.IPin.ptr				// *ppin
 				]).ptr
 		}, {
