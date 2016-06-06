@@ -712,11 +712,17 @@ var winTypes = function() {
 		}, {
 			'Invoke': ctypes.voidptr_t
 		}, { // end inherit from IDispatch // start IMediaControl
-			'Run': ctypes.voidptr_t
+			'Run': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IMediaControl.ptr
+				]).ptr
 		}, {
 			'Pause': ctypes.voidptr_t
 		}, {
-			'Stop': ctypes.voidptr_t
+			'Stop': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IMediaControl.ptr
+				]).ptr
 		}, {
 			'GetState': ctypes.voidptr_t
 		}, {
@@ -1317,17 +1323,11 @@ var winTypes = function() {
 		}, { // end inherit from IUnknown // start inherit from IPersist
 			'GetClassID': ctypes.voidptr_t
 		}, { // end inherit from IPersist // start inherit from IMediaFilter
-			'Stop': ctypes.FunctionType(this.CALLBACK_ABI,
-				this.HRESULT, [
-					this.IBaseFilter.ptr
-				]).ptr
+			'Stop': ctypes.voidptr_t
 		}, {
 			'Pause': ctypes.voidptr_t
 		}, {
-			'Run': ctypes.FunctionType(this.CALLBACK_ABI,
-				this.HRESULT, [
-					this.IBaseFilter.ptr
-				]).ptr
+			'Run': ctypes.voidptr_t
 		}, {
 			'GetState': ctypes.voidptr_t
 		}, {
