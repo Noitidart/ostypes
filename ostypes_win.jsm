@@ -1889,8 +1889,12 @@ var winInit = function() {
 		XBUTTON2: 0x0002,
 
 		COINIT_MULTITHREADED: 0x0,
-		CLSCTX_INPROC_SERVER: 0x1,
 		COINIT_APARTMENTTHREADED: 0x2,
+
+		CLSCTX_INPROC_SERVER: 0x1,
+		CLSCTX_INPROC_HANDLER: 0x2,
+		CLSCTX_LOCAL_SERVER: 0x4,
+		CLSCTX_REMOTE_SERVER: 0x10,
 
 		VARIANT_FALSE: 0, // http://blogs.msdn.com/b/oldnewthing/archive/2004/12/22/329884.aspx
 		VARIANT_TRUE: -1, // http://blogs.msdn.com/b/oldnewthing/archive/2004/12/22/329884.aspx
