@@ -30,10 +30,13 @@ var winTypes = function() {
 	this.void = ctypes.void_t;
 
 	// SIMPLE TYPES // based on ctypes.BLAH // as per WinNT.h etc
+	this.AUDCLNT_SHAREMODE = ctypes.unsigned_int; // guess type as this is an enum
 	this.BOOL = ctypes.bool;
 	this.BYTE = ctypes.unsigned_char;
 	this.CHAR = ctypes.char;
 	this.DWORD = ctypes.unsigned_long; // IntSafe.h defines it as: // typedef unsigned long DWORD; // so maybe can change this to ctypes.unsigned_long // i was always using `ctypes.uint32_t`
+	this.EDataFlow = ctypes.unsigned_int; // guess as this is an enum
+	this.ERole = ctypes.unsigned_int; // guess as this is an enum
 	this.FILE_INFORMATION_CLASS = ctypes.int; // https://msdn.microsoft.com/en-us/library/windows/hardware/ff728840%28v=vs.85%29.aspx // this is an enum, im guessing enum is ctypes.int
 	this.FXPT2DOT30 = ctypes.long; // http://stackoverflow.com/a/20864995/1828637 // https://github.com/wine-mirror/wine/blob/a7247df6ca54fd1209eff9f9199447643ebdaec5/include/wingdi.h#L150
 	this.INT = ctypes.int;
@@ -49,9 +52,12 @@ var winTypes = function() {
 	this.OBJECT_INFORMATION_CLASS = ctypes.int; // im guessing its in, it is an enum though for sure
 	this.PIN_DIRECTION = ctypes.int; // im guessing as its enum https://msdn.microsoft.com/en-us/library/windows/desktop/dd377427(v=vs.85).aspx
 	this.PVOID = ctypes.voidptr_t;
+	this.REFERENCE_TIME = ctypes.long_long;
 	this.RM_APP_TYPE = ctypes.unsigned_int; // i dont know im just guessing, i cant find a typedef that makes sense to me: https://msdn.microsoft.com/en-us/library/windows/desktop/aa373670%28v=vs.85%29.aspx
 	this.SHORT = ctypes.short;
 	this.UINT = ctypes.unsigned_int;
+	this.UINT32 = ctypes.uint32_t;
+	this.UINT64 = ctypes.uint64_t;
 	this.UINT_PTR = is64bit ? ctypes.uint64_t : ctypes.unsigned_int;
 	this.ULONG = ctypes.unsigned_long;
 	this.ULONGLONG = ctypes.unsigned_long_long;
@@ -243,13 +249,13 @@ var winTypes = function() {
 		{ lfFaceName: this.TCHAR.array(struct_const.LF_FACESIZE) }
 	]);
 	this.MOUSEINPUT = ctypes.StructType('tagMOUSEINPUT', [ // https://msdn.microsoft.com/en-us/library/windows/desktop/ms646273%28v=vs.85%29.aspx
-        { 'dx': this.LONG },
-        { 'dy': this.LONG },
-        { 'mouseData': this.DWORD },
-        { 'dwFlags': this.DWORD },
-        { 'time': this.ULONG_PTR },
-        { 'dwExtraInfo': this.DWORD }
-    ]);
+	        { 'dx': this.LONG },
+	        { 'dy': this.LONG },
+	        { 'mouseData': this.DWORD },
+	        { 'dwFlags': this.DWORD },
+	        { 'time': this.ULONG_PTR },
+        	{ 'dwExtraInfo': this.DWORD }
+	]);
 	this.NEWTEXTMETRIC = ctypes.StructType('tagNEWTEXTMETRIC', [
 		{ tmHeight: this.LONG },
 		{ tmAscent: this.LONG },
@@ -325,12 +331,12 @@ var winTypes = function() {
 		{ lLastY: this.LONG },
 		{ ulExtraInformation: this.ULONG }
 	]);
-    this.RECT = ctypes.StructType('_RECT', [ // https://msdn.microsoft.com/en-us/library/windows/desktop/dd162897%28v=vs.85%29.aspx
-        { left: this.LONG },
-        { top: this.LONG },
-        { right: this.LONG },
-        { bottom: this.LONG }
-    ]);
+	this.RECT = ctypes.StructType('_RECT', [ // https://msdn.microsoft.com/en-us/library/windows/desktop/dd162897%28v=vs.85%29.aspx
+		{ left: this.LONG },
+		{ top: this.LONG },
+		{ right: this.LONG },
+		{ bottom: this.LONG }
+	]);
 	this.SECURITY_ATTRIBUTES = ctypes.StructType('_SECURITY_ATTRIBUTES', [ // https://msdn.microsoft.com/en-us/library/windows/desktop/aa379560%28v=vs.85%29.aspx
 		{ 'nLength': this.DWORD },
 		{ 'lpSecurityDescriptor': this.LPVOID },
@@ -383,12 +389,12 @@ var winTypes = function() {
 	]);
 	this.WAVEFORMATEX = ctypes.StructType('tWAVEFORMATEX', [ // https://msdn.microsoft.com/en-us/library/windows/desktop/dd390970(v=vs.85).aspx
 		{ wFormatTag: this.WORD },
-	    { nChannels: this.WORD },
-	    { nSamplesPerSec: this.DWORD },
-	    { nAvgBytesPerSec: this.DWORD },
-	    { nBlockAlign: this.WORD },
-	    { wBitsPerSample: this.WORD },
-	    { cbSize: this.WORD }
+		{ nChannels: this.WORD },
+		{ nSamplesPerSec: this.DWORD },
+		{ nAvgBytesPerSec: this.DWORD },
+		{ nBlockAlign: this.WORD },
+		{ wBitsPerSample: this.WORD },
+		{ cbSize: this.WORD }
 	]);
 	this.WAVEHDR = ctypes.StructType('wavehdr_tag');
 	this.WAVEHDR.define([ // https://msdn.microsoft.com/en-us/library/windows/desktop/dd743837(v=vs.85).aspx
@@ -463,11 +469,12 @@ var winTypes = function() {
 		{ elfStyle: this.TCHAR.array(struct_const.LF_FACESIZE) }
 	]);
 	this.IID = this.GUID;
-    this.INPUT = ctypes.StructType('tagINPUT', [
-        { 'type': this.DWORD },
-        { 'mi': this.MOUSEINPUT } // union, pick which one you want, i picked mouse
-    ]);
+	this.INPUT = ctypes.StructType('tagINPUT', [
+		{ 'type': this.DWORD },
+		{ 'mi': this.MOUSEINPUT } // union, pick which one you want, i picked mouse
+	]);
 	this.LPCWAVEFORMATEX = this.WAVEFORMATEX.ptr;
+	this.LPCGUID = this.GUID.ptr;
 	this.LPOVERLAPPED = this.OVERLAPPED.ptr;
 	this.LPLOGFONT = this.LOGFONT.ptr;
 	this.LPSECURITY_ATTRIBUTES = this.SECURITY_ATTRIBUTES.ptr;
@@ -538,6 +545,12 @@ var winTypes = function() {
 	this.VARIANTARG = this.VARIANT;
 	this.LPVARIANT = this.VARIANT.ptr;
 	this.LPVARIANTARG = this.VARIANT.ptr;
+	this.WAVEFORMATEXTENSIBLE = ctypes.StructType('WAVEFORMATEXTENSIBLE', [
+		{ Format: this.WAVEFORMATEX },
+		{ wValidBitsPerSample: this.WORD }, // union { WORD wValidBitsPerSample; WORD wSamplesPerBlock; WORD wReserved; } Samples
+		{ dwChannelMask: this.DWORD },
+		{ SubFormat: this.GUID }
+	]);
 	this.WIN32_FIND_DATA = ctypes.StructType('_WIN32_FIND_DATA', [ // https://msdn.microsoft.com/en-us/library/windows/desktop/aa365740%28v=vs.85%29.aspx
 		{ 'dwFileAttributes': this.DWORD },
 		{ 'ftCreationTime': this.FILETIME },
@@ -553,8 +566,8 @@ var winTypes = function() {
 
 	// FURTHER ADVANCED STRUCTS
 	this.BITMAPV5HEADER = ctypes.StructType('BITMAPV5HEADER', [
-		{ bV5Size:			this.DWORD },
-		{ bV5Width:			this.LONG },
+		{ bV5Size:		this.DWORD },
+		{ bV5Width:		this.LONG },
 		{ bV5Height:		this.LONG },
 		{ bV5Planes:		this.WORD },
 		{ bV5BitCount:		this.WORD },
@@ -581,7 +594,8 @@ var winTypes = function() {
 	this.LPINPUT = this.INPUT.ptr;
 	this.LPMONITORINFOEX = this.MONITORINFOEX.ptr;
 	this.LPMSG = this.MSG.ptr;
-	this.PMSG = this.MSG.ptr
+	this.PMSG = this.MSG.ptr;
+	this.PWAVEFORMATEXTENSIBLE = this.WAVEFORMATEXTENSIBLE.ptr;
 	this.REFCLSID = this.CLSID.ptr; // https://github.com/wine-mirror/wine/blob/bdeb761357c87d41247e0960f71e20d3f05e40e6/include/wtypes.idl#L288
 	this.REFIID = this.IID.ptr;
 	this.REFPROPERTYKEY = this.PROPERTYKEY.ptr; // note: if you use any REF... (like this.REFPROPERTYKEY) as an arg to a declare, that arg expects a ptr. this is basically like
@@ -666,7 +680,181 @@ var winTypes = function() {
 		{ lpszClassName: this.LPCTSTR }
 	]);
 
-	// VTABLE's - SIMPLE
+	// VTABLEs - Level 1
+	// IAudioCaptureClient - https://msdn.microsoft.com/en-us/library/windows/desktop/dd370858%28v=vs.85%29.aspx
+	// order - https://github.com/wine-mirror/wine/blob/47cf3fe36d4f5a2f83c0d48ee763c256cd6010c5/dlls/wineoss.drv/mmdevdrv.c#L2112
+	var IAudioCaptureClientVtbl = ctypes.StructType('IAudioCaptureClientVtbl');
+	this.IAudioCaptureClient = ctypes.StructType('IAudioCaptureClient', [
+		{ 'lpVtbl': IAudioCaptureClientVtbl.ptr }
+	]);
+	IAudioCaptureClientVtbl.define([
+		{ //start inherit from IUnknown
+			'QueryInterface': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IAudioCaptureClient.ptr,
+					this.REFIID,		// riid
+					this.VOID.ptr.ptr	// **ppvObject
+				]).ptr
+		}, {
+			'AddRef': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.ULONG, [
+					this.IAudioCaptureClient.ptr
+				]).ptr
+		}, {
+			'Release': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.ULONG, [
+					this.IAudioCaptureClient.ptr
+				]).ptr
+		}, { //end inherit from IUnknown // start IAudioCaptureClient
+			'GetBuffer': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IAudioCaptureClient.ptr,
+					this.BYTE.ptr.ptr,		// **ppData
+					this.UINT32.ptr,		// *pNumFramesToRead
+					this.DWORD.ptr,			// *pdwFlags
+					this.UINT64.ptr,		// *pu64DevicePosition
+					this.UINT64.ptr,		// *pu64QPCPosition
+				]).ptr
+		}, {
+			'ReleaseBuffer': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IAudioCaptureClient.ptr,
+					this.UINT32		// NumFramesRead
+				]).ptr
+		}, {
+			'GetNextPacketSize': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IAudioCaptureClient.ptr,
+					this.UINT32.ptr			// *pNumFramesInNextPacket
+				]).ptr
+		}
+	]);
+
+	// IAudioClient - https://msdn.microsoft.com/en-us/library/windows/desktop/dd370865%28v=vs.85%29.aspx
+	// order - https://github.com/wine-mirror/wine/blob/47cf3fe36d4f5a2f83c0d48ee763c256cd6010c5/dlls/wineoss.drv/mmdevdrv.c#L1766
+	var IAudioClientVtbl = ctypes.StructType('IAudioClientVtbl');
+	this.IAudioClient = ctypes.StructType('IAudioClient', [
+		{ 'lpVtbl': IAudioClientVtbl.ptr }
+	]);
+	IAudioClientVtbl.define([
+		{ //start inherit from IUnknown
+			'QueryInterface': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IAudioClient.ptr,
+					this.REFIID,		// riid
+					this.VOID.ptr.ptr	// **ppvObject
+				]).ptr
+		}, {
+			'AddRef': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.ULONG, [
+					this.IAudioClient.ptr
+				]).ptr
+		}, {
+			'Release': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.ULONG, [
+					this.IAudioClient.ptr
+				]).ptr
+		}, { //end inherit from IUnknown // start IAudioClient
+			'Initialize': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IAudioClient.ptr,
+					this.AUDCLNT_SHAREMODE,		// ShareMode
+					this.DWORD,			// StreamFlags
+					this.REFERENCE_TIME,		// hnsBufferDuration
+					this.REFERENCE_TIME,		// hnsPeriodicity
+					this.WAVEFORMATEX.ptr,		// *pFormat
+					this.LPCGUID			// AudioSessionGuid
+				]).ptr
+		}, {
+			'GetBufferSize': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IAudioClient.ptr,
+					this.UINT32.ptr		// *pNumBufferFrames
+				]).ptr
+		}, {
+			'GetStreamLatency': ctypes.voidptr_t
+		}, {
+			'GetCurrentPadding': ctypes.voidptr_t
+		}, {
+			'IsFormatSupported': ctypes.voidptr_t
+		}, {
+			'GetMixFormat': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IAudioClient.ptr,
+					this.WAVEFORMATEX.ptr.ptr	// **ppDeviceFormat
+				]).ptr
+		}, {
+			'GetDevicePeriod': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IAudioClient.ptr,
+					this.REFERENCE_TIME.ptr,	// *phnsDefaultDevicePeriod
+					this.REFERENCE_TIME.ptr		// *phnsMinimumDevicePeriod
+				]).ptr
+		}, {
+			'Start': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IAudioClient.ptr
+				]).ptr
+		}, {
+			'Stop': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IAudioClient.ptr
+				]).ptr
+		}, {
+			'Reset': ctypes.voidptr_t
+		}, {
+			'SetEventHandle': ctypes.voidptr_t
+		}, {
+			'GetService': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IAudioClient.ptr,
+					this.REFIID,		// riid
+					this.void.ptr		// **ppv
+				]).ptr
+		}
+	]);
+
+	// IAudioRenderClient - https://msdn.microsoft.com/en-us/library/windows/desktop/dd368242%28v=vs.85%29.aspx
+	// order - https://github.com/wine-mirror/wine/blob/47cf3fe36d4f5a2f83c0d48ee763c256cd6010c5/dlls/wineoss.drv/mmdevdrv.c#L1943
+	var IAudioRenderClientVtbl = ctypes.StructType('IAudioRenderClientVtbl');
+	this.IAudioRenderClient = ctypes.StructType('IAudioRenderClient', [
+		{ 'lpVtbl': IAudioRenderClientVtbl.ptr }
+	]);
+	IAudioRenderClientVtbl.define([
+		{ //start inherit from IUnknown
+			'QueryInterface': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IAudioRenderClient.ptr,
+					this.REFIID,		// riid
+					this.VOID.ptr.ptr	// **ppvObject
+				]).ptr
+		}, {
+			'AddRef': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.ULONG, [
+					this.IAudioRenderClient.ptr
+				]).ptr
+		}, {
+			'Release': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.ULONG, [
+					this.IAudioRenderClient.ptr
+				]).ptr
+		}, { //end inherit from IUnknown // start IAudioRenderClient
+			'GetBuffer': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IAudioRenderClient.ptr,
+					this.UINT32,			// NumFramesRequested
+					this.BYTE.ptr.ptr		// **ppData
+				]).ptr
+		}, {
+			'ReleaseBuffer': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IAudioRenderClient.ptr,
+					this.UINT32,		// NumFramesWritten
+					this.DWORD		// dwFlags
+				]).ptr
+		}
+	]);
+
 	// IBindCtx - https://msdn.microsoft.com/en-us/library/windows/desktop/ms693755(v=vs.85).aspx
 	var IBindCtxVtbl = ctypes.StructType('IBindCtxVtbl');
 	this.IBindCtx = ctypes.StructType('IBindCtx', [
@@ -735,6 +923,91 @@ var winTypes = function() {
 			'get_RegFilterCollection': ctypes.voidptr_t
 		}, {
 			'StopWhenReady': ctypes.voidptr_t
+		}
+	]);
+
+	// IMMDevice - https://msdn.microsoft.com/en-us/library/windows/desktop/dd371395%28v=vs.85%29.aspx
+	// order - https://github.com/wine-mirror/wine/blob/47cf3fe36d4f5a2f83c0d48ee763c256cd6010c5/dlls/mmdevapi/devenum.c#L716
+	var IMMDeviceVtbl = ctypes.StructType('IMMDeviceVtbl');
+	this.IMMDevice = ctypes.StructType('IMMDevice', [
+		{ 'lpVtbl': IMMDeviceVtbl.ptr }
+	]);
+	IMMDeviceVtbl.define([
+		{ //start inherit from IUnknown
+			'QueryInterface': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IMMDevice.ptr,
+					this.REFIID,		// riid
+					this.VOID.ptr.ptr	// **ppvObject
+				]).ptr
+		}, {
+			'AddRef': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.ULONG, [
+					this.IMMDevice.ptr
+				]).ptr
+		}, {
+			'Release': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.ULONG, [
+					this.IMMDevice.ptr
+				]).ptr
+		}, { //end inherit from IUnknown // start IMMDevice
+			'Activate': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IMMDevice.ptr,
+					this.REFIID,		// riid
+					this.DWORD,		// clsctx
+					this.PROPVARIANT,	// *params
+					this.void.ptr		// **ppv
+				]).ptr
+		}, {
+			'OpenPropertyStore': ctypes.voidptr_t
+		}, {
+			'GetId': ctypes.voidptr_t
+		}, {
+			'GetState': ctypes.voidptr_t
+		}
+	]);
+
+	// IMMDeviceEnumerator - https://msdn.microsoft.com/en-us/library/windows/desktop/dd371399%28v=vs.85%29.aspx
+	// order - https://github.com/wine-mirror/wine/blob/47cf3fe36d4f5a2f83c0d48ee763c256cd6010c5/dlls/mmdevapi/devenum.c#L1308
+	var IMMDeviceEnumeratorVtbl = ctypes.StructType('IMMDeviceEnumeratorVtbl');
+	this.IMMDeviceEnumerator = ctypes.StructType('IMMDeviceEnumerator', [
+		{ 'lpVtbl': IMMDeviceEnumeratorVtbl.ptr }
+	]);
+	IMMDeviceEnumeratorVtbl.define([
+		{ //start inherit from IUnknown
+			'QueryInterface': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IMMDeviceEnumerator.ptr,
+					this.REFIID,		// riid
+					this.VOID.ptr.ptr	// **ppvObject
+				]).ptr
+		}, {
+			'AddRef': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.ULONG, [
+					this.IMMDeviceEnumerator.ptr
+				]).ptr
+		}, {
+			'Release': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.ULONG, [
+					this.IMMDeviceEnumerator.ptr
+				]).ptr
+		}, { //end inherit from IUnknown // start IMMDeviceEnumerator
+			'EnumAudioEndpoints': ctypes.voidptr_t
+		}, {
+			'GetDefaultAudioEndpoint': ctypes.FunctionType(this.CALLBACK_ABI,
+				this.HRESULT, [
+					this.IMMDeviceEnumerator.ptr,
+					this.EDataFlow,		// dataFlow
+					this.ERole,		// role
+					this.IMMDevice.ptr.ptr	// **ppDevice
+				]).ptr
+		}, {
+			'GetDevice': ctypes.voidptr_t
+		}, {
+			'RegisterEndpointNotificationCallback': ctypes.voidptr_t
+		}, {
+			'UnregisterEndpointNotificationCallback': ctypes.voidptr_t
 		}
 	]);
 
@@ -899,7 +1172,7 @@ var winTypes = function() {
 				this.ULONG, [
 					this.IPropertyStore.ptr
 				]).ptr
-		}, { //end inherit from IUnknown
+		}, { //end inherit from IUnknown // start IPropertyStore
 			'GetCount': ctypes.FunctionType(this.CALLBACK_ABI,
 				this.HRESULT, [
 					this.IPropertyStore.ptr,
@@ -1338,14 +1611,14 @@ var winTypes = function() {
 			'EnumPins': ctypes.FunctionType(this.CALLBACK_ABI,
 				this.HRESULT, [
 					this.IBaseFilter.ptr,
-					this.IEnumPins.ptr.ptr	// **ppEnum	// TODO: move this its no longer simple due to this
+					this.IEnumPins.ptr.ptr	// **ppEnum
 				]).ptr
 		}, {
 			'FindPin': ctypes.FunctionType(this.CALLBACK_ABI,
 				this.HRESULT, [
 					this.IBaseFilter.ptr,
 					this.LPCWSTR,		// Id
-					this.IPin.ptr.ptr	// **ppPin	// TODO: move this its no longer simple due to this
+					this.IPin.ptr.ptr	// **ppPin
 				]).ptr
 		}, {
 			'QueryFilterInfo': ctypes.voidptr_t
@@ -1743,7 +2016,36 @@ var winInit = function() {
 
 		PINDIR_INPUT: 0,
 		PINDIR_OUTPUT: 1,
-		MAX_PIN_NAME: 128
+		MAX_PIN_NAME: 128,
+
+		// enum _AUDCLNT_BUFFERFLAGS
+		AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY: 0x1,
+		AUDCLNT_BUFFERFLAGS_SILENT: 0x2,
+		AUDCLNT_BUFFERFLAGS_TIMESTAMP_ERROR: 0x4,
+
+		// AUDCLNT_STREAMFLAGS_XXX
+		AUDCLNT_STREAMFLAGS_CROSSPROCESS: 0x00010000,
+		AUDCLNT_STREAMFLAGS_LOOPBACK: 0x00020000,
+		AUDCLNT_STREAMFLAGS_EVENTCALLBACK: 0x00040000,
+		AUDCLNT_STREAMFLAGS_NOPERSIST: 0x00080000,
+		AUDCLNT_STREAMFLAGS_RATEADJUST: 0x00100000,
+		AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM: 0x80000000,
+		AUDCLT_STREAMFLAGS_SRC_DEFAULT_QUALITY: 0x08000000,
+
+		// enum _AUDCLNT_SHAREMODE
+		AUDCLNT_SHAREMODE_SHARED: 0,
+		AUDCLNT_SHAREMODE_EXCLUSIVE: 1,
+
+		WAVE_FORMAT_IEEE_FLOAT: 0x0003,
+		WAVE_FORMAT_EXTENSIBLE: 65534,
+
+		// enum ERole
+		eConsole: 0,
+		eMultimedia: 1,
+		eCommunications: 2,
+		ERole_enum_count: 3,
+
+
 	};
 
 	var _lib = {}; // cache for lib
@@ -4001,6 +4303,35 @@ var winInit = function() {
 				ppT.address().contents = ppT.constructor(0);
 			}
 			if (ppT && ppT.isNull()) { console.warn(varName + '->Release will not be done as it is isNull() - it was probably already released'); } // dev line, remove on production
+		},
+		IsEqualGUID: function(guid1, guid2) {
+			// args can be either CData GUID or a js arr like [1,2,3,[1,2,3,4,5,6,7,8]]
+			// returns true if both match, uses cutils.jscEqual for equality
+			var jsguid1;
+			if (Array.isArray(guid1)) {
+				jsguid1 = guid1;
+			} else {
+				jsguid1 = [guid1.Data1, guid1.Data2, guid1.Data3, [guid1.Data4[0], guid1.Data4[1], guid1.Data4[2], guid1.Data4[3], guid1.Data4[4], guid1.Data4[5], guid1.Data4[6], guid1.Data4[7]]];
+			}
+			var jsguid2;
+			if (Array.isArray(guid2)) {
+				jsguid2 = guid2;
+			} else {
+				jsguid2 = [guid2.Data1, guid2.Data2, guid2.Data3, [guid2.Data4[0], guid2.Data4[1], guid2.Data4[2], guid2.Data4[3], guid2.Data4[4], guid2.Data4[5], guid2.Data4[6], guid2.Data4[7]]];
+			}
+
+			for (var i=0; i<11; i++) {
+				if (i < 3) {
+					if (!cutils.jscEqual(jsguid1[i], jsguid2[i])) {
+						return false;
+					}
+				} else {
+					if (!cutils.jscEqual(jsguid1[3][i - 3], jsguid2[3][i - 3])) {
+						return false;
+					}
+				}
+			}
+			return true;
 		}
 	};
 
