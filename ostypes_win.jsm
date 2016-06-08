@@ -2045,7 +2045,11 @@ var winInit = function() {
 		eCommunications: 2,
 		ERole_enum_count: 3,
 
-
+		// enum EDataFlow
+		eRender: 0,
+		eCapture: 1,
+		eAll: 2,
+		EDataFlow_enum_count: 3
 	};
 
 	var _lib = {}; // cache for lib
