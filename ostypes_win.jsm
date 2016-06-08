@@ -956,7 +956,7 @@ var winTypes = function() {
 					this.IMMDevice.ptr,
 					this.REFIID,		// riid
 					this.DWORD,		// clsctx
-					this.PROPVARIANT,	// *params
+					this.PROPVARIANT.ptr,	// *params
 					this.void.ptr		// **ppv
 				]).ptr
 		}, {
