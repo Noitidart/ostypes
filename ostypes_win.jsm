@@ -23,18 +23,18 @@ var winTypes = function() {
 	  this.ABI = ctypes.winapi_abi;
 	}
 
-	// C TYPES
+	// TYPEs - Level 0 - C TYPES
 	this.char = ctypes.char;
 	this.int = ctypes.int;
 	this.size_t = ctypes.size_t;
 	this.void = ctypes.void_t;
 
-	// SIMPLE TYPES // based on ctypes.BLAH // as per WinNT.h etc
+	// TYPEs - Level 1 - Simple
 	this.AUDCLNT_SHAREMODE = ctypes.unsigned_int; // guess type as this is an enum
 	this.BOOL = ctypes.bool;
 	this.BYTE = ctypes.unsigned_char;
 	this.CHAR = ctypes.char;
-	this.DWORD = ctypes.unsigned_long; // IntSafe.h defines it as: // typedef unsigned long DWORD; // so maybe can change this to ctypes.unsigned_long // i was always using `ctypes.uint32_t`
+	this.DWORD = ctypes.uint32_t; // IntSafe.h defines it as: // typedef unsigned long DWORD; // so maybe can change this to ctypes.unsigned_long // i was always using `ctypes.uint32_t`
 	this.EDataFlow = ctypes.unsigned_int; // guess as this is an enum
 	this.ERole = ctypes.unsigned_int; // guess as this is an enum
 	this.FILE_INFORMATION_CLASS = ctypes.int; // https://msdn.microsoft.com/en-us/library/windows/hardware/ff728840%28v=vs.85%29.aspx // this is an enum, im guessing enum is ctypes.int
@@ -69,13 +69,14 @@ var winTypes = function() {
 	this.WCHAR = ctypes.jschar;
 	this.WORD = ctypes.unsigned_short;
 
-	// ADVANCED TYPES // as per how it was defined in WinNT.h // defined by "simple types"
+	// TYPES - Level 2
 	this.ACCESS_MASK = this.DWORD; // https://msdn.microsoft.com/en-us/library/windows/desktop/aa374892%28v=vs.85%29.aspx
 	this.ATOM = this.WORD;
 	this.BOOLEAN = this.BYTE; // http://blogs.msdn.com/b/oldnewthing/archive/2004/12/22/329884.aspx
 	this.COLORREF = this.DWORD; // when i copied/pasted there was this comment next to this: // 0x00bbggrr
 	this.DWORD_PTR = this.ULONG_PTR;
 	this.FILEOP_FLAGS = this.WORD;
+	this.FOURCC = this.DWORD;
 	this.HANDLE = this.PVOID;
 	this.HRESULT = this.LONG;
 	this.LPBYTE = this.BYTE.ptr;

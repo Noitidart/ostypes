@@ -40,13 +40,13 @@ var macTypes = function() {
 	this.unsigned_long = ctypes.unsigned_long;
 	this.unsigned_long_long = ctypes.unsigned_long_long;
 	this.void = ctypes.void_t;
-	
+
 	// ADV C TYPES
 	this.time_t = this.long; // https://github.com/j4cbo/chiral/blob/3c66a8bb64e541c0f63b04b78ec2d0ffdf5b473c/chiral/os/kqueue.py#L34 AND also based on this github search https://github.com/search?utf8=%E2%9C%93&q=time_t+ctypes&type=Code&ref=searchresults AND based on this answer here: http://stackoverflow.com/a/471287/1828637
-	
+
 	// GUESS C TYPES
 	this.FILE = ctypes.void_t; // not really a guess, i just dont have a need to fill it
-	
+
 	// C SIMPLE STRUCTS
 	var flockHollowStruct = new cutils.HollowStructure('flock', OS.Constants.libc.OSFILE_SIZEOF_FLOCK);
 	flockHollowStruct.add_field_at(OS.Constants.libc.OSFILE_OFFSETOF_FLOCK_L_WHENCE, 'l_whence', this.short);
@@ -55,8 +55,8 @@ var macTypes = function() {
 	flockHollowStruct.add_field_at(OS.Constants.libc.OSFILE_OFFSETOF_FLOCK_L_PID, 'l_pid', this.pid_t);
 	flockHollowStruct.add_field_at(OS.Constants.libc.OSFILE_OFFSETOF_FLOCK_L_LEN, 'l_len', this.off_t);
 	this.flock = flockHollowStruct.getType().implementation;
-	
-	
+
+
 	////// CoreFoundation TYPES
 	// SIMPLE TYPES // based on ctypes.BLAH
 	this.Boolean = ctypes.unsigned_char;
@@ -68,6 +68,7 @@ var macTypes = function() {
 	this.CGError = ctypes.int32_t;
 	this.CGEventField = ctypes.uint32_t;
 	this.CGEventMask = ctypes.uint64_t;
+	this.CGEventTapLocation = ctypes.uint32_t;
 	this.CGEventTapOptions = ctypes.uint32_t;
 	this.CGEventTapPlacement = ctypes.uint32_t;
 	this.CGEventType = ctypes.uint32_t;
@@ -94,7 +95,7 @@ var macTypes = function() {
 	this.UInt64 = ctypes.unsigned_long_long;
 	this.UniChar = ctypes.jschar;
 	this.VOID = ctypes.void_t;
-	
+
 	// ADVANCED TYPES // as per how it was defined in WinNT.h // defined by "simple types"
 	this.AlertType = this.SInt16;
 	this.CFAbsoluteTime = this.CFTimeInterval;
@@ -110,12 +111,12 @@ var macTypes = function() {
 	this.OptionBits = this.UInt32;
 	this.OSErr = this.SInt16;
 	this.OSStatus = this.SInt32;
-	
+
 	// SUPER ADVANCED TYPES // defined by "advanced types"
 	this.OSType = this.FourCharCode;
-	
-	
-	
+
+
+
 	// SUPER DUPER ADVANCED TYPES // defined by "super advanced types"
 
 	// GUESS TYPES - i know these are something else but setting them to voidptr_t or something just works and all the extra work isnt needed
@@ -211,16 +212,16 @@ var macTypes = function() {
 	this.EventTargetRef = this.OpaqueEventTargetRef.ptr;
 	this.FSEventStreamRef = this.__FSEventStream.ptr;
 	this.RgnHandle = this.OpaqueRgnHandle.ptr;
-	
+
 	// FURTHER ADVANCED STRUCTS
 	this.DialogRef = this.DialogPtr;
-	
+
 	// FURTHER ADV STRUCTS
 
 	// FUNCTION TYPES
 	this.CFAllocatorCopyDescriptionCallBack = ctypes.FunctionType(this.CALLBACK_ABI, this.CFStringRef, [this.void.ptr]).ptr; // https://developer.apple.com/library/ios/documentation/CoreFoundation/Reference/CFAllocatorRef/index.html#//apple_ref/doc/c_ref/CFAllocatorCopyDescriptionCallBack
-	this.CFAllocatorRetainCallBack = ctypes.FunctionType(this.CALLBACK_ABI, this.void.ptr, [this.void.ptr]).ptr; // https://developer.apple.com/library/ios/documentation/CoreFoundation/Reference/CFAllocatorRef/index.html#//apple_ref/doc/c_ref/CFAllocatorRetainCallBack //  typedef const void *(*CFAllocatorRetainCallBack) ( const void *info ); 
-	this.CFAllocatorReleaseCallBack = ctypes.FunctionType(this.CALLBACK_ABI, this.void, [this.void.ptr]).ptr; // https://developer.apple.com/library/ios/documentation/CoreFoundation/Reference/CFAllocatorRef/index.html#//apple_ref/doc/c_ref/CFAllocatorReleaseCallBack //  typedef void (*CFAllocatorReleaseCallBack) ( const void *info ); 
+	this.CFAllocatorRetainCallBack = ctypes.FunctionType(this.CALLBACK_ABI, this.void.ptr, [this.void.ptr]).ptr; // https://developer.apple.com/library/ios/documentation/CoreFoundation/Reference/CFAllocatorRef/index.html#//apple_ref/doc/c_ref/CFAllocatorRetainCallBack //  typedef const void *(*CFAllocatorRetainCallBack) ( const void *info );
+	this.CFAllocatorReleaseCallBack = ctypes.FunctionType(this.CALLBACK_ABI, this.void, [this.void.ptr]).ptr; // https://developer.apple.com/library/ios/documentation/CoreFoundation/Reference/CFAllocatorRef/index.html#//apple_ref/doc/c_ref/CFAllocatorReleaseCallBack //  typedef void (*CFAllocatorReleaseCallBack) ( const void *info );
 	this.CFArrayCopyDescriptionCallBack = ctypes.FunctionType(this.CALLBACK_ABI, this.CFStringRef, [this.void.ptr]).ptr;
 	this.CFArrayEqualCallBack = ctypes.FunctionType(this.CALLBACK_ABI, this.Boolean, [this.void.ptr, this.void.ptr]).ptr;
 	this.CFArrayReleaseCallBack = ctypes.FunctionType(this.CALLBACK_ABI, this.void, [this.CFAllocatorRef, this.void.ptr]).ptr;
@@ -230,11 +231,11 @@ var macTypes = function() {
 	this.FSEventStreamCallback = ctypes.FunctionType(this.CALLBACK_ABI, this.void, [this.ConstFSEventStreamRef, this.void.ptr, this.size_t, this.void.ptr, this.FSEventStreamEventFlags.ptr, this.FSEventStreamEventId.ptr]).ptr;
 	this.ModalFilterProcPtr = ctypes.FunctionType(this.CALLBACK_ABI, this.Boolean, [this.DialogRef, this.EventRecord.ptr, this.DialogItemIndex.ptr]).ptr;
 	this.CGEventTapCallBack = ctypes.FunctionType(this.CALLBACK_ABI, this.CGEventRef, [this.CGEventTapProxy, this.CGEventType, this.CGEventRef, this.VOID.ptr]).ptr;
-	
+
 	// ADVANCED FUNCTION TYPES
 	this.EventHandlerUPP = this.EventHandlerProcPtr;
 	this.ModalFilterUPP = this.ModalFilterProcPtr;
-	
+
 	// STRUCTS USING FUNC TYPES
 	this.AlertStdAlertParamRec = ctypes.StructType('AlertStdAlertParamRec', [
 		{ movable: this.Boolean },
@@ -268,21 +269,21 @@ var macTypes = function() {
 		{release: this.CFAllocatorReleaseCallBack},
 		{copyDescription: this.CFAllocatorCopyDescriptionCallBack}
 	]);
-	
-	
+
+
 	///// OBJC
-	
+
 	// SIMPLE OBJC TYPES
 	this.BOOL = ctypes.signed_char;
 	this.NSInteger = is64bit ? ctypes.long: ctypes.int;
 	this.NSUInteger = is64bit ? ctypes.unsigned_long : ctypes.unsigned_int;
-	
+
 	// ADV OBJC TYPES
 	this.NSBitmapFormat = this.NSUInteger;
 	this.NSEventType = this.NSUInteger;
 	this.NSEventMask = this.NSUInteger;
 	this.NSURLBookmarkCreationOptions = this.NSUInteger;
-	
+
 	// GUESS TYPES OBJC - they work though
 	this.id = ctypes.voidptr_t;
 	this.IMP = ctypes.voidptr_t;
@@ -290,9 +291,9 @@ var macTypes = function() {
 	this.Class = ctypes.voidptr_t;
 	this.NSEvent = ctypes.voidptr_t;
 	this.NSWindow = ctypes.voidptr_t;
-	
+
 	// NULL CONSTs that i use for vaiadic args
-	
+
 	// SIMPLE OBJC STRUCTS
 	this.Block_descriptor_1 = ctypes.StructType('Block_descriptor_1', [
 		{ reserved: this.unsigned_long_long },
@@ -306,7 +307,7 @@ var macTypes = function() {
 		{ 'width': this.CGFloat },
 		{ 'height': this.CGFloat }
 	]);
-	
+
 	// ADV OBJC STRUCTS
 	this.Block_literal_1 = ctypes.StructType('Block_literal_1', [
 		{ isa: this.void.ptr },
@@ -319,7 +320,7 @@ var macTypes = function() {
 		{ 'origin': this.NSPoint },
 		{ 'size': this.NSSize }
 	]);
-	
+
 	// FUNC OBJC TYPES
 	this.IMP_for_EventMonitorCallback = ctypes.FunctionType(this.CALLBACK_ABI, this.NSEvent.ptr, [this.id, this.NSEvent.ptr]);
 
@@ -376,10 +377,17 @@ var macInit = function() {
 		kCGWindowListOptionOnScreenBelowWindow: 4,
 		kCGWindowListOptionIncludingWindow: 8,
 		kCGWindowListExcludeDesktopElements: 16,
-		
+
+		kCGHIDEventTap: 0,
+	    kCGSessionEventTap: 1,
+	    kCGAnnotatedSessionEventTap: 2,
+
 		kCGHeadInsertEventTap: 0,
+		kCGTailAppendEventTap: 1,
+
 		kCGEventTapOptionDefault: 0,
-		
+		kCGEventTapOptionListenOnly: 1,
+
 		cmdKey: 256,
 		shiftKey: 512,
 		alphaLock: 1024,
@@ -388,10 +396,10 @@ var macInit = function() {
 		rightShiftKey: 8192,
 		rightOptionKey: 16384,
 		rightControlKey: 32768,
-		
+
 		kEventClassKeyboard: 0x6B657962,
 		kEventHotKeyPressed: 5,
-		
+
 		kCGEventNull: 0,
 		kCGEventLeftMouseDown: 1,
 		kCGEventLeftMouseUp: 2,
@@ -412,7 +420,7 @@ var macInit = function() {
 		kCGEventTapDisabledByTimeout: 0xFFFFFFFE, // this.TYPE.CGEventType('0xFFFFFFFE'),
 		kCGEventTapDisabledByUserInput: 0xFFFFFFFF, // this.TYPE.CGEventType('0xFFFFFFFF'),
 		kCGEventMaskForAllEvents: ctypes.UInt64('0xffffffffffffffff'), // #define kCGEventMaskForAllEvents	(~(CGEventMask)0) // https://github.com/sschiesser/ASK_server/blob/a51e2fbdac894c37d97142fc72faa35f89057744/MacOSX10.6/System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/CoreGraphics.framework/Versions/A/Headers/CGEventTypes.h#L380
-		
+
 		kCGMouseEventNumber: 0,
 		kCGMouseEventClickState: 1,
 		kCGMouseEventPressure: 2,
@@ -421,7 +429,7 @@ var macInit = function() {
 		kCGMouseEventDeltaY: 5,
 		kCGMouseEventInstantMouser: 6,
 		kCGMouseEventSubtype: 7,
-		
+
 		kCGScrollWheelEventDeltaAxis1: 11,
 		kCGScrollWheelEventDeltaAxis2: 12,
 		kCGScrollWheelEventDeltaAxis3: 13,
@@ -432,7 +440,7 @@ var macInit = function() {
 		kCGScrollWheelEventPointDeltaAxis2: 97,
 		kCGScrollWheelEventPointDeltaAxis3: 98,
 		kCGScrollWheelEventInstantMouser: 14,
-		
+
 		kCFRunLoopRunFinished: 1,
 		kCFRunLoopRunStopped: 2,
 		kCFRunLoopRunTimedOut: 3,
@@ -441,19 +449,29 @@ var macInit = function() {
 		kCGSOrderAbove: 1,
 		kCGSOrderBelow: -1,
 		kCGSOrderOut: 0,
-		
+
+		NX_SYSDEFINED: 14,
+
+		NX_KEYTYPE_SOUND_UP: 0,
+		NX_KEYTYPE_SOUND_DOWN: 1,
+		NX_KEYTYPE_PLAY: 16,
+		NX_KEYTYPE_NEXT: 17,
+		NX_KEYTYPE_PREVIOUS: 18,
+		NX_KEYTYPE_FAST: 19,
+		NX_KEYTYPE_REWIND: 20,
+
 		///////// OBJC - all consts are wrapped in a type as if its passed to variadic it needs to have type defind, see jsctypes chat with arai on 051015 357p
 		NO: self.TYPE.BOOL(0),
 		NSPNGFileType: self.TYPE.NSUInteger(4),
 		YES: self.TYPE.BOOL(1), // i do this instead of 1 becuase for varidic types we need to expclicitly define it
 		NIL: self.TYPE.void.ptr(ctypes.UInt64('0x0')), // needed for varidic args, as i cant pass null there
-		
+
 		NSFileWriteFileExistsError: 516, // i dont use this a variadic, just for compare so i dont wrap this in a type, but the type is  NSInteger. I figured this because NSError says its code value is NSInteger. The types for NSFileWriteFileExistsError says its enum - but by looking up code i can see that enum is type NSInteger - sources: https://developer.apple.com/library/ios/documentation/Cocoa/Reference/Foundation/Classes/NSError_Class/index.html#//apple_ref/occ/instp/NSError/code && https://developer.apple.com/library/ios/documentation/Cocoa/Reference/Foundation/Miscellaneous/Foundation_Constants/index.html#//apple_ref/doc/constant_group/NSError_Codes
 		NSURLBookmarkCreationSuitableForBookmarkFile: self.TYPE.NSURLBookmarkCreationOptions(1 << 10),
-		
+
 		NSApplicationActivateAllWindows: self.TYPE.NSUInteger(1 << 0),
 		NSApplicationActivateIgnoringOtherApps: self.TYPE.NSUInteger(1 << 1),
-		
+
 		NSLeftMouseDown: 1,				// TYPES.NSEventType
 		NSLeftMouseUp: 2,				// TYPES.NSEventType
 		NSRightMouseDown: 3,			// TYPES.NSEventType
@@ -487,17 +505,17 @@ var macInit = function() {
 		NSEventTypeQuickLook: 33,		// TYPES.NSEventType
 		NSEventTypePressure: 34,		// TYPES.NSEventType
 		NSUIntegerMax: this.TYPE.NSUInteger(is64bit ? '0xffffffff' : '0xffff'),		// TYPES.NSUInteger
-		
+
 		BLOCK_HAS_COPY_DISPOSE: 1 << 25,
 		BLOCK_HAS_CTOR: 1 << 26,
 		BLOCK_IS_GLOBAL: 1 << 28,
 		BLOCK_HAS_STRET: 1 << 29,
 		BLOCK_HAS_SIGNATURE: 1 << 30,
 	};
-	
+
 	// ADVANCED CONST
 	this.CONST.NULL = this.CONST.NIL.address();
-	
+
 	this.CONST.NSLeftMouseDownMask = 1 << this.CONST.NSLeftMouseDown;
 	this.CONST.NSLeftMouseUpMask = 1 << this.CONST.NSLeftMouseUp;
 	this.CONST.NSRightMouseDownMask = 1 << this.CONST.NSRightMouseDown;
@@ -542,22 +560,22 @@ var macInit = function() {
 			//default it opens the path, but some things are special like libc in mac is different then linux or like x11 needs to be located based on linux version
 			switch (path) {
 				case 'CarbonCore':
-				
+
 						_lib[path] = ctypes.open('/System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/CarbonCore');
-					
+
 					break;
 				case 'CoreFoundation':
-				
+
 						_lib[path] = ctypes.open('/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation');
-					
+
 					break;
 				case 'CoreGraphics':
-				
+
 						_lib[path] = ctypes.open('/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics');
-					
+
 					break;
 				case 'FSEvents':
-				
+
 						try {
 							// for osx 10.10
 							_lib[path] = ctypes.open('/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/FSEvents.framework/Versions/A/FSEvents');
@@ -568,7 +586,7 @@ var macInit = function() {
 							// for osx < 10.10
 							_lib[path] = lib('CarbonCore');
 						}
-					
+
 					break;
 				case 'libc':
 
@@ -603,9 +621,9 @@ var macInit = function() {
 
 					break;
 				case 'objc':
-				
+
 						_lib[path] = ctypes.open(ctypes.libraryName('objc'));
-					
+
 					break;
 				default:
 					try {
@@ -835,7 +853,7 @@ var macInit = function() {
 			 *   CFRunLoopRef rl,
 			 *   CFRunLoopTimerRef timer,
 			 *   CFStringRef mode
-			 * ); 
+			 * );
 			 */
 			return lib('CoreFoundation').declare('CFRunLoopAddTimer', self.TYPE.ABI,
 				self.TYPE.void,					// return
@@ -913,7 +931,7 @@ var macInit = function() {
 			 *   CFIndex order,
 			 *   CFRunLoopTimerCallBack callout,
 			 *   CFRunLoopTimerContext *context
-			 * ); 
+			 * );
 			 */
 			return lib('CoreFoundation').declare('CFRunLoopTimerCreate', self.TYPE.ABI,
 				self.TYPE.CFRunLoopTimerRef,		// return
@@ -943,7 +961,7 @@ var macInit = function() {
 			 *   CFAllocatorRef alloc,
 			 *   const UniChar *chars,
 			 *   CFIndex numChars
-			 * ); 
+			 * );
 			 */
 			return lib('CoreFoundation').declare('CFStringCreateWithCharacters', self.TYPE.ABI,
 				self.TYPE.CFStringRef,		// return
@@ -956,7 +974,7 @@ var macInit = function() {
 			/* https://developer.apple.com/library/mac/documentation/CoreFoundation/Reference/CFTypeRef/#//apple_ref/c/func/CFRelease
 			 * void CFRelease (
 			 *   CFTypeRef cf
-			 * ); 
+			 * );
 			 */
 			return lib('CoreFoundation').declare('CFRelease', self.TYPE.ABI,
 				self.TYPE.void,		// return
@@ -993,7 +1011,7 @@ var macInit = function() {
 			 *   CGContextRef c,
 			 *   CGRect rect,
 			 *   CGImageRef image
-			 * ); 
+			 * );
 			 */
 			return lib('CoreGraphics').declare('CGContextDrawImage', self.TYPE.ABI,
 				self.TYPE.void,		// return
@@ -1037,7 +1055,7 @@ var macInit = function() {
 			 * int64_t CGEventGetIntegerValueField (
 			 *   CGEventRef event,
 			 *   CGEventField field
-			 * ); 
+			 * );
 			 */
 			return lib('CoreGraphics').declare('CGEventGetIntegerValueField', self.TYPE.ABI,
 				self.TYPE.int64_t,		// return
@@ -1049,7 +1067,7 @@ var macInit = function() {
 			/* https://developer.apple.com/library/mac/documentation/Carbon/Reference/QuartzEventServicesRef/index.html#//apple_ref/c/macro/CGEventMaskBit
 			 * CGEventMask CGEventMaskBit (
 			 *   CGEventType eventType
-			 * ); 
+			 * );
 			 */
 			// its inlined apparently: as this doesnt work
 			  // return lib('CoreGraphics').declare('CGEventMaskBit', self.TYPE.ABI,
@@ -1060,6 +1078,27 @@ var macInit = function() {
 			return function(eventType) {
 				return self.TYPE.CGEventMask(1 << eventType);
 			};
+		},
+		CGEventTapCreate: function() {
+			/* https://developer.apple.com/library/mac/documentation/Carbon/Reference/QuartzEventServicesRef/index.html#//apple_ref/c/func/CGEventTapCreate
+			 * CFMachPortRef CGEventTapCreate (
+			 *   CGEventTapLocation tap
+			 *   CGEventTapPlacement place
+			 *   CGEventTapOptions options
+			 *   CGEventMask eventsOfInterest
+			 *   CGEventTapCallBack callback
+			 *   void *userInfo
+			 * );
+			 */
+			return lib('CoreGraphics').declare('CGEventTapCreate', self.TYPE.ABI,
+				self.TYPE.CFMachPortRef,
+				self.TYPE.CGEventTapLocation,
+				self.TYPE.CGEventTapPlacement,
+				self.TYPE.CGEventTapOptions,
+				self.TYPE.CGEventMask,
+				self.TYPE.CGEventTapCallBack,
+				self.TYPE.VOID.ptr
+			);
 		},
 		CGEventTapCreateForPSN: function() {
 			/* https://developer.apple.com/library/mac/documentation/Carbon/Reference/QuartzEventServicesRef/index.html#//apple_ref/c/func/CGEventTapCreateForPSN
@@ -1096,7 +1135,7 @@ var macInit = function() {
 			 *   uint32_t maxDisplays,
 			 *   CGDirectDisplayID *activeDisplays,
 			 *   uint32_t *displayCount
-			 * ); 
+			 * );
 			 */
 			return lib('CoreGraphics').declare('CGGetActiveDisplayList', self.TYPE.ABI,
 				self.TYPE.CGError,					// return
@@ -1137,7 +1176,7 @@ var macInit = function() {
 			 *    CGFloat y,
 			 *    CGFloat width,
 			 *    CGFloat height
-			 * ); 
+			 * );
 			 */
 			 /*
 			 // its inlined, so this declare doesnt work, see: http://stackoverflow.com/questions/30158864/cgrectmake-symbol-not-found#comment48456276_30173759
@@ -1161,7 +1200,7 @@ var macInit = function() {
 			 * bool CGRectMakeWithDictionaryRepresentation (
 			 *   CFDictionaryRef dict,
 			 *   CGRect *rect
-			 * ); 
+			 * );
 			 */
 			return lib('CoreGraphics').declare('CGRectMakeWithDictionaryRepresentation', self.TYPE.ABI,
 				ctypes.bool,				// return
@@ -1204,7 +1243,7 @@ var macInit = function() {
 			/* https://developer.apple.com/legacy/library/documentation/Carbon/Reference/Carbon_Event_Manager_Ref/index.html#//apple_ref/c/func/GetApplicationEventTarget
 			 *  EventTargetRef GetApplicationEventTarget (
 			 *    void
-			 * );  
+			 * );
 			 */
 			return lib('/System/Library/Frameworks/Carbon.framework/Frameworks/HIToolbox.framework/HIToolbox').declare('GetApplicationEventTarget', self.TYPE.ABI,
 				self.TYPE.EventTargetRef	// return
@@ -1220,7 +1259,7 @@ var macInit = function() {
 			/* https://developer.apple.com/legacy/library/documentation/Carbon/Reference/Carbon_Event_Manager_Ref/index.html#//apple_ref/c/func/GetApplicationEventTarget
 			 *  EventTargetRef GetEventDispatcherTarget (
 			 *    void
-			 * );  
+			 * );
 			 */
 			return lib('/System/Library/Frameworks/Carbon.framework/Frameworks/HIToolbox.framework/HIToolbox').declare('GetEventDispatcherTarget', self.TYPE.ABI,
 				self.TYPE.EventTargetRef	// return
@@ -1256,7 +1295,7 @@ var macInit = function() {
 			 *   EventTargetRef inTarget,
 			 *   OptionBits inOptions,
 			 *   EventHotKeyRef *outRef
-			 * ); 
+			 * );
 			 */
 			return lib('/System/Library/Frameworks/Carbon.framework/Frameworks/HIToolbox.framework/HIToolbox').declare('RegisterEventHotKey', self.TYPE.ABI,
 				self.TYPE.OSStatus,				// return
@@ -1272,7 +1311,7 @@ var macInit = function() {
 			/* https://developer.apple.com/legacy/library/documentation/Carbon/Reference/Carbon_Event_Manager_Ref/index.html#//apple_ref/c/func/RunCurrentEventLoop
 			 * OSStatus RunCurrentEventLoop (
 			 *   EventTimeout inTimeout
-			 * ); 
+			 * );
 			 */
 			return lib('/System/Library/Frameworks/Carbon.framework/Frameworks/HIToolbox.framework/HIToolbox').declare('RunCurrentEventLoop', self.TYPE.ABI,
 				self.TYPE.OSStatus,		// return
@@ -1283,7 +1322,7 @@ var macInit = function() {
 			/* https://developer.apple.com/legacy/library/documentation/Carbon/Reference/Carbon_Event_Manager_Ref/index.html#//apple_ref/c/func/UnregisterEventHotKey
 			 * OSStatus UnregisterEventHotKey (
 			 *   EventHotKeyRef inHotKeyCode
-			 * ); 
+			 * );
 			 */
 			return lib('/System/Library/Frameworks/Carbon.framework/Frameworks/HIToolbox.framework/HIToolbox').declare('UnregisterEventHotKey', self.TYPE.ABI,
 				self.TYPE.OSStatus,			// return
@@ -1291,7 +1330,7 @@ var macInit = function() {
 			);
 		},
 		WaitNextEvent: function() {
-			/* 
+			/*
 			 *
 			 */
 			return lib('/System/Library/Frameworks/Carbon.framework/Frameworks/HIToolbox.framework/HIToolbox').declare('WaitNextEvent', self.TYPE.ABI,
@@ -1307,7 +1346,7 @@ var macInit = function() {
 			/* https://developer.apple.com/library/mac/documentation/Cocoa/Reference/ObjCRuntimeRef/index.html#//apple_ref/c/func/objc_getClass
 			 * Class objc_getClass (
 			 *   const char *name
-			 * ); 
+			 * );
 			 */
 			return lib('objc').declare('objc_getClass', self.TYPE.ABI,
 				self.TYPE.Class,		// return
@@ -1319,8 +1358,8 @@ var macInit = function() {
 			 * id objc_msgSend (
 			 *   id self,
 			 *   SEL op,
-			 *   ... 
-			 * ); 
+			 *   ...
+			 * );
 			 */
 			return lib('objc').declare('objc_msgSend', self.TYPE.ABI,
 				self.TYPE.id,		// return
@@ -1333,7 +1372,7 @@ var macInit = function() {
 			/* https://developer.apple.com/library/mac/documentation/Cocoa/Reference/ObjCRuntimeRef/index.html#//apple_ref/c/func/objc_getClass
 			 * SEL sel_registerName (
 			 *   const char *str
-			 * ); 
+			 * );
 			 */
 			return lib('objc').declare('sel_registerName', self.TYPE.ABI,
 				self.TYPE.SEL,		// return
@@ -1344,7 +1383,7 @@ var macInit = function() {
 			/* https://developer.apple.com/library/mac/documentation/Cocoa/Reference/ObjCRuntimeRef/index.html#//apple_ref/c/func/objc_registerClassPair
 			 * void objc_registerClassPair (
 			 *   Class cls
-			 * ); 
+			 * );
 			 */
 			return lib('objc').declare('objc_registerClassPair', self.TYPE.ABI,
 				self.TYPE.void,	// return
@@ -1373,7 +1412,7 @@ var macInit = function() {
 			 *   SEL name,
 			 *   IMP imp,
 			 *   const char *types
-			 * ); 
+			 * );
 			 */
 			return lib('objc').declare('class_addMethod', self.TYPE.ABI,
 				self.TYPE.BOOL,		// return
@@ -1387,7 +1426,7 @@ var macInit = function() {
 			/* https://developer.apple.com/library/mac/documentation/Cocoa/Reference/ObjCRuntimeRef/index.html#//apple_ref/c/func/objc_disposeClassPair
 			 * void objc_disposeClassPair (
 			 *   Class cls
-			 * ); 
+			 * );
 			 */
 			return lib('objc').declare('objc_disposeClassPair', self.TYPE.ABI,
 				self.TYPE.void,	// return
@@ -1411,7 +1450,7 @@ var macInit = function() {
 			/* https://developer.apple.com/library/mac/documentation/Darwin/Reference/ManPages/man2/fcntl.2.html
 			 * http://linux.die.net/man/2/fcntl
 			 * fcntl() can take an optional third argument. Whether or not this argument is required is determined by cmd.
-			 * F_GETLK, F_SETLK and F_SETLKW are used to acquire, release, and test for the existence of record locks (also known as file-segment or file-region locks). The third argument, lock, is a pointer to a structure that has at least the following fields (in unspecified order). 
+			 * F_GETLK, F_SETLK and F_SETLKW are used to acquire, release, and test for the existence of record locks (also known as file-segment or file-region locks). The third argument, lock, is a pointer to a structure that has at least the following fields (in unspecified order).
 			 * int fcntl(int fd, int cmd);
 			 * int fcntl(int fd, int cmd, long arg);
 			 * int fcntl(int fd, int cmd, struct flock *lock);
@@ -1444,7 +1483,7 @@ var macInit = function() {
 			 *   FILE *stream
 			 * );
 			 */
-			return lib('libc').declare('fread', self.TYPE.ABI, 
+			return lib('libc').declare('fread', self.TYPE.ABI,
 				self.TYPE.size_t,		// return
 				self.TYPE.void.ptr,		// *ptr
 				self.TYPE.size_t, 		// size
@@ -1526,7 +1565,7 @@ var macInit = function() {
 			/* https://developer.apple.com/library/prerelease/mac/documentation/Performance/Reference/GCD_libdispatch_Ref/#//apple_ref/c/func/dispatch_get_main_queue
 			 *  dispatch_queue_t dispatch_get_main_queue (
 			 *   void
-			 * ); 
+			 * );
 			 */
 			// return lib('/usr/lib/system/libdispatch.dylib').declare('_dispatch_main_q', self.TYPE.ABI,
 			// 	self.TYPE.dispatch_queue_t	// return
@@ -1540,7 +1579,7 @@ var macInit = function() {
 			 * void dispatch_sync (
 			 *   dispatch_queue_t queue,
 			 *   dispatch_block_t block
-			 * ); 
+			 * );
 			 */
 			return lib('/usr/lib/system/libdispatch.dylib').declare('dispatch_sync', self.TYPE.ABI,
 				self.TYPE.void,					// return
@@ -1592,7 +1631,7 @@ var macInit = function() {
 
 					this.class[jsStr] = self.API('objc_msgSend')(self.HELPER.class('NSString'), self.HELPER.sel('alloc'));;
 
-					
+
 					var rez_initWithUTF8String = self.API('objc_msgSend')(this.class[jsStr], self.HELPER.sel('initWithUTF8String:'), self.TYPE.char.array()(jsStr));
 					this.coll[jsStr] = rez_initWithUTF8String;
 
@@ -1601,7 +1640,7 @@ var macInit = function() {
 				}
 				return this.coll[jsStr];
 			};
-			
+
 			this.releaseAll = function() {
 				for (var nsstring in this.coll) {
 					var rez_relNSS = self.API('objc_msgSend')(this.coll[nsstring], self.HELPER.sel('release'));
@@ -1619,20 +1658,20 @@ var macInit = function() {
 		createBlock: function(aFuncTypePtr) {
 			// based on work from here: https://github.com/trueinteractions/tint2/blob/f6ce18b16ada165b98b07869314dad1d7bee0252/modules/Bridge/core.js#L370-L394
 			var bl = self.TYPE.Block_literal_1();
-			
+
 			// Set the class of the instance
 			bl.isa = self.CONST._NSConcreteGlobalBlock;
-			
+
 			// Global flags
 			bl.flags = self.CONST.BLOCK_HAS_STRET;
 			bl.reserved = 0;
 			bl.invoke = aFuncTypePtr;
-			
+
 			// create descriptor
 			var desc = self.TYPE.Block_descriptor_1();
 			desc.reserved = 0;
 			desc.size = self.TYPE.Block_literal_1.size;
-			
+
 			// set descriptor into block literal
 			bl.descriptor = desc.address();
 
