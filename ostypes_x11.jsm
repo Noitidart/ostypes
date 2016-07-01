@@ -1951,6 +1951,17 @@ var x11Init = function() {
 		},
 		// end - XRANDR
 		// start - gtk
+		g_app_info_get_commandline: function() {
+			/* https://developer.gnome.org/gio/stable/GAppInfo.html#g-app-info-get-commandline
+			 * const char *g_app_info_get_commandline (
+			 *   GAppInfo *appinfo
+			 * );
+			 */
+			return lib('gio').declare('g_app_info_get_commandline', self.TYPE.ABI,
+				self.TYPE.char.ptr,		// return
+				self.TYPE.GAppInfo.ptr	// *appinfo
+			);
+		},
 		g_app_info_get_default_for_uri_scheme: function() {
 			/* https://developer.gnome.org/gio/stable/GAppInfo.html#g-app-info-get-default-for-uri-scheme
 			 * GAppInfo * g_app_info_get_default_for_uri_scheme (
@@ -1960,6 +1971,17 @@ var x11Init = function() {
 			return lib('gio').declare('g_app_info_get_default_for_uri_scheme', self.TYPE.ABI,
 				self.TYPE.GAppInfo.ptr,		// return
 				self.TYPE.char.ptr			// *uri_scheme
+			);
+		},
+		g_app_info_get_executable: function() {
+			/* https://developer.gnome.org/gio/stable/GAppInfo.html#g-app-info-get-executable
+			 * const char *g_app_info_get_executable (
+			 *   GAppInfo *appinfo
+			 * );
+			 */
+			return lib('gio').declare('g_app_info_get_executable', self.TYPE.ABI,
+				self.TYPE.char.ptr,		// return
+				self.TYPE.GAppInfo.ptr	// *appinfo
 			);
 		},
 		g_app_info_launch_uris: function() {
@@ -1977,6 +1999,17 @@ var x11Init = function() {
 				self.TYPE.GList.ptr,				// *uris
 				self.TYPE.GAppLaunchContext.ptr,	// *launch_context
 				self.TYPE.GError.ptr.ptr			// **error
+			);
+		},
+		g_desktop_app_info_get_filename: function() {
+			/* https://developer.gnome.org/gio/stable/gio-Desktop-file-based-GAppInfo.html#g-desktop-app-info-get-filename
+			 * const char *g_desktop_app_info_get_filename (
+			 *   GDesktopAppInfo *info
+			 * );
+			 */
+			return lib('gio').declare('g_desktop_app_info_get_filename', self.TYPE.ABI,
+				self.TYPE.char.ptr,				// return
+				self.TYPE.GDesktopAppInfo.ptr	// *info
 			);
 		},
 		g_desktop_app_info_new_from_filename: function() {
