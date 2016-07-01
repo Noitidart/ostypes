@@ -1726,9 +1726,11 @@ var macInit = function() {
 			return bl;
 		},
 		convertLongOSStatus: function(aJSInt) {
+			// aJSInt can be string of int
 			var daHex = '0x' + parseInt(aJSInt).toString(16);
 			var daOSStatus = ctypes.cast(ctypes.long_long(aJSInt), ctypes.int).value; // this can be looked up here - https://developer.apple.com/library/mac/documentation/Security/Reference/keychainservices/index.html#//apple_ref/c/econst/errSecAllocate
 			console.log(aJSInt, daHex, daOSStatus);
+			return daOSStatus;
 			// so like aJSInt of 4294967246 is hex 0xffffffce which is OSStatus of -50 which is errSecParam which means - One or more parameters passed to the function were not valid.
 		}
 	};
