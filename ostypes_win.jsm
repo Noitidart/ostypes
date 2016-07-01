@@ -1939,9 +1939,10 @@ var winInit = function() {
 
 		ObjectNameInformation: 1,
 
-		HKEY_CLASSES_ROOT: 0x80000000, // wrap it in self.TYPE.HKEY before use
-		HKEY_CURRENT_USER: self.TYPE.HKEY(0x80000001), // https://github.com/wine-mirror/wine/blob/9bd963065b1fb7b445d010897d5f84967eadf75b/include/winreg.h#L29
-		HKEY_LOCAL_MACHINE: self.TYPE.HKEY(0x80000002), // https://github.com/wine-mirror/wine/blob/9bd963065b1fb7b445d010897d5f84967eadf75b/include/winreg.h#L30
+		// wrap it in self.TYPE.HKEY before use
+		HKEY_CLASSES_ROOT: 0x80000000,
+		HKEY_CURRENT_USER: 0x80000001, // https://github.com/wine-mirror/wine/blob/9bd963065b1fb7b445d010897d5f84967eadf75b/include/winreg.h#L29
+		HKEY_LOCAL_MACHINE: 0x80000002, // https://github.com/wine-mirror/wine/blob/9bd963065b1fb7b445d010897d5f84967eadf75b/include/winreg.h#L30
 		HKEY_USERS: 0x80000003,
 		HKEY_PERFORMANCE_DATA: 0x80000004,
 		HKEY_CURRENT_CONFIG: 0x80000005,
