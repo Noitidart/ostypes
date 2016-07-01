@@ -88,6 +88,7 @@ var macTypes = function() {
 	this.ConstStringPtr = ctypes.unsigned_char.ptr;
 	this.EventTime = ctypes.double;
 	this.ItemCount = ctypes.unsigned_long;
+	this.UInt8 = ctypes.uint8_t; // osxtypes says ctypes.unsigned_char
 	this.SInt16 = ctypes.short;
 	this.SInt32 = ctypes.long;
 	this.UInt16 = ctypes.unsigned_short;
@@ -113,6 +114,7 @@ var macTypes = function() {
 	this.OSStatus = this.SInt32;
 
 	// SUPER ADVANCED TYPES // defined by "advanced types"
+	this.LSRolesMask = this.OptionBits;
 	this.OSType = this.FourCharCode;
 
 
@@ -131,6 +133,7 @@ var macTypes = function() {
 	this.__CFAllocator = ctypes.StructType('__CFAllocator');
 	this.__CFArray = ctypes.StructType('__CFArray');
 	this.__CFDictionary = ctypes.StructType('__CFDictionary');
+	this.__CFError = ctypes.StructType('__CFError');
 	this.__CFMachPort = ctypes.StructType('__CFMachPort');
 	this.__CFRunLoop = ctypes.StructType('__CFRunLoop');
 	this.__CFRunLoopSource = ctypes.StructType('__CFRunLoopSource');
@@ -158,6 +161,9 @@ var macTypes = function() {
 		{ eventClass: this.OSType },
 		{ eventKind: this.UInt32 }
 	]);
+	this.FSRef = ctypes.StructType('FSRef', [
+		{ hidden: this.UInt8.array(80) }
+	]);
 	this.OpaqueDialogPtr = ctypes.StructType('OpaqueDialogPtr');
 	this.OpaqueEventHandlerCallRef = ctypes.StructType('OpaqueEventHandlerCallRef');
 	this.OpaqueEventHandlerRef = ctypes.StructType('OpaqueEventHandlerRef');
@@ -182,6 +188,7 @@ var macTypes = function() {
 	this.CFAllocatorRef = this.__CFAllocator.ptr;
 	this.CFArrayRef = this.__CFArray.ptr;
 	this.CFDictionaryRef = this.__CFDictionary.ptr;
+	this.CFErrorRef = this.__CFError.ptr;
 	this.CFMachPortRef = this.__CFMachPort.ptr;
 	this.CFRunLoopRef = this.__CFRunLoop.ptr;
 	this.CFRunLoopSourceRef = this.__CFRunLoopSource.ptr;
@@ -460,6 +467,12 @@ var macInit = function() {
 		NX_KEYTYPE_PREVIOUS: 18,
 		NX_KEYTYPE_FAST: 19,
 		NX_KEYTYPE_REWIND: 20,
+
+		kLSRolesNone: 1,
+	    kLSRolesViewer: 2,
+	    kLSRolesEditor: 4,
+	    kLSRolesShell: 8,
+	    kLSRolesAll: 0xffffffff, // sources show this as -1 but type is uint32 so this should be 0xffffffff
 
 		///////// OBJC - all consts are wrapped in a type as if its passed to variadic it needs to have type defind, see jsctypes chat with arai on 051015 357p
 		NO: self.TYPE.BOOL(0),
@@ -1286,6 +1299,40 @@ var macInit = function() {
 				self.TYPE.void.ptr,				// *inUserData,
 				self.TYPE.EventHandlerRef.ptr	// *outRef
 			);
+		},
+		LSGetApplicationForURL: function() {
+			// < 10.10
+			/* https://developer.apple.com/library/mac/documentation/Carbon/Reference/LaunchServicesReference/#//apple_ref/c/func/LSGetApplicationForURL
+			 * OSStatus LSGetApplicationForURL (
+			 *   CFURLRef inURL,
+			 *   LSRolesMask inRoleMask,
+			 *   FSRef *outAppRef,
+			 *   CFURLRef *outAppURL
+		 	 * );
+			 */
+			return lib('/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/LaunchServices').declare('LSGetApplicationForURL', self.TYPE.ABI,
+				ostypes.TYPE.OSStatus,			// return
+				ostypes.TYPE.CFURLRef,			// inURL
+				ostypes.TYPE.LSRolesMask,		// inRoleMask
+				ostypes.TYPE.FSRef.ptr,			// *outAppRef
+				ostypes.TYPE.CFURLRef.ptr		// *outAppURL
+			);
+		},
+		LSCopyDefaultApplicationURLForURL: function() {
+			// 10.10+
+			/* https://developer.apple.com/library/mac/documentation/Carbon/Reference/LaunchServicesReference/#//apple_ref/c/func/LSCopyDefaultApplicationURLForURL
+			 * CFURLRef LSCopyDefaultApplicationURLForURL (
+			 *   CFURLRef inURL,
+			 *   LSRolesMask inRoleMask,
+			 *   CFErrorRef _Nullable *outError
+		     * );
+			 */
+			 return lib('/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/LaunchServices').declare('LSCopyDefaultApplicationURLForURL', self.TYPE.ABI,
+ 				ostypes.TYPE.CFURLRef,			// return
+ 				ostypes.TYPE.CFURLRef,			// inURL
+ 				ostypes.TYPE.LSRolesMask,		// inRoleMask
+ 				ostypes.TYPE.CFErrorRef.ptr		// *outError
+ 			);
 		},
 		RegisterEventHotKey: function() {
 			/* https://developer.apple.com/legacy/library/documentation/Carbon/Reference/Carbon_Event_Manager_Ref/index.html#//apple_ref/c/func/RegisterEventHotKey
