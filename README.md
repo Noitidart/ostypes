@@ -1,19 +1,19 @@
 ## Table of Contents
 
-- [How to download this into your addon](#)
-	- [As a Submodule](#)
-		- [Updating the Submodule](#)
-	- [I don't use git](#)
-- [Platform Detection Methods](#)
-	- [Off of Main Thread - Chrome Worker](#)
-	- [Main Thread](#)
-		- [OS Global](#)
-		- [Services.jsm](#)
-- [How to import the modules into your addon files](#)
-	- [Off of Main Thread - Chrome Worker](#)
-	- [Main Thread](#)
-- [Usage after importing the files](#)
-- [Why cutils.jsm and ctypes_math.jsm?](#)
+- [How to download this into your addon](#how-to-download-this-into-your-addon)
+	- [As a Submodule](#as-a-submodule)
+		- [Updating the Submodule](#updating-the-submodule)
+	- [I don't use git](#i-dont-use-git)
+- [Platform Detection Methods](#platform-detection-methods)
+	- [Off of Main Thread - Chrome Worker](#off-of-main-thread---chrome-worker)
+	- [Main Thread](#main-thread)
+		- [OS Global](#os-global)
+		- [Services.jsm](#servicesjsm)
+- [How to import the modules into your addon files](#how-to-import-the-modules-into-your-addon-files)
+	- [Off of Main Thread - Chrome Worker](#off-of-main-thread---chrome-worker-1)
+	- [Main Thread](#main-thread-1)
+- [Usage after importing the files](#usage-after-importing-the-files)
+- [Why cutils.jsm and ctypes_math.jsm?](#why-cutilsjsm-and-ctypes_mathjsm)
 
 ## How to download this into your addon
 ### As a Submodule
