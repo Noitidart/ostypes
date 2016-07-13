@@ -15,14 +15,17 @@ var xlibTypes = function() {
 	this.CALLBACK_ABI = ctypes.default_abi;
 	this.ABI = ctypes.default_abi;
 
-	///// C TYPES
-	// SIMPLE TYPES
+	var struct_const = {};
+	////////// C
+	///// TYPES
+	// TYPEs - Level 0
 	this.char = ctypes.char;
 	this.fd_set = ctypes.uint8_t; // This is supposed to be fd_set*, but on Linux at least fd_set is just an array of bitfields that we handle manually. this is for my fd_set_set helper functions link4765403
 	this.int = ctypes.int;
 	this.int16_t = ctypes.int16_t;
 	this.long = ctypes.long;
 	this.size_t = ctypes.size_t;
+	this.ssize_t = ctypes.ssize_t;
 	this.unsigned_char = ctypes.unsigned_char;
 	this.unsigned_int = ctypes.unsigned_int;
 	this.unsigned_long = ctypes.unsigned_long;
@@ -31,7 +34,17 @@ var xlibTypes = function() {
 	this.uint8_t = ctypes.uint8_t;
 	this.void = ctypes.void_t;
 
-	// SIMPLE STRUCTS
+	///// STRUCTS
+	struct_const.NAME_MAX = 255;
+
+	// STRUCTs - Level 0
+	this.inotify_event = ctypes.StructType('inotify_event', [ // http://man7.org/linux/man-pages/man7/inotify.7.html
+		{ wd: this.int },													// Watch descriptor
+		{ mask: this.uint32_t },											// Mask describing event
+		{ cookie: this.uint32_t },											// Unique cookie associating related events (for rename(2))
+		{ len: this.uint32_t },												// Size of name field
+		{ name: this.char.array(struct_const.NAME_MAX + 1) }	// Optional null-terminated name // Within a ufs filesystem the maximum length from http://www.unix.com/unix-for-dummies-questions-and-answers/4260-maximum-file-name-length.htmlof a filename is 255 and i do 256 becuause i wnant it null terminated
+	]);
 	this.timeval = ctypes.StructType('timeval', [
 		{ 'tv_sec': this.long },
 		{ 'tv_usec': this.long }
@@ -597,6 +610,65 @@ var x11Init = function() {
 	// XAtom.h - https://github.com/simonkwong/Shamoov/blob/64aa8d3d0f69710db48691f69440ce23eeb41ad0/SeniorTeamProject/Bullet/btgui/OpenGLWindow/optionalX11/X11/Xatom.h
 	// xlib.py - https://github.com/hazelnusse/sympy-old/blob/65f802573e5963731a3e7e643676131b6a2500b8/sympy/thirdparty/pyglet/pyglet/window/xlib/xlib.py#L88
 	this.CONST = {
+		//// C
+		NAME_MAX: 255,
+		/// inotify
+		// from https://github.com/dsoprea/PyInotify/blob/980610f91d4c3819dce54988cfec8f138599cedf/inotify/constants.py
+		// had to use https://github.com/D-Programming-Language/druntime/blob/61ba4b8d3c0052065c17ffc8eef4f11496f3db3e/src/core/sys/linux/sys/inotify.d#L53
+			// cuz otherwise it would throw SyntaxError: octal literals and octal escape sequences are deprecated
+	    // inotify_init1 flags.
+	    IN_CLOEXEC: 0x80000, // octal!2000000
+	    IN_NONBLOCK: 0x800, // octal!4000
+
+	    // Supported events suitable for MASK parameter of INOTIFY_ADD_WATCH.
+	    IN_ACCESS: 0x00000001,
+	    IN_MODIFY: 0x00000002,
+	    IN_ATTRIB: 0x00000004,
+	    IN_CLOSE_WRITE: 0x00000008,
+	    IN_CLOSE_NOWRITE: 0x00000010,
+	    IN_OPEN: 0x00000020,
+	    IN_MOVED_FROM: 0x00000040,
+	    IN_MOVED_TO: 0x00000080,
+	    IN_CREATE: 0x00000100,
+	    IN_DELETE: 0x00000200,
+	    IN_DELETE_SELF: 0x00000400,
+	    IN_MOVE_SELF: 0x00000800,
+
+	    // Events sent by kernel.
+	    IN_UNMOUNT: 0x00002000, // Backing fs was unmounted.
+	    IN_Q_OVERFLOW: 0x00004000, // Event queued overflowed.
+	    IN_IGNORED: 0x00008000, // File was ignored.
+
+	    // Special flags.
+	    IN_ONLYDIR: 0x01000000, // Only watch the path if it is a directory.
+	    IN_DONT_FOLLOW: 0x02000000, // Do not follow a sym link.
+	    IN_MASK_ADD: 0x20000000, // Add to the mask of an already existing watch.
+	    IN_ISDIR: 0x40000000, // Event occurred against dir.
+	    IN_ONESHOT: 0x80000000, // Only send event once.
+	    /// inotify
+
+		//// GIO
+		// GFileMonitorFlags
+		G_FILE_MONITOR_NONE: 0,
+		G_FILE_MONITOR_WATCH_MOUNTS: 1,
+		G_FILE_MONITOR_SEND_MOVED: 2,
+		G_FILE_MONITOR_WATCH_HARD_LINKS: 3,
+		G_FILE_MONITOR_WATCH_MOVES: 4,
+
+		// GFileMonitorEvent
+		G_FILE_MONITOR_EVENT_CHANGED: 0,
+		G_FILE_MONITOR_EVENT_CHANGES_DONE_HINT: 1,
+		G_FILE_MONITOR_EVENT_DELETED: 2,
+		G_FILE_MONITOR_EVENT_CREATED: 3,
+		G_FILE_MONITOR_EVENT_ATTRIBUTE_CHANGED: 4,
+		G_FILE_MONITOR_EVENT_PRE_UNMOUNT: 5,
+		G_FILE_MONITOR_EVENT_UNMOUNTED: 6,
+		G_FILE_MONITOR_EVENT_MOVED: 7,
+		G_FILE_MONITOR_EVENT_RENAMED: 8,
+		G_FILE_MONITOR_EVENT_MOVED_IN: 9,
+		G_FILE_MONITOR_EVENT_MOVED_OUT: 10,
+
+		//// X11
 		AnyPropertyType: 0,
 		BadAtom: 5,
 		BadValue: 2,
@@ -862,6 +934,12 @@ var x11Init = function() {
 		SCROLL_MASK: 1 << 21,
 		ALL_EVENTS_MASK: 0x3FFFFE
 	};
+
+	//////// ADVANCED CONST
+	//// C
+	this.CONST.IN_CLOSE = this.CONST.IN_CLOSE_WRITE | this.CONST.IN_CLOSE_NOWRITE;
+	this.CONST.IN_MOVE = this.CONST.IN_MOVED_FROM | this.CONST.IN_MOVED_TO;
+	this.CONST.IN_ALL_EVENTS = this.CONST.IN_ACCESS | this.CONST.IN_MODIFY | this.CONST.IN_ATTRIB | this.CONST.IN_CLOSE_WRITE | this.CONST.IN_CLOSE_NOWRITE | this.CONST.IN_OPEN | this.CONST.IN_MOVED_FROM | this.CONST.IN_MOVED_TO | this.CONST.IN_CREATE | this.CONST.IN_DELETE | this.CONST.IN_DELETE_SELF | this.CONST.IN_MOVE_SELF; // All events which a program can wait on.
 
 	var _lib = {}; // cache for lib
 	var libAttempter = function(aPath, aPrefered, aPossibles) {
@@ -2049,6 +2127,51 @@ var x11Init = function() {
 				self.TYPE.GError.ptr.ptr		// **error
 			);
 		},
+		g_object_unref: function() {
+			/* https://developer.gnome.org/gobject/stable/gobject-The-Base-Object-Type.html#g-object-unref
+			 * void g_object_unref (
+			 *   gpointer object
+		 	 * );
+			 */
+			return lib('gio').declare('g_object_unref', self.TYPE.ABI,
+				self.TYPE.void,		// return
+				self.TYPE.gpoiner	// object
+			);
+		},
+		g_signal_connect_data: function() {
+			/* https://developer.gnome.org/gobject/stable/gobject-Signals.html#g-signal-connect-data
+			 * gulong g_signal_connect_data (
+			 *   gpointer instance,
+			 *   gchar *detailed_signal,
+			 *   GCallback c_handler,
+			 *   gpointer data,
+			 *   GClosureNotify destroy_data,
+			 *   GConnectFlags connect_flags
+			 * );
+			 */
+			return lib('gio').delcare('g_signal_connect_data', self.TYPE.ABI,
+				self.TYPE.gulong,			// return
+				self.TYPE.gpointer,			// instance
+				self.TYPE.gchar.ptr,		// *detailed_signal
+				self.TYPE.GCallback,		// c_handler
+				self.TYPE.gpointer,			// data
+				self.TYPE.GClosureNotify,	// destroy_data
+				self.TYPE.GConnectFlags,	// connect_flags
+		 	);
+		},
+		g_signal_handler_disconnect: function() {
+			/* https://developer.gnome.org/gobject/stable/gobject-Signals.html#g-signal-handler-disconnect
+			 * void g_signal_handler_disconnect (
+			 *   gpointer instance,
+			 *   gulong handler_id
+		 	 * );
+			 */
+			return lib('gio').declare('g_signal_handler_disconnect', self.TYPE.ABI,
+				self.TYPE.void,		// return
+				self.TYPE.gpointer,	// instance
+   				self.TYPE.gulong	// handler_id
+			);
+		},
 		gdk_get_default_root_window: function() {
 			/* https://developer.gnome.org/gdk3/stable/gdk3-Windows.html#gdk-get-default-root-window
 			 * GdkWindow *gdk_get_default_root_window (void);
@@ -2231,6 +2354,57 @@ var x11Init = function() {
 		},
 		// end - gtk
 		// start - libc
+		close: function() {
+		   /* http://linux.die.net/man/2/close
+			*  int close(
+			*    int fd
+			*  );
+			*/
+			return lib('libc').declare('close', self.TYPE_ABI,
+				self.TYPE.int,		// return
+				self.TYPE.int		// fd
+			);
+		},
+		inotify_add_watch: function() {
+			/* http://linux.die.net/man/2/inotify_add_watch
+			 * int inotify_add_watch(
+			 *   int fd,
+			 *   const char *pathname,
+			 *   uint32_t mask
+			 * );
+			 */
+			 return lib('libc').declare('inotify_add_watch', self.TYPE.ABI,
+				self.TYPE.int,			// return
+				self.TYPE.int,			// fd
+				self.TYPE.char.ptr,	// *pathname
+				self.TYPE.uint32_t		// mask
+			);
+		},
+		inotify_init: function() {
+			/* http://linux.die.net/man/2/inotify_init
+			 * Notes: Pass 0 as flags if you want inotify_init1 to behave as `int inotify_init(void);`
+			 * int inotify_init1(
+			 *   int flags
+			 * );
+			 */
+			return lib('libc').declare('inotify_init1', self.TYPE.ABI,
+				self.TYPE.int,		// return
+				self.TYPE.int		// flags
+			);
+		},
+		inotify_rm_watch: function() {
+			/* http://linux.die.net/man/2/inotify_rm_watch
+			 * int inotify_rm_watch(
+			 *   int fd,
+			 *   int wd
+			 * );
+			 */
+			return lib('libc').declare('inotify_rm_watch', self.TYPE.ABI,
+				self.TYPE.int,		// return
+				self.TYPE.int,		// fd
+				self.TYPE.int		// wd
+			);
+		},
 		memcpy: function() {
 			/* http://linux.die.net/man/3/memcpy
 			 * void *memcpy (
@@ -2244,6 +2418,21 @@ var x11Init = function() {
 				self.TYPE.void.ptr,	// *dest
 				self.TYPE.void.ptr,	// *src
 				self.TYPE.size_t	// count
+			);
+		},
+		read: function() {
+			/* http://linux.die.net/man/2/read
+			 *  ssize_t read(
+			 *    int fd,
+			 *    void *buf,
+			 *    size_t count;
+			 *  );
+			 */
+			return lib('libc').declare('read', self.TYPE.ABI,
+				self.TYPE.ssize_t,		// return
+				self.TYPE.int,			// fd
+				self.TYPE.void.ptr, 	// *buf
+				self.TYPE.size_t		// count
 			);
 		},
 		select: function() {
