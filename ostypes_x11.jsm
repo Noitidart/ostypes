@@ -2156,7 +2156,7 @@ var x11Init = function() {
 				self.TYPE.GCallback,		// c_handler
 				self.TYPE.gpointer,			// data
 				self.TYPE.GClosureNotify,	// destroy_data
-				self.TYPE.GConnectFlags,	// connect_flags
+				self.TYPE.GConnectFlags		// connect_flags
 		 	);
 		},
 		g_signal_handler_disconnect: function() {
