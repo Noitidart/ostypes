@@ -263,14 +263,17 @@ var xlibTypes = function() {
 		{ possible: this.RROutput.ptr }
 	]);
 
-	/////////////// GTK stuff temporary for test, i want to use x11 for everything
-	// SIMPLE TYPES
+	//////// GTK
+	//// TYPES
+	// TYPEs - Level 0
 	this.CARD32 = /^(Alpha|hppa|ia64|ppc64|s390|x86_64)-/.test(core.os.xpcomabi) ? ctypes.unsigned_int : ctypes.unsigned_long;
 	this.gchar = ctypes.char;
 	this.GAppInfo = ctypes.StructType('GAppInfo');
 	this.GAppLaunchContext = ctypes.StructType('GAppLaunchContext');
 	this.GBytes = ctypes.StructType('_GBytes');
+	this.GCallback = this.void.ptr; // https://developer.gnome.org/gobject/stable/gobject-Closures.html#GCallback
 	this.GCancellable = ctypes.StructType('_GCancellable');
+	this.GConnectFlags = ctypes.unsigned_int; // guess as its enum
 	this.GdkColormap = ctypes.StructType('GdkColormap');
 	this.GDesktopAppInfo = ctypes.StructType('GDesktopAppInfo');
 	this.GdkDisplay = ctypes.StructType('GdkDisplay');
@@ -288,6 +291,7 @@ var xlibTypes = function() {
 	this.gdouble = ctypes.double;
 	this.GFile = ctypes.StructType('_GFile');
 	this.GFileMonitor = ctypes.StructType('_GFileMonitor');
+	this.GFileMonitorFlags = ctypes.unsigned_int; // guess as its enum
 	this.gint = ctypes.int;
 	this.gpointer = ctypes.void_t.ptr;
 	this.GtkWidget = ctypes.StructType('GtkWidget');
@@ -298,31 +302,35 @@ var xlibTypes = function() {
 	this.guint32 = ctypes.unsigned_int;
 	this.gulong = ctypes.unsigned_long;
 
-	// ADVANCED TYPES // defined by "simple types"
+	// TYPEs - Level 2
 	this.gboolean = this.gint;
 	this.GQuark = this.guint32;
 
-	///
+	//// STRUCTS
+	// STRUCTs - Level GUESS
 	this.GdkXEvent = this.XEvent;
 	//this.GdkEvent = ctypes.StructType('GdkEvent', [
 
 	//]);
 	this.GdkEvent = ctypes.void_t;
 
-	// SIMPLE STRUCTS
-	this.GError = new ctypes.StructType('GError', [
+	// STRUCTs - Level 1
+	this.GClosure = ctypes.StructType('GClosure');
+	this.GError = ctypes.StructType('GError', [
 		{'domain': this.GQuark},
 		{'code': ctypes.int},
 		{'message': ctypes.char.ptr}
 	]);
-	this.GList = new ctypes.StructType('GList', [
+	this.GList = ctypes.StructType('GList', [
 		{'data': ctypes.voidptr_t},
 		{'next': ctypes.voidptr_t},
 		{'prev': ctypes.voidptr_t}
 	]);
 
-	// FUNCTION TYPES
+	//// FUNCTYPES
+	// FUNCTTYPEs - Level 1
 	this.GdkFilterFunc = ctypes.FunctionType(this.CALLBACK_ABI, this.GdkFilterReturn, [this.GdkXEvent.ptr, this.GdkEvent.ptr, this.gpointer]).ptr; // https://developer.gnome.org/gdk3/stable/gdk3-Windows.html#GdkFilterFunc
+	this.GClosureNotify = ctypes.FunctionType(this.CALLBACK_ABI, this.void, [this.gpointer, this.GClosure.ptr]).ptr; // https://developer.gnome.org/gobject/stable/gobject-Closures.html#GClosureNotify
 	// end - gtk
 
 	/////////////// XCB stuff
@@ -667,6 +675,10 @@ var x11Init = function() {
 		G_FILE_MONITOR_EVENT_RENAMED: 8,
 		G_FILE_MONITOR_EVENT_MOVED_IN: 9,
 		G_FILE_MONITOR_EVENT_MOVED_OUT: 10,
+
+		// GConnectFlags
+		G_CONNECT_AFTER: 0,
+		G_CONNECT_SWAPPED: 1,
 
 		//// X11
 		AnyPropertyType: 0,
@@ -2099,6 +2111,23 @@ var x11Init = function() {
 			return lib('gio').declare('g_desktop_app_info_new_from_filename', self.TYPE.ABI,
 				self.TYPE.GDesktopAppInfo.ptr,	// return
 				self.TYPE.gchar.ptr				// *filename
+			);
+		},
+		g_file_monitor_directory: function() {
+			/* https://developer.gnome.org/gio/stable/GFile.html#g-file-monitor-directory
+			 * GFileMonitor *g_file_monitor_directory (
+			 *   GFile *file,
+			 *   GFileMonitorFlags flags,
+			 *   GCancellable *cancellable,
+			 *   GError **error
+		 	 * );
+			 */
+			return lib('gio').declare('g_file_monitor_directory', self.TYPE.ABI,
+				self.TYPE.GFileMonitor.ptr,		// return
+				self.TYPE.GFile.ptr,			// *file
+				self.TYPE.GFileMonitorFlags,	// flags
+				self.TYPE.GCancellable.ptr,		// *cancellable
+				self.TYPE.GError.ptr.ptr		// **error
 			);
 		},
 		g_file_new_for_path: function() {
