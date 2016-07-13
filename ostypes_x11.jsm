@@ -2164,7 +2164,7 @@ var x11Init = function() {
 			 */
 			return lib('gio').declare('g_object_unref', self.TYPE.ABI,
 				self.TYPE.void,		// return
-				self.TYPE.gpoiner	// object
+				self.TYPE.gpointer	// object
 			);
 		},
 		g_signal_connect_data: function() {
