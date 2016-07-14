@@ -1749,4 +1749,25 @@ var macInit = function() {
 	};
 }
 
+// helper function
+function importServicesJsm() {
+	if (!this.DedicatedWorkerGlobalScope && typeof(Services) == 'undefined') {
+		if (typeof(Cu) == 'undefined') {
+			if (typeof(Components) != 'undefined') {
+				// Bootstrap
+				var { utils:Cu } = Components;
+			} else if (typeof(require) != 'undefined') {
+				// Addon SDK
+				var { Cu } = require('chrome');
+			} else {
+				console.warn('cannot import Services.jsm');
+			}
+		}
+		if (typeof(Cu) != 'undefined') {
+			Cu.import('resource://gre/modules/Services.jsm');
+		}
+	}
+}
+
+// init
 var ostypes = new macInit();
