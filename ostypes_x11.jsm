@@ -331,6 +331,7 @@ var xlibTypes = function() {
 	// FUNCTTYPEs - Level 1
 	this.GdkFilterFunc = ctypes.FunctionType(this.CALLBACK_ABI, this.GdkFilterReturn, [this.GdkXEvent.ptr, this.GdkEvent.ptr, this.gpointer]).ptr; // https://developer.gnome.org/gdk3/stable/gdk3-Windows.html#GdkFilterFunc
 	this.GClosureNotify = ctypes.FunctionType(this.CALLBACK_ABI, this.void, [this.gpointer, this.GClosure.ptr]).ptr; // https://developer.gnome.org/gobject/stable/gobject-Closures.html#GClosureNotify
+	this.GFileMonitor_changed_signal = ctypes.FunctionType(this.CALLBACK_ABI, this.void, [this.GFileMonitor.ptr, this.GFile.ptr, this.gFile.ptr, this.GFileMonitorEvent, this.gpointer]).ptr; // void user_function (GFileMonitor *monitor, GFile *file, GFile *other_file, GFileMonitorEvent event_type, gpointer user_data) // the `GFileMonitor_changed_signal` name is my made up name
 	// end - gtk
 
 	/////////////// XCB stuff
