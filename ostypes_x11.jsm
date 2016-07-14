@@ -291,6 +291,7 @@ var xlibTypes = function() {
 	this.gdouble = ctypes.double;
 	this.GFile = ctypes.StructType('_GFile');
 	this.GFileMonitor = ctypes.StructType('_GFileMonitor');
+	this.GFileMonitorEvent = ctypes.unsigned_int; // guess as its enum
 	this.GFileMonitorFlags = ctypes.unsigned_int; // guess as its enum
 	this.gint = ctypes.int;
 	this.gpointer = ctypes.void_t.ptr;
