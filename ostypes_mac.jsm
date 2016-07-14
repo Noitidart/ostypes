@@ -10,6 +10,8 @@ if (ctypes.voidptr_t.size == 4 /* 32-bit */) {
 	throw new Error('huh??? not 32 or 64 bit?!?!');
 }
 
+var osname = OS.Constants.Sys.Name.toLowerCase();
+
 var macTypes = function() {
 
 	// ABIs
@@ -604,7 +606,7 @@ var macInit = function() {
 					break;
 				case 'libc':
 
-						switch (core.os.name) {
+						switch (osname) {
 							case 'darwin':
 								_lib[path] = ctypes.open('libc.dylib');
 								break;
