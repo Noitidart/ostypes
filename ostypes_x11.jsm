@@ -2178,7 +2178,7 @@ var x11Init = function() {
 			 *   GConnectFlags connect_flags
 			 * );
 			 */
-			return lib('gio').delcare('g_signal_connect_data', self.TYPE.ABI,
+			return lib('gio').declare('g_signal_connect_data', self.TYPE.ABI,
 				self.TYPE.gulong,			// return
 				self.TYPE.gpointer,			// instance
 				self.TYPE.gchar.ptr,		// *detailed_signal
