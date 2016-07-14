@@ -10,7 +10,18 @@ if (ctypes.voidptr_t.size == 4 /* 32-bit */) {
 	throw new Error('huh??? not 32 or 64 bit?!?!');
 }
 
-var osname = OS.Constants.Sys.Name.toLowerCase();
+var osname;
+if (this.DedicatedWorkerGlobalScope) {
+	OS.Constants.Sys.Name.toLowerCase();
+} else {
+	importServicesJsm();
+	if (typeof(Services) == 'undefined') {
+		// failed to import, so just set to `linux`
+		osname = 'linux';
+	} else {
+		osname = Services.appinfo.OS.toLowerCase();
+	}
+}
 
 var macTypes = function() {
 

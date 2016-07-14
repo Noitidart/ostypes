@@ -10,7 +10,18 @@ if (ctypes.voidptr_t.size == 4 /* 32-bit */) {
 	throw new Error('huh??? not 32 or 64 bit?!?!');
 }
 
-var osname = OS.Constants.Sys.Name.toLowerCase();
+var osname;
+if (this.DedicatedWorkerGlobalScope) {
+	OS.Constants.Sys.Name.toLowerCase();
+} else {
+	importServicesJsm();
+	if (typeof(Services) == 'undefined') {
+		// failed to import, so just set to `linux`
+		osname = 'linux';
+	} else {
+		osname = Services.appinfo.OS.toLowerCase();
+	}
+}
 
 var fxversion; // needed to figure out if should use gtk2 or gtk3
 if (this.DedicatedWorkerGlobalScope) {
@@ -3603,8 +3614,6 @@ var x11Init = function() {
 	};
 };
 
-var ostypes = new x11Init();
-
 // helper function
 function importServicesJsm() {
 	if (!this.DedicatedWorkerGlobalScope && typeof(Services) == 'undefined') {
@@ -3624,3 +3633,6 @@ function importServicesJsm() {
 		}
 	}
 }
+
+// init
+var ostypes = new x11Init();
