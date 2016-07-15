@@ -3554,6 +3554,17 @@ var winInit = function() {
 				self.TYPE.PROPVARIANT.ptr		// *pvar
 			);
 		},
+		PulseEvent: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms684914(v=vs.85).aspx
+			 * BOOL WINAPI PulseEvent(
+			 *   __in_ HANDLE hEvent
+			 * );
+			 */
+			return lib('kernel32').declare('PulseEvent', self.TYPE.ABI,
+				self.TYPE.BOOL,		// return
+				self.TYPE.HANDLE	// hEvent
+			);
+		},
 		QueryDosDevice: function() {
 			/* https://msdn.microsoft.com/en-us/library/windows/desktop/aa365461%28v=vs.85%29.aspx
 			 * DWORD WINAPI QueryDosDevice(
