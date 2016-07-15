@@ -2396,6 +2396,23 @@ var winInit = function() {
 				self.TYPE.DWORD				// dwOffset
 			);
 		},
+		CreateEvent: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms682396(v=vs.85).aspx
+			 * HANDLE WINAPI CreateEvent(
+			 *   __in_opt_ LPSECURITY_ATTRIBUTES lpEventAttributes,
+			 *   __in_     BOOL                  bManualReset,
+			 *   __in_     BOOL                  bInitialState,
+			 *   __in_opt_ LPCTSTR               lpName
+			 * );
+			 */
+			return lib('kernel32').declare(ifdef_UNICODE ? 'CreateEventW' : 'CreateEventA', self.TYPE.ABI,
+				self.TYPE.HANDLE,					// return
+				self.TYPE.LPSECURITY_ATTRIBUTES,	// lpEventAttributes
+				self.TYPE.BOOL,						// bManualReset
+				self.TYPE.BOOL,						// bInitialState
+				self.TYPE.LPCTSTR					// lpName
+			);
+		},
 		CreateFile: function() {
 			/* https://msdn.microsoft.com/en-us/library/windows/desktop/aa363858%28v=vs.85%29.aspx
 			 * HANDLE WINAPI CreateFile(
