@@ -4010,6 +4010,25 @@ var winInit = function() {
 				self.TYPE.VARIANTARG.ptr	// *pvarg
 			);
 		},
+		WaitForMultipleObjectsEx: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms687028%28v=vs.85%29.aspx
+			 * DWORD WINAPI WaitForMultipleObjectsEx(
+			 *   __in_  DWORD nCount,
+			 *   __in_  const HANDLE *lpHandles,
+			 *   __in_  BOOL bWaitAll,
+			 *   __in_  DWORD dwMilliseconds,
+			 *   __in_  BOOL bAlertable
+			 * );
+			 */
+			return lib('kernel32').declare('WaitForMultipleObjectsEx', self.TYPE.ABI,
+				self.TYPE.DWORD,		// return
+				self.TYPE.DWORD,		// nCount
+				self.TYPE.HANDLE.ptr,	// *lpHandles
+				self.TYPE.BOOL,			// bWaitAll
+				self.TYPE.DWORD,		// dwMilliseconds
+				self.TYPE.BOOL			// bAlertable
+			);
+		},
 		WaitForSingleObjectEx: function() {
 			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms687036(v=vs.85).aspx
 			 * DWORD WINAPI WaitForSingleObjectEx(
