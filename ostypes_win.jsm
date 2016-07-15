@@ -203,6 +203,12 @@ var winTypes = function() {
 		{ FileNameLength: this.ULONG },
 		{ FileName: this.WCHAR.array(OS.Constants.Win.MAX_PATH) } // { FileName: this.WCHAR.array(1) }
 	]);
+	this.FILE_NOTIFY_INFORMATION = ctypes.StructType('FILE_NOTIFY_INFORMATION', [
+		{ NextEntryOffset: this.DWORD },
+		{ Action: this.DWORD },
+		{ FileNameLength: this.DWORD },
+		{ FileName: ctypes.ArrayType(this.WCHAR, 1) }, // not null terminated
+	]);
 	this.FILETIME = ctypes.StructType('_FILETIME', [ // http://msdn.microsoft.com/en-us/library/windows/desktop/ms724284%28v=vs.85%29.aspx
 	  { 'dwLowDateTime': this.DWORD },
 	  { 'dwHighDateTime': this.DWORD }
@@ -643,6 +649,7 @@ var winTypes = function() {
 
 	// FUNCTION TYPES
 	this.EnumFontFamProc = ctypes.FunctionType(this.CALLBACK_ABI, this.int, [this.ENUMLOGFONT.ptr, this.NEWTEXTMETRIC.ptr, this.DWORD, this.LPARAM]); // https://msdn.microsoft.com/en-us/library/windows/desktop/dd162621%28v=vs.85%29.aspx
+	this.FileIOCompletionRoutine = ctypes.FunctionType(this.CALLBACK_ABI, this.VOID, [this.DWORD, this.DWORD, this.LPOVERLAPPED]);
 	this.MONITORENUMPROC = ctypes.FunctionType(this.CALLBACK_ABI, this.BOOL, [this.HMONITOR, this.HDC, this.LPRECT, this.LPARAM]);
 	this.LowLevelMouseProc = ctypes.FunctionType(this.CALLBACK_ABI, this.LRESULT, [this.INT, this.WPARAM, this.LPARAM]);
 	this.WNDPROC = ctypes.FunctionType(this.CALLBACK_ABI, this.LRESULT, [
@@ -666,6 +673,7 @@ var winTypes = function() {
 	// ADV FUNC TYPES
 	this.FONTENUMPROC = this.EnumFontFamProc.ptr;
 	this.HOOKPROC = this.LowLevelMouseProc.ptr; // not a guess really, as this is the hook type i use, so yeah it has to be a pointer to it
+	this.LPOVERLAPPED_COMPLETION_ROUTINE = this.FileIOCompletionRoutine.ptr;
 
 	// STRUCTS USING FUNC TYPES
 	this.WNDCLASS = ctypes.StructType('tagWNDCLASS', [
@@ -1970,7 +1978,7 @@ var winInit = function() {
 		QS_ALLEVENTS: 0x04BF,
 		QS_ALLINPUT: 0x04FF,
 		WAIT_ABANDONED_0: 0x00000080, // 128
-		WAIT_FAILED: self.TYPE.DWORD('0xFFFFFFFF'),
+		WAIT_FAILED: 0xFFFFFFFF,
 		WAIT_IO_COMPLETION: 0x000000C0, // 192
 		WAIT_OBJECT_0: 0,
 		WAIT_TIMEOUT: 0x00000102, // 258
@@ -2088,7 +2096,25 @@ var winInit = function() {
 		PIPE_WAIT: 0x00000000,
 		PIPE_NOWAIT: 0x00000001,
 
-		INFINITE: 0xFFFFFFFF
+		INFINITE: 0xFFFFFFFF,
+
+		FILE_NOTIFY_CHANGE_FILE_NAME: 0x00000001,
+		FILE_NOTIFY_CHANGE_DIR_NAME: 0x00000002,
+		FILE_NOTIFY_CHANGE_ATTRIBUTES: 0x00000004,
+		FILE_NOTIFY_CHANGE_SIZE: 0x00000008,
+		FILE_NOTIFY_CHANGE_LAST_WRITE: 0x00000010,
+		FILE_NOTIFY_CHANGE_LAST_ACCESS: 0x00000020,
+		FILE_NOTIFY_CHANGE_CREATION: 0x00000040,
+		FILE_NOTIFY_CHANGE_SECURITY: 0x00000100,
+
+		FILE_ACTION_ADDED: 0x00000001,
+		FILE_ACTION_REMOVED: 0x00000002,
+		FILE_ACTION_MODIFIED: 0x00000003,
+		FILE_ACTION_RENAMED_OLD_NAME: 0x00000004,
+		FILE_ACTION_RENAMED_NEW_NAME: 0x00000005,
+
+		FILE_FLAG_BACKUP_SEMANTICS: 0x02000000, // 33554432
+		FILE_LIST_DIRECTORY: 0x0001
 	};
 
 	var _lib = {}; // cache for lib
