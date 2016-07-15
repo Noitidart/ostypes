@@ -2073,6 +2073,21 @@ var winInit = function() {
 		eCapture: 1,
 		eAll: 2,
 		EDataFlow_enum_count: 3
+
+		//
+		PIPE_ACCESS_DUPLEX: 0x00000003,
+		PIPE_ACCESS_INBOUND: 0x00000001,
+		PIPE_ACCESS_OUTBOUND: 0x00000002,
+		FILE_FLAG_FIRST_PIPE_INSTANCE: 0x00080000,
+		FILE_FLAG_WRITE_THROUGH: 0x80000000,
+		FILE_FLAG_OVERLAPPED: 0x40000000,
+		PIPE_TYPE_BYTE: 0x00000000,
+		PIPE_TYPE_MESSAGE: 0x00000004,
+		PIPE_READMODE_BYTE: 0x00000000,
+		PIPE_READMODE_MESSAGE: 0x00000002,
+		PIPE_WAIT: 0x00000000,
+		PIPE_NOWAIT: 0x00000001
+
 	};
 
 	var _lib = {}; // cache for lib
@@ -2316,21 +2331,6 @@ var winInit = function() {
 				self.TYPE.VOID	// return
 			);
 		},
-		CreateHardLink: function() {
-			/* https://msdn.microsoft.com/en-us/library/windows/desktop/aa363860%28v=vs.85%29.aspx
-			 * BOOL WINAPI CreateHardLink(
-			 *   __in_        LPCTSTR lpFileName,
-			 *   __in_        LPCTSTR lpExistingFileName,
-			 *   __reserved_  LPSECURITY_ATTRIBUTES lpSecurityAttributes
-			 * );
-			 */
-			return lib('kernel32').declare('CreateHardLinkW', self.TYPE.ABI,
-				self.TYPE.BOOL,					// return
-				self.TYPE.LPCTSTR,				// lpFileName
-				self.TYPE.LPCTSTR,				// lpExistingFileName
-				self.TYPE.LPSECURITY_ATTRIBUTES	// lpSecurityAttributes
-			);
-		},
 		CreateCompatibleBitmap: function() {
 			/* http://msdn.microsoft.com/en-us/library/windows/desktop/dd183488%28v=vs.85%29.aspx
 			 * HBITMAP CreateCompatibleBitmap(
@@ -2416,6 +2416,46 @@ var winInit = function() {
 				self.TYPE.DWORD,					// dwCreationDisposition
 				self.TYPE.DWORD,					// dwFlagsAndAttributes
 				self.TYPE.HANDLE					// hTemplateFile
+			);
+		},
+		CreateNamedPipe: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/aa365150(v=vs.85).aspx
+			 * HANDLE WINAPI CreateNamedPipe(
+			 *   __in_     LPCTSTR               lpName,
+			 *   __in_     DWORD                 dwOpenMode,
+			 *   __in_     DWORD                 dwPipeMode,
+			 *   __in_     DWORD                 nMaxInstances,
+			 *   __in_     DWORD                 nOutBufferSize,
+			 *   __in_     DWORD                 nInBufferSize,
+			 *   __in_     DWORD                 nDefaultTimeOut,
+			 *   __in_opt_ LPSECURITY_ATTRIBUTES lpSecurityAttributes
+			 * );
+			 */
+			return lib('kernel32').declare(ifdef_UNICODE ? 'CreateNamedPipeW' : 'CreateNamedPipeA', self.TYPE.ABI,
+				self.TYPE.HANDLE,					// return
+				self.TYPE.LPCTSTR,					// lpName
+				self.TYPE.DWORD,					// dwOpenMode
+				self.TYPE.DWORD,					// dwPipeMode
+				self.TYPE.DWORD,					// nMaxInstances
+				self.TYPE.DWORD,					// nOutBufferSize
+				self.TYPE.DWORD,					// nInBufferSize
+				self.TYPE.DWORD,					// nDefaultTimeOut
+				self.TYPE.LPSECURITY_ATTRIBUTES		// lpSecurityAttributes
+			);
+		},
+		CreateHardLink: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/aa363860%28v=vs.85%29.aspx
+			 * BOOL WINAPI CreateHardLink(
+			 *   __in_        LPCTSTR lpFileName,
+			 *   __in_        LPCTSTR lpExistingFileName,
+			 *   __reserved_  LPSECURITY_ATTRIBUTES lpSecurityAttributes
+			 * );
+			 */
+			return lib('kernel32').declare('CreateHardLinkW', self.TYPE.ABI,
+				self.TYPE.BOOL,					// return
+				self.TYPE.LPCTSTR,				// lpFileName
+				self.TYPE.LPCTSTR,				// lpExistingFileName
+				self.TYPE.LPSECURITY_ATTRIBUTES	// lpSecurityAttributes
 			);
 		},
 		CreateSymbolicLink: function() {
