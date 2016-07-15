@@ -3606,6 +3606,31 @@ var winInit = function() {
 				self.TYPE.DWORD			// ucchMax
 			);
 		},
+		ReadDirectoryChanges: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/aa365465%28v=vs.85%29.aspx
+			 * BOOL WINAPI ReadDirectoryChangesW(
+			 *   __in_         HANDLE hDirectory,
+			 *   __out_        LPVOID lpBuffer,
+			 *   __in_         DWORD nBufferLength,
+			 *   __in_         BOOL bWatchSubtree,
+			 *   __in_         DWORD dwNotifyFilter,
+			 *   __out_opt_    LPDWORD lpBytesReturned,
+			 *   __inout_opt_  LPOVERLAPPED lpOverlapped,
+			 *   __in_opt_     LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine
+			 * );
+			 */
+			return lib('kernel32').declare('ReadDirectoryChangesW', self.TYPE.ABI,
+				self.TYPE.BOOL,								// return
+				self.TYPE.HANDLE,							// hDirectory,
+				self.TYPE.LPVOID,							// lpBuffer,
+				self.TYPE.DWORD,							// nBufferLength,
+				self.TYPE.BOOL,								// bWatchSubtree,
+				self.TYPE.DWORD,							// dwNotifyFilter,
+				self.TYPE.LPDWORD,							// lpBytesReturned,
+				self.TYPE.LPOVERLAPPED,						// lpOverlapped,
+				self.TYPE.LPOVERLAPPED_COMPLETION_ROUTINE	// lpCompletionRoutine
+			);
+		}
 		ReadFile: function() {
 			/* https://msdn.microsoft.com/en-us/library/windows/desktop/aa365467%28v=vs.85%29.aspx
 			 * BOOL WINAPI ReadFile(
