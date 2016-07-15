@@ -1653,6 +1653,12 @@ var macInit = function() {
 	// end - function declares
 
 	this.HELPER = {
+		closeLibs: function() {
+			for (var a_lib in _lib) {
+				ctypes.close(a_lib);
+			}
+			_lib = {};
+		},
 		makeCFStr: function(jsStr) {
 			// js str is just a string
 			// returns a CFStr that must be released with CFRelease when done

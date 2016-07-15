@@ -2072,7 +2072,7 @@ var winInit = function() {
 		eRender: 0,
 		eCapture: 1,
 		eAll: 2,
-		EDataFlow_enum_count: 3
+		EDataFlow_enum_count: 3,
 
 		//
 		PIPE_ACCESS_DUPLEX: 0x00000003,
@@ -4205,6 +4205,12 @@ var winInit = function() {
 	// end - function declares
 
 	this.HELPER = {
+		closeLibs: function() {
+			for (var a_lib in _lib) {
+				ctypes.close(a_lib);
+			}
+			_lib = {};
+		},
 		checkHRESULT: function(hr /*HRESULT*/, funcName /*jsStr*/) {
 			// https://msdn.microsoft.com/en-us/library/windows/desktop/ff485842%28v=vs.85%29.aspx
 			// throws if bad hresult

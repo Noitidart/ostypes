@@ -3355,6 +3355,12 @@ var x11Init = function() {
 	this._cacheXCBAtoms = {};
 
 	this.HELPER = {
+		closeLibs: function() {
+			for (var a_lib in _lib) {
+				ctypes.close(a_lib);
+			}
+			_lib = {};
+		},
 		gdkWinPtrToXID: function(aGDKWindowPtr) {
 			var xidOfWin;
 			if (parseInt(fxversion) <= 45) {
