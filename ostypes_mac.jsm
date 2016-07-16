@@ -360,12 +360,12 @@ var macInit = function() {
 	var _const = {}; // lazy load consts
 	this.CONST = {
 		get CGRectNull () { if (!('CGRectNull' in _const)) { _const['CGRectNull'] = lib('CoreGraphics').declare('CGRectNull', self.TYPE.CGRect); } return _const['CGRectNull']; },
-		get kCFTypeArrayCallBacks () { if (!('kCFTypeArrayCallBacks' in _const)) { _const['kCFTypeArrayCallBacks'] = lib('CoreFoundation').declare('kCFTypeArrayCallBacks', self.TYPE.CFArrayCallBacks); } return _const['kCFTypeArrayCallBacks']; },
 		get _NSConcreteGlobalBlock () { if (!('_NSConcreteGlobalBlock' in _const)) { _const['_NSConcreteGlobalBlock'] = lib('objc').declare('_NSConcreteGlobalBlock', self.TYPE.void.ptr); } return _const['_NSConcreteGlobalBlock']; },
 		get kCFAllocatorDefault () { if (!('kCFAllocatorDefault' in _const)) { _const['kCFAllocatorDefault'] = lib('CoreFoundation').declare('kCFAllocatorDefault', self.TYPE.CFAllocatorRef); } return _const['kCFAllocatorDefault']; },
 		get kCFAllocatorSystemDefault () { if (!('kCFAllocatorSystemDefault' in _const)) { _const['kCFAllocatorSystemDefault'] = lib('CoreFoundation').declare('kCFAllocatorSystemDefault', self.TYPE.CFAllocatorRef); } return _const['kCFAllocatorSystemDefault']; },
 		get kCFRunLoopDefaultMode () { if (!('kCFRunLoopDefaultMode' in _const)) { _const['kCFRunLoopDefaultMode'] = lib('CoreFoundation').declare('kCFRunLoopDefaultMode', self.TYPE.CFStringRef); } return _const['kCFRunLoopDefaultMode']; },
 		get kCFRunLoopCommonModes () { if (!('kCFRunLoopCommonModes' in _const)) { _const['kCFRunLoopCommonModes'] = lib('CoreFoundation').declare('kCFRunLoopCommonModes', self.TYPE.CFStringRef); } return _const['kCFRunLoopCommonModes']; },
+		get kCFTypeArrayCallBacks () { if (!('kCFTypeArrayCallBacks' in _const)) { _const['kCFTypeArrayCallBacks'] = lib('CoreFoundation').declare('kCFTypeArrayCallBacks', self.TYPE.CFArrayCallBacks); } return _const['kCFTypeArrayCallBacks']; },
 		get CGSDefaultConnection () { if (!('CGSDefaultConnection' in _const)) { _const['CGSDefaultConnection'] = self.API('_CGSDefaultConnection')(); } return _const['CGSDefaultConnection']; }, // https://gist.github.com/Noitidart/3664c5c2059c9aa6779f#file-cgsprivate-h-L39
 		kCGErrorSuccess: 0,
 		kCGNullDirectDisplay: 0,
@@ -486,6 +486,31 @@ var macInit = function() {
 	    kLSRolesEditor: 4,
 	    kLSRolesShell: 8,
 	    kLSRolesAll: 0xffffffff, // sources show this as -1 but type is uint32 so this should be 0xffffffff
+
+		kFSEventStreamCreateFlagFileEvents: 16, // https://github.com/bizonix/DropBoxLibrarySRC/blob/2e4a151caa88b48653f31a22cb207fff851b75f8/pyc_decrypted/latest/pymac/constants.py#L165
+		kFSEventStreamCreateFlagNoDefer: 2,
+		kFSEventStreamCreateFlagWatchRoot: 4,
+		kFSEventStreamEventFlagNone: 0x00000000,
+		kFSEventStreamEventFlagMustScanSubDirs: 0x00000001,
+		kFSEventStreamEventFlagUserDropped: 0x00000002,
+		kFSEventStreamEventFlagKernelDropped: 0x00000004,
+		kFSEventStreamEventFlagEventIdsWrapped: 0x00000008,
+		kFSEventStreamEventFlagHistoryDone: 0x00000010,
+		kFSEventStreamEventFlagRootChanged: 0x00000020,
+		kFSEventStreamEventFlagMount: 0x00000040,
+		kFSEventStreamEventFlagUnmount: 0x00000080,
+		kFSEventStreamEventFlagItemCreated: 0x00000100,
+		kFSEventStreamEventFlagItemRemoved: 0x00000200,
+		kFSEventStreamEventFlagItemInodeMetaMod: 0x00000400,
+		kFSEventStreamEventFlagItemRenamed: 0x00000800,
+		kFSEventStreamEventFlagItemModified: 0x00001000,
+		kFSEventStreamEventFlagItemFinderInfoMod: 0x00002000,
+		kFSEventStreamEventFlagItemChangeOwner: 0x00004000,
+		kFSEventStreamEventFlagItemXattrMod: 0x00008000,
+		kFSEventStreamEventFlagItemIsFile: 0x00010000,
+		kFSEventStreamEventFlagItemIsDir: 0x00020000,
+		kFSEventStreamEventFlagItemIsSymlink: 0x00040000,
+		kFSEventStreamEventIdSinceNow: '0xFFFFFFFFFFFFFFFF', // must use wrapped in `self.TYPE.UInt64`
 
 		///////// OBJC - all consts are wrapped in a type as if its passed to variadic it needs to have type defind, see jsctypes chat with arai on 051015 357p
 		NO: self.TYPE.BOOL(0),
@@ -889,7 +914,7 @@ var macInit = function() {
 				self.TYPE.CFStringRef			// mode
 			);
 		},
-		CFRunLoopGetCurrent: function() {
+			CFRunLoopGetCurrent: function() {
 			return lib('CoreFoundation').declare('CFRunLoopGetCurrent', self.TYPE.ABI,
 				self.TYPE.CFRunLoopRef
 			);
@@ -1264,6 +1289,76 @@ var macInit = function() {
 				self.TYPE.CGRect,
 				self.TYPE.CGRect,
 				self.TYPE.CGRect
+			);
+		},
+		FSEventsGetCurrentEventId: function() {
+			/* https://developer.apple.com/library/mac/documentation/Darwin/Reference/FSEvents_Ref/#//apple_ref/c/func/FSEventsGetCurrentEventId
+			 * extern FSEventStreamEventId FSEventsGetCurrentEventId( void);
+			 */
+			return lib('FSEvents').declare('FSEventsGetCurrentEventId', self.TYPE.ABI,
+				self.TYPE.FSEventStreamEventId
+			);
+		},
+		FSEventStreamCreate: function() {
+			/* https://developer.apple.com/library/mac/documentation/Darwin/Reference/FSEvents_Ref/#//apple_ref/c/func/FSEventStreamCreate
+			 * extern FSEventStreamRef FSEventStreamCreate( CFAllocatorRef allocator, FSEventStreamCallback callback, FSEventStreamContext *context, CFArrayRef pathsToWatch, FSEventStreamEventId sinceWhen, CFTimeInterval latency, FSEventStreamCreateFlags flags);
+			 */
+			return lib('FSEvents').declare('FSEventStreamCreate', self.TYPE.ABI,
+				self.TYPE.FSEventStreamRef,
+				self.TYPE.CFAllocatorRef,
+				self.TYPE.FSEventStreamCallback,
+				self.TYPE.FSEventStreamContext.ptr,
+				self.TYPE.CFArrayRef,
+				self.TYPE.FSEventStreamEventId,
+				self.TYPE.CFTimeInterval,
+				self.TYPE.FSEventStreamCreateFlags
+			);
+		},
+		FSEventStreamInvalidate: function() {
+			/* https://developer.apple.com/library/mac/documentation/Darwin/Reference/FSEvents_Ref/#//apple_ref/c/func/FSEventStreamInvalidate
+			 * extern void FSEventStreamInvalidate( FSEventStreamRef streamRef);
+			 */
+			return lib('FSEvents').declare('FSEventStreamInvalidate', self.TYPE.ABI,
+				self.TYPE.void,
+				self.TYPE.FSEventStreamRef
+			);
+		},
+		FSEventStreamRelease: function() {
+			/* https://developer.apple.com/library/mac/documentation/Darwin/Reference/FSEvents_Ref/#//apple_ref/c/func/FSEventStreamRelease
+			 * extern void FSEventStreamRelease( FSEventStreamRef streamRef);
+			 */
+			return lib('FSEvents').declare('FSEventStreamRelease', self.TYPE.ABI,
+				self.TYPE.void,
+				self.TYPE.FSEventStreamRef
+			);
+		},
+		FSEventStreamScheduleWithRunLoop: function() {
+			/* https://developer.apple.com/library/mac/documentation/Darwin/Reference/FSEvents_Ref/#//apple_ref/c/func/FSEventStreamScheduleWithRunLoop
+			 * extern void FSEventStreamScheduleWithRunLoop( FSEventStreamRef streamRef, CFRunLoopRef runLoop, CFStringRef runLoopMode);
+			 */
+			return lib('FSEvents').declare('FSEventStreamScheduleWithRunLoop', self.TYPE.ABI,
+				self.TYPE.void,
+				self.TYPE.FSEventStreamRef,
+				self.TYPE.CFRunLoopRef,
+				self.TYPE.CFStringRef
+			);
+		},
+		FSEventStreamStart: function() {
+			/* https://developer.apple.com/library/mac/documentation/Darwin/Reference/FSEvents_Ref/#//apple_ref/c/func/FSEventStreamStart
+			 * extern Boolean FSEventStreamStart( FSEventStreamRef streamRef);
+			 */
+			return lib('FSEvents').declare('FSEventStreamStart', self.TYPE.ABI,
+				self.TYPE.Boolean,
+				self.TYPE.FSEventStreamRef
+			);
+		},
+		FSEventStreamStop: function() {
+			/* https://developer.apple.com/library/mac/documentation/Darwin/Reference/FSEvents_Ref/#//apple_ref/c/func/FSEventStreamStop
+			 * extern void FSEventStreamStop( FSEventStreamRef streamRef);
+			 */
+			return lib('FSEvents').declare('FSEventStreamStop', self.TYPE.ABI,
+				self.TYPE.void,
+				self.TYPE.FSEventStreamRef
 			);
 		},
 		GetApplicationEventTarget: function() {
