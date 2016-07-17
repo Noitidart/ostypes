@@ -914,7 +914,7 @@ var macInit = function() {
 				self.TYPE.CFStringRef			// mode
 			);
 		},
-			CFRunLoopGetCurrent: function() {
+		CFRunLoopGetCurrent: function() {
 			return lib('CoreFoundation').declare('CFRunLoopGetCurrent', self.TYPE.ABI,
 				self.TYPE.CFRunLoopRef
 			);
@@ -1359,6 +1359,21 @@ var macInit = function() {
 			return lib('FSEvents').declare('FSEventStreamStop', self.TYPE.ABI,
 				self.TYPE.void,
 				self.TYPE.FSEventStreamRef
+			);
+		},
+		FSEventStreamUnscheduleFromRunLoop: function() {
+			/* https://developer.apple.com/library/mac/documentation/Darwin/Reference/FSEvents_Ref/#//apple_ref/c/func/FSEventStreamUnscheduleFromRunLoop
+			 * extern void FSEventStreamUnscheduleFromRunLoop(
+			 *   FSEventStreamRef streamRef,
+			 *   CFRunLoopRef runLoop,
+			 *   CFStringRef runLoopMode
+		 	 * );
+			 */
+			return lib('FSEvents').declare('FSEventStreamUnscheduleFromRunLoop', self.TYPE.ABI,
+				self.TYPE.void,					// return
+				self.TYPE.FSEventStreamRef,		// streamRef
+				self.TYPE.CFRunLoopRef,			// runLoop
+				self.TYPE.CFStringRef			// runLoopMode
 			);
 		},
 		GetApplicationEventTarget: function() {
