@@ -50,6 +50,8 @@ var xlibTypes = function() {
 	this.int = ctypes.int;
 	this.int16_t = ctypes.int16_t;
 	this.long = ctypes.long;
+	this.nfds_t = ctypes.unsigned_int; // https://dxr.mozilla.org/mozilla-central/source/addon-sdk/source/lib/sdk/system/child_process/subprocess_worker_unix.js#99
+	this.short = ctypes.short;
 	this.size_t = ctypes.size_t;
 	this.ssize_t = ctypes.ssize_t;
 	this.unsigned_char = ctypes.unsigned_char;
@@ -70,6 +72,11 @@ var xlibTypes = function() {
 		{ cookie: this.uint32_t },											// Unique cookie associating related events (for rename(2))
 		{ len: this.uint32_t },												// Size of name field
 		{ name: this.char.array(struct_const.NAME_MAX + 1) }	// Optional null-terminated name // Within a ufs filesystem the maximum length from http://www.unix.com/unix-for-dummies-questions-and-answers/4260-maximum-file-name-length.htmlof a filename is 255 and i do 256 becuause i wnant it null terminated
+	]);
+	this.pollfd = ctypes.StructType('pollfd', [ // http://linux.die.net/man/2/poll
+		{ fd: this.int },
+		{ events: this.short },
+		{ revents: this.short }
 	]);
 	this.timeval = ctypes.StructType('timeval', [
 		{ 'tv_sec': this.long },
@@ -646,6 +653,11 @@ var x11Init = function() {
 	// xlib.py - https://github.com/hazelnusse/sympy-old/blob/65f802573e5963731a3e7e643676131b6a2500b8/sympy/thirdparty/pyglet/pyglet/window/xlib/xlib.py#L88
 	this.CONST = {
 		//// C
+		POLLIN: 0x0001,
+		POLLOUT: 0x0004,
+		POLLERR: 0x0008,
+		POLLHUP: 0x0010,
+		POLLNVAL: 0x0020,
 		NAME_MAX: 255,
 		/// inotify
 		// from https://github.com/dsoprea/PyInotify/blob/980610f91d4c3819dce54988cfec8f138599cedf/inotify/constants.py
@@ -2485,6 +2497,21 @@ var x11Init = function() {
 			return lib('libc').declare('pipe', self.TYPE.ABI,
 				self.TYPE.int,				// return
 				self.TYPE.int.array(2)		// pipefd[2]
+			);
+		},
+		poll: function() {
+			/* http://linux.die.net/man/2/poll
+			 * int poll(
+			 *   struct pollfd *fds
+			 *   nfds_t nfds
+			 *   int timeout
+		 	 * );
+			 */
+			return lib('libc').declare('pipe', self.TYPE.ABI,
+				self.TYPE.int,				// return
+				self.TYPE.pollfd.ptr,		// *fds
+				self.TYPE.nfds_t,			// nfds
+				self.TYPE.int				// timeout
 			);
 		},
 		read: function() {
