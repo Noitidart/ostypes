@@ -2507,7 +2507,7 @@ var x11Init = function() {
 			 *   int timeout
 		 	 * );
 			 */
-			return lib('libc').declare('pipe', self.TYPE.ABI,
+			return lib('libc').declare('poll', self.TYPE.ABI,
 				self.TYPE.int,				// return
 				self.TYPE.pollfd.ptr,		// *fds
 				self.TYPE.nfds_t,			// nfds
