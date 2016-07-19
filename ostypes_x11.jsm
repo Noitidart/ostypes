@@ -2476,6 +2476,17 @@ var x11Init = function() {
 				self.TYPE.size_t	// count
 			);
 		},
+		pipe: function() {
+			/* http://linux.die.net/man/2/pipe
+			 * int pipe(
+			 *   int pipefd[2]
+		 	 * );
+			 */
+			return lib('libc').declare('pipe', self.TYPE.ABI,
+				self.TYPE.int,				// return
+				self.TYPE.int.array(2)		// pipefd[2]
+			);
+		},
 		read: function() {
 			/* http://linux.die.net/man/2/read
 			 *  ssize_t read(
@@ -2508,6 +2519,21 @@ var x11Init = function() {
 				self.TYPE.fd_set.ptr,	// *writefds // This is supposed to be fd_set*, but on Linux at least fd_set is just an array of bitfields that we handle manually. link4765403
 				self.TYPE.fd_set.ptr,	// *exceptfds // This is supposed to be fd_set*, but on Linux at least fd_set is just an array of bitfields that we handle manually. link4765403
 				self.TYPE.timeval.ptr	// *timeout
+			);
+		},
+		write: function() {
+			/* http://linux.die.net/man/2/write
+			 * ssize_t write(
+			 *   int fd,
+			 *   const void *buf,
+			 *   size_t count
+		 	 * );
+			 */
+			return lib('libc').declare('write', self.TYPE.ABI,
+				self.TYPE.ssize_t,		// return
+				self.TYPE.int,			// fd
+				self.TYPE.void.ptr,		// *buf
+				self.TYPE.size_t		// count
 			);
 		},
 		// end - libc

@@ -57,21 +57,21 @@ function utilsInit() {
 		}
 		return obj;
 	};
-	
+
 	this.jscEqual = function(obj1, obj2) {
 		// ctypes numbers equal
 		// compares obj1 and obj2
 		// if equal returns true, else returns false
-		
+
 		// check if equal first
 		var str1 = obj1;
 		var str2 = obj2;
-		
+
 		var str1 = this.jscGetDeepest(str1); //cuz apparently its not passing by reference
 		var str2 = this.jscGetDeepest(str2); //cuz apparently its not passing by reference
-		
+
 		//console.info('comparing:', str1, str2);
-		
+
 		if (str1 == str2) {
 			return true;
 		} else {
@@ -79,7 +79,7 @@ function utilsInit() {
 		}
 	};
 	// end - comparison stuff
-	
+
 	// start - mem stuff mimicking
 	this.memset = function(array, val, size) {
 		/* http://stackoverflow.com/questions/24466228/memset-has-no-dll-so-how-ctype-it
@@ -92,12 +92,12 @@ function utilsInit() {
 			array[i] = val;
 		}
 	};
-	
+
 	this.memcpy = function(dst, src, size) {
 		/* https://gist.github.com/nmaier/ab4bfe59e8c8fcdc5b90
 		 * This would be in theory good enough and is a reasonable memcpy implementation
 		 * (although we could test if both arrays are the same and skip the copy in that case).
-		 * 
+		 *
 		 * But we want memmove, which makes sure that if the arrays overlap data will be still
 		 * copied correctly. To do that, we need to compare the addresses and if src.address() < dst.address() then
 		 * we'll need to copy back to front, else if src.address() < dst.address() then copy front to back, or
@@ -112,7 +112,7 @@ function utilsInit() {
 			dst[i] = src[i];
 		}
 	};
-	
+
 	this.comparePointers = function(a, b) {
 		/* https://gist.github.com/nmaier/ab4bfe59e8c8fcdc5b90
 		 */
@@ -121,7 +121,7 @@ function utilsInit() {
 			ctypes.cast(b, ctypes.uintptr_t).value
 		);
 	};
-	
+
 	this.memmove = function(dst, src, size) {
 		/* https://gist.github.com/nmaier/ab4bfe59e8c8fcdc5b90
 		 * by @nmaier
@@ -147,7 +147,7 @@ function utilsInit() {
 		}
 	};
 	// end - mem stuff mimicking
-	
+
 	// start - my alternative to .readStringReplaceMalformed
 	this.readAsChar8ThenAsChar16 = function(stringPtr, known_len, jschar) {
 		// when reading as jschar it assumes max length of 500
@@ -199,11 +199,11 @@ function utilsInit() {
 		}
 	};
 	// end - my alternative to .readStringReplaceMalformed
-	
+
 	this.strOfPtr = function(ptr) {
 		// ptr must be something.address() something can be `ctypes.int.array(5)()` or `ctypes.int()` or anything like that
 		// to read this later on do: `ctypes.int.ptr(ctypes.UInt64(RETURNED_PTRSTR_OF_THIS_FUNC)).contents`
-		
+
 		/* EXAMPLE 1 - shows you cant pass just a `ctypes.blah.array(10)()` here as its not auto converted to ptr. if you pass this (`ctypes.blah.array(10)()`) to argument of a ctypes declared function it gets converted to a ptr im pretty sure (maybe auto converted even if in field of struct)
 		 *   var events_to_monitor = ctypes.int.array(10)();
 		 *   events_to_monitor.toString(); // "ctypes.int.array(10)([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])"
@@ -214,7 +214,7 @@ function utilsInit() {
 		 *   readIntArrPtr.contents // CData { length: 10 }
 		 *   readIntArrPtr.contents.toString(); // "ctypes.int.array(10)([0, 0, 0, 3, 0, 0, 0, 0, 0, 0])"
 		 */
-		 
+
 		/* EXAMPLE 2
 		 *   var i = ctypes.int(10);
 		 *   i.value = 5; // this just shows how you can change the number contained inside without having to do `ctypes.int(NEW_NUM_HERE)` again
@@ -223,7 +223,7 @@ function utilsInit() {
 		 *   var readIntPtr = ctypes.int.ptr(ctypes.UInt64(ptrStr));
 		 *   readIntPtr // CData { contents: 5 }
 		 */
-		 
+
 		/* EXAMPLE 3 - with string
 		 * var a = ctypes.char.array(100).ptr(ctypes.UInt64('0x1cf1e710')); // you must know the length, like i knew it was 100
 		 * a.contents.readString(); //gives you value
@@ -231,37 +231,37 @@ function utilsInit() {
 		 * a.contents.addressOfElement(0).contents = 97
 		 * // or use cutils.modifyCStr
 		 */
-		 
+
 		var ptrStr = ptr.toString().match(/.*"(.*?)"/); // can alternatively do `'0x' + ctypes.cast(num_files.address(), ctypes.uintptr_t).value.toString(16)`
-		
+
 		if (!ptrStr) {
 			throw new Error('Could not find address string, make sure you passed a .address(), ptr.toString() was: ' + ptr.toString());
 		}
-		
+
 		return ptrStr[1];
 	};
-	
+
 	this.modifyCStr =  function(ctypesCharArr, newStr_js) {
 		// changes contents of a c string without changing the .address() of it
 		// ctypesCharArr must be at least newStr_js.length + 1 (+1 for null terminator)
 		// returns nothing, this acts on the ctypesCharArr itself
-		
+
 		/* EXAMPLE
 		var cstr = ctypes.char.array(100)('hi');
 		cstr.address().toString(); // "ctypes.char.array(100).ptr(ctypes.UInt64("0x1440ad60"))"
 		cstr.readString(); // "hi"
-		
+
 		cutils.modifyCStr(cstr, 'bye');
 		cstr.address().toString(); // "ctypes.char.array(100).ptr(ctypes.UInt64("0x1440ad60"))"
 		cstr.readString(); "bye"
 		*/
-		
+
 		if (newStr_js.length+1 >= ctypesCharArr.length) {
 			throw new Error('not enough room in ctypesCharArr for the newStr_js and its null terminator');
 		}
-		
+
 		//console.info('pre mod readString():', ctypesCharArr.readString().toString());
-		
+
 		for (var i=0; i<ctypesCharArr.length; i++) {
 			var charCodeAtCurrentPosition = ctypesCharArr.addressOfElement(i).contents;
 			if (charCodeAtCurrentPosition != 0) {
@@ -271,14 +271,14 @@ function utilsInit() {
 				break;
 			}
 		}
-		
+
 		for (var i=0; i<newStr_js.length; i++) {
 			ctypesCharArr.addressOfElement(i).contents = newStr_js.charCodeAt(i);
 		}
-		
+
 		//console.info('post mod readString():', ctypesCharArr.readString().toString());
 	};
-	
+
 	this.typeOfField = function(structDef, fieldName) {
 		for (var i=0; i<structDef.fields.length; i++) {
 			for (var f in structDef.fields[i]) {
@@ -289,7 +289,7 @@ function utilsInit() {
 			}
 		}
 	};
-	
+
 	// HollowStructure - taken from - https://dxr.mozilla.org/mozilla-central/source/toolkit/components/osfile/modules/osfile_shared_allthreads.jsm#812 - on 010816
 	function osfile_shared_allthreads_Type(name, implementation) {
 	  if (!(typeof name == "string")) {
@@ -440,6 +440,19 @@ function utilsInit() {
 		}
 		return result;
 	  }
+	};
+
+	// var cutilsIter = (arr_c, actor) => { var arr = new Array(arr_c.length); arr.forEach( (_, i) => arr[i]=actor(arr_c[i]) ); return arr; } // wont work due to bug https://bugzilla.mozilla.org/show_bug.cgi?id=1287357
+	this.map = function(arr_c, actor) {
+		// returns a new array, with the arr_c iterated over in a way compatible with js-ctypes array (it musth ave a length, and each element must be accessible by a number) with actor
+		// example: `cutils.map( [0,1,2], el=>el+10 )` will give you `Array [ 10, 11, 12 ]`
+		// example with js-ctypes: `cutilsIter( ctypes.int.array()([1,2,3]), el=>el+10 )` gvies `Array [ 11, 12, 13 ]`
+		var l = arr_c.length;
+		var arr = new Array(l);
+		for(var i=0; i<l; i++) {
+			arr[i]=actor(arr_c[i]);
+		}
+		return arr;
 	};
 }
 
