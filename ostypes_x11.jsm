@@ -2450,6 +2450,16 @@ var x11Init = function() {
 		},
 		inotify_init: function() {
 			/* http://linux.die.net/man/2/inotify_init
+			 * int inotify_init(
+			 *   void
+			 * );
+			 */
+			return lib('libc').declare('inotify_init', self.TYPE.ABI,
+				self.TYPE.int		// return
+			);
+		},
+		inotify_init1: function() {
+			/* http://linux.die.net/man/2/inotify_init
 			 * Notes: Pass 0 as flags if you want inotify_init1 to behave as `int inotify_init(void);`
 			 * int inotify_init1(
 			 *   int flags
