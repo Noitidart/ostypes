@@ -2107,7 +2107,7 @@ var winInit = function() {
 		FILE_ACTION_RENAMED_NEW_NAME: 0x00000005,
 
 		FILE_FLAG_BACKUP_SEMANTICS: 0x02000000, // 33554432
-		FILE_LIST_DIRECTORY: 0x0001
+		FILE_LIST_DIRECTORY: 0x0001,
 
 		// these are VK constants, the ones that start with lower case "vk_" are not really named that, i just named it like that per - https://msdn.microsoft.com/en-us/library/windows/desktop/dd375731%28v=vs.85%29.aspx?f=255&MSPPError=-2147217396
 		VK_LBUTTON: 0x01,
