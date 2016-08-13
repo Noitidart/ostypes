@@ -1254,7 +1254,12 @@ var x11Init = function() {
 		XK_braceleft: 0x007b,
 		XK_bar: 0x007c,
 		XK_braceright: 0x007d,
-		XK_asciitilde: 0x007e
+		XK_asciitilde: 0x007e,
+
+		XF86AudioPlay: 0x1008ff14, // untested and unverified. haven't even verified this with multiple sources yet jul 1 2016
+		XF86AudioNext: 0x1008ff17,
+		XF86AudioPrev: 0x1008ff16,
+		XF86AudioStop: 0x1008ff15
 	};
 
 	//////// ADVANCED CONST
