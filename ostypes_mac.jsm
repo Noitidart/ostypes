@@ -692,6 +692,7 @@ var macInit = function() {
 
 		kEventParamDirectObject: 757935405,
 
+		noErr: 0
 	};
 
 	// ADVANCED CONST
@@ -1644,12 +1645,12 @@ var macInit = function() {
 		UnregisterEventHotKey: function() {
 			/* https://developer.apple.com/legacy/library/documentation/Carbon/Reference/Carbon_Event_Manager_Ref/index.html#//apple_ref/c/func/UnregisterEventHotKey
 			 * OSStatus UnregisterEventHotKey (
-			 *   EventHotKeyRef inHotKeyCode
+			 *   EventHotKeyRef inHotKey
 			 * );
 			 */
 			return lib('/System/Library/Frameworks/Carbon.framework/Frameworks/HIToolbox.framework/HIToolbox').declare('UnregisterEventHotKey', self.TYPE.ABI,
 				self.TYPE.OSStatus,			// return
-				self.TYPE.EventHotKeyRef	// inHotKeyCode
+				self.TYPE.EventHotKeyRef	// inHotKey
 			);
 		},
 		WaitNextEvent: function() {
@@ -2020,10 +2021,10 @@ var macInit = function() {
 				throw new Error('aFourCharString must be 4 in length!');
 			}
 
-			return (string.charCodeAt(0) << 24) +
-				   (string.charCodeAt(1) << 16) +
-		           (string.charCodeAt(2) << 8) +
-		           string.charCodeAt(3);
+			return (aFourCharString.charCodeAt(0) << 24) +
+				   (aFourCharString.charCodeAt(1) << 16) +
+		           (aFourCharString.charCodeAt(2) << 8) +
+		           aFourCharString.charCodeAt(3);
 		}
 	};
 }
