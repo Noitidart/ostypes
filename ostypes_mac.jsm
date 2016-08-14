@@ -73,6 +73,7 @@ var macTypes = function() {
 	////// CoreFoundation TYPES
 	// SIMPLE TYPES // based on ctypes.BLAH
 	this.Boolean = ctypes.unsigned_char;
+	this.ByteCount = ctypes.unsigned_long;
 	this.CFIndex = ctypes.long;
 	this.CFOptionFlags = ctypes.unsigned_long;
 	this.CFTimeInterval = ctypes.double;
@@ -130,9 +131,9 @@ var macTypes = function() {
 	this.LSRolesMask = this.OptionBits;
 	this.OSType = this.FourCharCode;
 
-
-
 	// SUPER DUPER ADVANCED TYPES // defined by "super advanced types"
+	this.EventParamName = this.OSType;
+    this.EventParamType = this.OSType;
 
 	// GUESS TYPES - i know these are something else but setting them to voidptr_t or something just works and all the extra work isnt needed
 
@@ -418,8 +419,9 @@ var macInit = function() {
 		rightOptionKey: 16384,
 		rightControlKey: 32768,
 
-		kEventClassKeyboard: 0x6B657962,
+		kEventClassKeyboard: 0x6B657962, // OS_TYPE("keyb")
 		kEventHotKeyPressed: 5,
+		typeEventHotKeyID: 0x686b6964, // OS_TYPE("hkid")
 
 		kCGEventNull: 0,
 		kCGEventLeftMouseDown: 1,
@@ -687,6 +689,8 @@ var macInit = function() {
 		// 'KEY_Eisuu': 94,
 		// 'KEY_Kana': 96,
 		// {F(0,255)}
+
+		kEventParamDirectObject: 757935405,
 
 	};
 
@@ -1527,6 +1531,29 @@ var macInit = function() {
 				self.TYPE.EventTargetRef	// return
 			);
 		},
+		GetEventParameter: function() {
+			/* https://developer.apple.com/legacy/library/documentation/Carbon/Reference/Carbon_Event_Manager_Ref/index.html#//apple_ref/c/func/GetEventParameter
+			 * OSStatus GetEventParameter (
+			 *   EventRef inEvent,
+			 *   EventParamName inName,
+			 *   EventParamType inDesiredType,
+			 *   EventParamType *outActualType,
+			 *   ByteCount inBufferSize,
+			 *   ByteCount *outActualSize,
+			 *   void *outData
+		 	 * );
+			 */
+			 return lib('/System/Library/Frameworks/Carbon.framework/Frameworks/HIToolbox.framework/HIToolbox').declare('GetEventParameter', self.TYPE.ABI,
+ 				self.TYPE.OSStatus,				// return
+ 				self.TYPE.EventRef,				// inEvent,
+ 				self.TYPE.EventParamName,		// inName,
+ 				self.TYPE.EventParamType,		// inDesiredType,
+ 				self.TYPE.EventParamType.ptr,	// *outActualType,
+ 				self.TYPE.ByteCount,			// inBufferSize,
+ 				self.TYPE.ByteCount.ptr,		// *outActualSize
+				self.TYPE.void.ptr				// *outData
+ 			);
+		},
 		InstallEventHandler: function() {
 			/* https://developer.apple.com/legacy/library/documentation/Carbon/Reference/Carbon_Event_Manager_Ref/index.html#//apple_ref/c/func/InstallEventHandler
 			 * OSStatus InstallEventHandler (
@@ -1986,6 +2013,17 @@ var macInit = function() {
 			console.log(aJSInt, daHex, daOSStatus);
 			return daOSStatus;
 			// so like aJSInt of 4294967246 is hex 0xffffffce which is OSStatus of -50 which is errSecParam which means - One or more parameters passed to the function were not valid.
+		},
+		OS_TYPE: function(aFourCharString) {
+			// http://stackoverflow.com/a/38939620/1828637
+			if (aFourCharString.length !== 4) {
+				throw new Error('aFourCharString must be 4 in length!');
+			}
+
+			return (string.charCodeAt(0) << 24) +
+				   (string.charCodeAt(1) << 16) +
+		           (string.charCodeAt(2) << 8) +
+		           string.charCodeAt(3);
 		}
 	};
 }
