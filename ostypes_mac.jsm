@@ -21,7 +21,7 @@ if (this.DedicatedWorkerGlobalScope) {
 	} else {
 		osname = Services.appinfo.OS.toLowerCase();
 	}
-	
+
 	importOsConstsJsm(); // needed for access OS.Constants.libc
 }
 
@@ -1631,6 +1631,17 @@ var macInit = function() {
 				self.TYPE.EventTargetRef,		// inTarget
 				self.TYPE.OptionBits,			// inOptions
 				self.TYPE.EventHotKeyRef.ptr	// *outRef
+			);
+		},
+		RemoveEventHandler: function() {
+			/* https://developer.apple.com/legacy/library/documentation/Carbon/Reference/Carbon_Event_Manager_Ref/index.html#//apple_ref/c/func/RemoveEventHandler
+			 * OSStatus RemoveEventHandler (
+			 *   EventHandlerRef inHandlerRef
+			 * );
+			 */
+			return lib('/System/Library/Frameworks/Carbon.framework/Frameworks/HIToolbox.framework/HIToolbox').declare('RemoveEventHandler', self.TYPE.ABI,
+				self.TYPE.OSStatus,			// return
+				self.TYPE.EventHandlerRef	// inHandlerRef
 			);
 		},
 		RunCurrentEventLoop: function() {
