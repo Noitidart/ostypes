@@ -12,7 +12,7 @@ if (ctypes.voidptr_t.size == 4 /* 32-bit */) {
 
 var osname;
 if (this.DedicatedWorkerGlobalScope) {
-	OS.Constants.Sys.Name.toLowerCase();
+	osname = OS.Constants.Sys.Name.toLowerCase();
 } else {
 	importServicesJsm();
 	if (typeof(Services) == 'undefined') {
