@@ -12,6 +12,14 @@ if (ctypes.voidptr_t.size == 4 /* 32-bit */) {
 
 var ifdef_UNICODE = true;
 
+if (this.DedicatedWorkerGlobalScope) {
+	// osname = OS.Constants.Sys.Name.toLowerCase();
+	// i dont use `osname` in ostypes_win.jsm
+} else {
+	importOsConstsJsm();
+	// for access to OS.Constants.Win
+}
+
 var winTypes = function() {
 
 	// ABIs
@@ -4692,6 +4700,25 @@ var winInit = function() {
 }
 
 var ostypes = new winInit();
+
+function importOsConstsJsm() {
+	if (!this.DedicatedWorkerGlobalScope && typeof(OS) == 'undefined') {
+		if (typeof(Cu) == 'undefined') {
+			if (typeof(Components) != 'undefined') {
+				// Bootstrap
+				var { utils:Cu } = Components;
+			} else if (typeof(require) != 'undefined') {
+				// Addon SDK
+				var { Cu } = require('chrome');
+			} else {
+				console.warn('cannot import Services.jsm');
+			}
+		}
+		if (typeof(Cu) != 'undefined') {
+			Cu.import('resource://gre/modules/osfile.jsm');
+		}
+	}
+}
 
 var WIN32_ERROR_STR = {
 	HRESULT: {

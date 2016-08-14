@@ -21,6 +21,8 @@ if (this.DedicatedWorkerGlobalScope) {
 	} else {
 		osname = Services.appinfo.OS.toLowerCase();
 	}
+	
+	importOsConstsJsm(); // needed for access OS.Constants.libc
 }
 
 var macTypes = function() {
@@ -2045,6 +2047,25 @@ function importServicesJsm() {
 		}
 		if (typeof(Cu) != 'undefined') {
 			Cu.import('resource://gre/modules/Services.jsm');
+		}
+	}
+}
+
+function importOsConstsJsm() {
+	if (!this.DedicatedWorkerGlobalScope && typeof(OS) == 'undefined') {
+		if (typeof(Cu) == 'undefined') {
+			if (typeof(Components) != 'undefined') {
+				// Bootstrap
+				var { utils:Cu } = Components;
+			} else if (typeof(require) != 'undefined') {
+				// Addon SDK
+				var { Cu } = require('chrome');
+			} else {
+				console.warn('cannot import Services.jsm');
+			}
+		}
+		if (typeof(Cu) != 'undefined') {
+			Cu.import('resource://gre/modules/osfile.jsm');
 		}
 	}
 }
