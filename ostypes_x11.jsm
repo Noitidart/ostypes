@@ -2,40 +2,18 @@ var EXPORTED_SYMBOLS = ['ostypes'];
 
 // no need to define core or import cutils as all the globals of the worker who importScripts'ed it are availble here
 
-if (ctypes.voidptr_t.size == 4 /* 32-bit */) {
-	var is64bit = false;
-} else if (ctypes.voidptr_t.size == 8 /* 64-bit */) {
-	var is64bit = true;
-} else {
-	throw new Error('huh??? not 32 or 64 bit?!?!');
-}
-
-var osname;
-if (this.DedicatedWorkerGlobalScope) {
-	osname = OS.Constants.Sys.Name.toLowerCase();
-} else {
-	importServicesJsm();
-	if (typeof(Services) == 'undefined') {
-		// failed to import, so just set to `linux`
-		osname = 'linux';
-	} else {
-		osname = Services.appinfo.OS.toLowerCase();
-	}
-
+if (!this.DedicatedWorkerGlobalScope) {
 	importOsConstsJsm(); // needed for access OS.Constants.libc
+	importServicesJsm();
 }
 
-var fxversion; // needed to figure out if should use gtk2 or gtk3
-if (this.DedicatedWorkerGlobalScope) {
-	fxversion = parseFloat(/Firefox\/(\d+\.\d+)/.exec(navigator.userAgent)[1]);
-} else {
-	importServicesJsm();
-	if (typeof(Services) == 'undefined') {
-		// failed to import, so force use gtk3, which is 46+
-		fxversion = 46;
-	} else {
-		fxversion = Services.appinfo.version;
-	}
+const APP_64BIT = ctypes.voidptr_t.size === 4 ? false : true;
+const OS_NAME = this.DedicatedWorkerGlobalScope ? OS.Constants.Sys.Name.toLowerCase() : Services.appinfo.OS.toLowerCase(); // lower case platform name
+const FIREFOX_VERSION = this.DedicatedWorkerGlobalScope ? parseFloat(/Firefox\/(\d+\.\d+)/.exec(navigator.userAgent)[1]) : Services.appinfo.version; // not used for anything right now
+try {
+	var GTK_VERSION = (this.DedicatedWorkerGlobalScope ? core.os.toolkit : Services.appinfo.widgetToolkit) == 'gtk2' ? 2 : 3; // needed all over the place
+} catch(ignore) {
+	var GTK_VERSION = FIREFOX_VERSION < 46 ? 2 : 3; // guess fall back. this is horrible guess though, as on OpenSuse Firefox 47 is still Gtk2 (TWO) it is NOT gtk THREE
 }
 
 var xlibTypes = function() {
@@ -95,7 +73,7 @@ var xlibTypes = function() {
 	this.VisualID = ctypes.unsigned_long;
 	this.XID = ctypes.unsigned_long;
 	this.XPointer = ctypes.char.ptr;
-	this.CARD32 = !is64bit ? this.unsigned_int : this.unsigned_long; // /^(Alpha|hppa|ia64|ppc64|s390|x86_64)-/.test(core.os.xpcomabi) ? this.unsigned_int : this.unsigned_long; // https://github.com/foudfou/FireTray/blob/a0c0061cd680a3a92b820969b093cc4780dfb10c/src/modules/ctypes/linux/x11.jsm#L45 // // http://mxr.mozilla.org/mozilla-central/source/configure.in
+	this.CARD32 = !APP_64BIT ? this.unsigned_int : this.unsigned_long; // /^(Alpha|hppa|ia64|ppc64|s390|x86_64)-/.test(core.os.xpcomabi) ? this.unsigned_int : this.unsigned_long; // https://github.com/foudfou/FireTray/blob/a0c0061cd680a3a92b820969b093cc4780dfb10c/src/modules/ctypes/linux/x11.jsm#L45 // // http://mxr.mozilla.org/mozilla-central/source/configure.in
 	this.RROutput = this.XID;
 	this.Connection = ctypes.uint16_t; // not exactly sure about this one but its working
 	this.SubpixelOrder = ctypes.uint16_t; // not exactly sure about this one but its working
@@ -646,7 +624,7 @@ var xlibTypes = function() {
 var x11Init = function() {
 	var self = this;
 
-	this.IS64BIT = is64bit;
+	this.IS64BIT = APP_64BIT;
 
 	this.TYPE = new xlibTypes();
 
@@ -1306,7 +1284,7 @@ var x11Init = function() {
 
 						var preferred;
 						// all values of preferred MUST exist in possibles reason is link123543939
-						switch (osname) {
+						switch (OS_NAME) {
 							case 'linux':
 								preferred = 'libgdk-x11-2.0.so.0';
 								break;
@@ -1323,7 +1301,7 @@ var x11Init = function() {
 
 						var preferred;
 						// all values of preferred MUST exist in possibles reason is link123543939
-						switch (osname) {
+						switch (OS_NAME) {
 							case 'linux':
 								preferred = 'libgdk-3.so.0';
 								break;
@@ -1340,7 +1318,7 @@ var x11Init = function() {
 
 						var preferred;
 						// all values of preferred MUST exist in possibles reason is link123543939
-						switch (osname) {
+						switch (OS_NAME) {
 							case 'linux':
 								preferred = 'libgio-2.0.so.0';
 								break;
@@ -1357,7 +1335,7 @@ var x11Init = function() {
 
 						var preferred;
 						// all values of preferred MUST exist in possibles reason is link123543939
-						switch (osname) {
+						switch (OS_NAME) {
 							case 'linux':
 								preferred = 'libgtk-x11-2.0.so.0';
 								break;
@@ -1374,7 +1352,7 @@ var x11Init = function() {
 
 						var preferred;
 						// all values of preferred MUST exist in possibles reason is link123543939
-						switch (osname) {
+						switch (OS_NAME) {
 							case 'freebsd': // physically unverified
 							case 'openbsd': // physically unverified
 							case 'android': // physically unverified
@@ -1398,7 +1376,7 @@ var x11Init = function() {
 
 						var preferred;
 						// all values of preferred MUST exist in possibles reason is link123543939
-						switch (osname) {
+						switch (OS_NAME) {
 							case 'freebsd': // physically unverified
 							case 'openbsd': // physically unverified
 							case 'android': // physically unverified
@@ -1422,7 +1400,7 @@ var x11Init = function() {
 
 						var preferred;
 						// all values of preferred MUST exist in possibles reason is link123543939
-						switch (osname) {
+						switch (OS_NAME) {
 							case 'freebsd': // physically unverified
 							case 'openbsd': // physically unverified
 							case 'android': // physically unverified
@@ -1445,7 +1423,7 @@ var x11Init = function() {
 						var possibles = ['libc.dylib', 'libc.so.7', 'libc.so.61.0', 'libc.so', 'libc.so.6', 'libc.so.0.1'];
 						var preferred;
 						// all values of preferred MUST exist in possibles reason is link123543939
-						switch (osname) {
+						switch (OS_NAME) {
 							case 'darwin':
 								preferred = 'libc.dylib';
 								break;
@@ -1479,7 +1457,7 @@ var x11Init = function() {
 						var possibles = ['libX11.dylib', 'libX11.so.7', 'libX11.so.61.0', 'libX11.so', 'libX11.so.6', 'libX11.so.0.1'];
 						var preferred;
 						// all values of preferred MUST exist in possibles reason is link123543939
-						switch (osname) {
+						switch (OS_NAME) {
 							case 'darwin': // physically unverified
 								preferred = 'libX11.dylib';
 								break;
@@ -1512,7 +1490,7 @@ var x11Init = function() {
 						var possibles = ['libXrandr.so.2'];
 						var preferred;
 						// all values of preferred MUST exist in possibles reason is link123543939
-						switch (osname) {
+						switch (OS_NAME) {
 							case 'freebsd': // physically unverified
 							case 'openbsd': // physically unverified
 							case 'sunos': // physically unverified
@@ -1534,7 +1512,7 @@ var x11Init = function() {
 						var possibles = ['libxcb-randr.so.0'];
 						var preferred;
 						// all values of preferred MUST exist in possibles reason is link123543939
-						switch (osname) {
+						switch (OS_NAME) {
 							case 'freebsd': // physically unverified
 							case 'openbsd': // physically unverified
 							case 'sunos': // physically unverified
@@ -2522,7 +2500,7 @@ var x11Init = function() {
 			/* https://developer.gnome.org/gdk3/stable/gdk3-Windows.html#gdk-get-default-root-window
 			 * GdkWindow *gdk_get_default_root_window (void);
 			 */
-			return lib(parseInt(fxversion) <= 45 ? 'gdk2' : 'gdk3').declare('gdk_get_default_root_window', self.TYPE.ABI,
+			return lib(GTK_VERSION === 2 ? 'gdk2' : 'gdk3').declare('gdk_get_default_root_window', self.TYPE.ABI,
 				self.TYPE.GdkWindow.ptr	// return
 			);
 		},
@@ -2532,7 +2510,7 @@ var x11Init = function() {
 			 *   GdkScreen *screen
 			 * );
 			 */
-			return lib(parseInt(fxversion) <= 45 ? 'gdk2' : 'gdk3').declare('gdk_screen_get_active_window', self.TYPE.ABI,
+			return lib(GTK_VERSION === 2 ? 'gdk2' : 'gdk3').declare('gdk_screen_get_active_window', self.TYPE.ABI,
 				self.TYPE.GdkWindow.ptr,	// return
 				self.TYPE.GdkScreen.ptr		// *screen
 			);
@@ -2541,7 +2519,7 @@ var x11Init = function() {
 			/* https://developer.gnome.org/gdk3/stable/GdkScreen.html#gdk-screen-get-default
 			 * GdkScreen *gdk_screen_get_default (void);
 			 */
-			return lib(parseInt(fxversion) <= 45 ? 'gdk2' : 'gdk3').declare('gdk_screen_get_default', self.TYPE.ABI,
+			return lib(GTK_VERSION === 2 ? 'gdk2' : 'gdk3').declare('gdk_screen_get_default', self.TYPE.ABI,
 				self.TYPE.GdkScreen.ptr	// return
 			);
 		},
@@ -2551,7 +2529,7 @@ var x11Init = function() {
 			 *   GdkScreen *screen
 			 * );
 			 */
-			return lib(parseInt(fxversion) <= 45 ? 'gdk2' : 'gdk3').declare('gdk_screen_get_root_window', self.TYPE.ABI,
+			return lib(GTK_VERSION === 2 ? 'gdk2' : 'gdk3').declare('gdk_screen_get_root_window', self.TYPE.ABI,
 				self.TYPE.GdkWindow.ptr,	// return
 				self.TYPE.GdkScreen.ptr		// *screen
 			);
@@ -2564,7 +2542,7 @@ var x11Init = function() {
 			 *   gpointer data
 			 * );
 			 */
-			return lib(parseInt(fxversion) <= 45 ? 'gdk2' : 'gdk3').declare('gdk_window_add_filter', self.TYPE.ABI,
+			return lib(GTK_VERSION === 2 ? 'gdk2' : 'gdk3').declare('gdk_window_add_filter', self.TYPE.ABI,
 				self.TYPE.void,				// return
 				self.TYPE.GdkWindow.ptr,	// *window
 				self.TYPE.GdkFilterFunc,	// function
@@ -2578,7 +2556,7 @@ var x11Init = function() {
 			 *   gpointer *data
 			 * );
 			 */
-			return lib(parseInt(fxversion) <= 45 ? 'gdk2' : 'gdk3').declare('gdk_window_get_user_data', self.TYPE.ABI,
+			return lib(GTK_VERSION === 2 ? 'gdk2' : 'gdk3').declare('gdk_window_get_user_data', self.TYPE.ABI,
 				self.TYPE.void,				// return
 				self.TYPE.GdkWindow.ptr,	// *window
 				self.TYPE.gpointer.ptr		// *data
@@ -2592,7 +2570,7 @@ var x11Init = function() {
 			 *   gpointer data
 			 * );
 			 */
-			return lib(parseInt(fxversion) <= 45 ? 'gdk2' : 'gdk3').declare('gdk_window_remove_filter', self.TYPE.ABI,
+			return lib(GTK_VERSION === 2 ? 'gdk2' : 'gdk3').declare('gdk_window_remove_filter', self.TYPE.ABI,
 				self.TYPE.void,				// return
 				self.TYPE.GdkWindow.ptr,	// *window
 				self.TYPE.GdkFilterFunc,	// function
@@ -2606,7 +2584,7 @@ var x11Init = function() {
 			 *   GdkEventMask event_mask
 			 * );
 			 */
-			return lib(parseInt(fxversion) <= 45 ? 'gdk2' : 'gdk3').declare('gdk_window_set_events', self.TYPE.ABI,
+			return lib(GTK_VERSION === 2 ? 'gdk2' : 'gdk3').declare('gdk_window_set_events', self.TYPE.ABI,
 				self.TYPE.void,				// return
 				self.TYPE.GdkWindow.ptr,	// *window
 				self.TYPE.GdkEventMask		// event_mask
@@ -2618,13 +2596,13 @@ var x11Init = function() {
 			 *   GdkDrawable *drawable
 			 * );
 			 */
-			if (parseInt(fxversion) <= 45) {
+			if (GTK_VERSION === 2) {
 				// can use gdk2 ok good
 			} else {
 				console.error('not available in gdk3 and this version of firefox cant use gdk2')
 				throw new Error('not available in gdk3 and this version of firefox cant use gdk2')
 			}
-			// return lib(parseInt(fxversion) <= 45 ? 'gdk2' : 'gdk3').declare('gdk_x11_drawable_get_xid', self.TYPE.ABI,
+			// return lib(GTK_VERSION === 2 ? 'gdk2' : 'gdk3').declare('gdk_x11_drawable_get_xid', self.TYPE.ABI,
 			// this is only available in gdk2
 			return lib('gdk2').declare('gdk_x11_drawable_get_xid', self.TYPE.ABI,
 				self.TYPE.XID,				// return
@@ -2637,13 +2615,13 @@ var x11Init = function() {
 			 *   GdkWindow *window
 			 * );
 			 */
-			if (parseInt(fxversion) <= 45) {
+			if (GTK_VERSION === 2) {
 				console.error('not available in gdk2 and this version of firefox cant use gdk3')
 				throw new Error('not available in gdk2 and this version of firefox cant use gdk3')
 			} else {
 				// can use gdk3 ok good
 			}
-			// return lib(parseInt(fxversion) <= 45 ? 'gdk2' : 'gdk3').declare('gdk_x11_drawable_get_xid', self.TYPE.ABI,
+			// return lib(GTK_VERSION === 2 ? 'gdk2' : 'gdk3').declare('gdk_x11_drawable_get_xid', self.TYPE.ABI,
 			// this is only available in gdk2
 			return lib('gdk3').declare('gdk_x11_window_get_xid', self.TYPE.ABI,
 				self.TYPE.Window,			// return
@@ -2657,7 +2635,7 @@ var x11Init = function() {
 			 *   Window window
 			 * );
 			 */
-			return lib(parseInt(fxversion) <= 45 ? 'gdk2' : 'gdk3').declare('gdk_x11_window_lookup_for_display', self.TYPE.ABI,
+			return lib(GTK_VERSION === 2 ? 'gdk2' : 'gdk3').declare('gdk_x11_window_lookup_for_display', self.TYPE.ABI,
 				self.TYPE.GdkWindow.ptr,	// *return
 				self.TYPE.GdkDisplay.ptr,	// *display
 				self.TYPE.Window			// window
@@ -2667,7 +2645,7 @@ var x11Init = function() {
 			/* https://developer.gnome.org/gdk2/stable/gdk2-X-Window-System-Interaction.html#gdk-xid-table-lookup
 			 * gpointer gdk_xid_table_lookup (XID xid);
 			 */
-			// return lib(parseInt(fxversion) <= 45 ? 'gdk2' : 'gdk3').declare('gdk_xid_table_lookup', self.TYPE.ABI,
+			// return lib(GTK_VERSION === 2 ? 'gdk2' : 'gdk3').declare('gdk_xid_table_lookup', self.TYPE.ABI,
 			// not available in gdk3
 			return lib('gdk2').declare('gdk_xid_table_lookup', self.TYPE.ABI,
 				self.TYPE.gpointer,		// return
@@ -3704,7 +3682,7 @@ var x11Init = function() {
 		},
 		gdkWinPtrToXID: function(aGDKWindowPtr) {
 			var xidOfWin;
-			if (parseInt(fxversion) <= 45) {
+			if (GTK_VERSION === 2) {
 				// use gdk2
 				var GdkDrawPtr = ctypes.cast(aGDKWindowPtr, self.TYPE.GdkDrawable.ptr);
 				xidOfWin = self.API('gdk_x11_drawable_get_xid')(GdkDrawPtr);
@@ -3881,7 +3859,7 @@ var x11Init = function() {
 		// link4765403
 		fd_set_get_idx: function(fd) {
 			// https://github.com/pioneers/tenshi/blob/9b3273298c34b9615e02ac8f021550b8e8291b69/angel-player/src/chrome/content/common/serport_posix.js#L497
-			if (osname == 'darwin' /*is_mac*/) {
+			if (OS_NAME == 'darwin' /*is_mac*/) {
 				// We have an array of int32. This should hopefully work on Darwin
 				// 32 and 64 bit.
 				let elem32 = Math.floor(fd / 32);
@@ -3902,7 +3880,7 @@ var x11Init = function() {
 				}
 
 				return {'elem8': elem8, 'bitpos8': bitpos8};
-			} else { // else if (osname == 'linux' /*is_linux*/) { // removed the else if so this supports bsd and solaris now
+			} else { // else if (OS_NAME == 'linux' /*is_linux*/) { // removed the else if so this supports bsd and solaris now
 				// :todo: add 32bit support
 				// Unfortunately, we actually have an array of long ints, which is
 				// a) platform dependent and b) not handled by typed arrays. We manually
