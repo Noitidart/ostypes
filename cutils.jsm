@@ -58,7 +58,7 @@ function utilsInit() {
 		return obj;
 	};
 
-	this.jscEqual = function(obj1, obj2) {
+	this.jscEqual = function(obj1, obj2, castVoidptrAsDecOrAsHex) {
 		// ctypes numbers equal
 		// compares obj1 and obj2
 		// if equal returns true, else returns false
@@ -67,8 +67,8 @@ function utilsInit() {
 		var str1 = obj1;
 		var str2 = obj2;
 
-		var str1 = this.jscGetDeepest(str1); //cuz apparently its not passing by reference
-		var str2 = this.jscGetDeepest(str2); //cuz apparently its not passing by reference
+		var str1 = this.jscGetDeepest(str1, castVoidptrAsDecOrAsHex); //cuz apparently its not passing by reference
+		var str2 = this.jscGetDeepest(str2, castVoidptrAsDecOrAsHex); //cuz apparently its not passing by reference
 
 		//console.info('comparing:', str1, str2);
 
