@@ -52,12 +52,14 @@ var macTypes = function() {
 	this.uintptr_t = ctypes.uintptr_t;
 	this.uint64_t = ctypes.uint64_t;
 	this.unsigned_char = ctypes.unsigned_char;
+	this.unsigned_int = ctypes.unsigned_int;
 	this.unsigned_long = ctypes.unsigned_long;
 	this.unsigned_long_long = ctypes.unsigned_long_long;
 	this.void = ctypes.void_t;
 
 	// ADV C TYPES
 	this.time_t = this.long; // https://github.com/j4cbo/chiral/blob/3c66a8bb64e541c0f63b04b78ec2d0ffdf5b473c/chiral/os/kqueue.py#L34 AND also based on this github search https://github.com/search?utf8=%E2%9C%93&q=time_t+ctypes&type=Code&ref=searchresults AND based on this answer here: http://stackoverflow.com/a/471287/1828637
+	this.useconds_t = this.unsigned_int; // http://opensource.apple.com/source/cvs/cvs-39/cvs/windows-NT/sys/types.h
 
 	// GUESS C TYPES
 	this.FILE = ctypes.void_t; // not really a guess, i just dont have a need to fill it
@@ -1895,6 +1897,28 @@ var macInit = function() {
 				self.TYPE.char.ptr,		// *restrict path
 				self.TYPE.char.ptr,		// *restrict buf
 				self.TYPE.size_t		// bufsize
+			);
+		},
+		sleep: function() {
+			/* https://developer.apple.com/legacy/library/documentation/Darwin/Reference/ManPages/man3/sleep.3.html
+			 * unsigned int sleep(
+			 *   unsigned int seconds
+		 	 * );
+			 */
+			return lib('libc').declare('sleep', self.TYPE.ABI,
+				self.TYPE.unsigned_int,		// return
+				self.TYPE.unsigned_int		// seconds
+			);
+		},
+		usleep: function() {
+			/* https://developer.apple.com/legacy/library/documentation/Darwin/Reference/ManPages/man3/usleep.3.html
+			 * int usleep(
+			 *   useconds_t useconds
+		 	 * );
+			 */
+			return lib('libc').declare('usleep', self.TYPE.ABI,
+				self.TYPE.int,			// return
+				self.TYPE.useconds_t	// useconds
 			);
 		},
 		////////////// LIBDISPATCH

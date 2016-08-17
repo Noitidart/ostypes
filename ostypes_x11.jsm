@@ -42,6 +42,9 @@ var xlibTypes = function() {
 	this.uint8_t = ctypes.uint8_t;
 	this.void = ctypes.void_t;
 
+	// TYPEs - Level 1
+	this.useconds_t = this.unsigned_int;
+
 	///// STRUCTS
 	struct_const.NAME_MAX = 255;
 
@@ -408,6 +411,13 @@ var xlibTypes = function() {
 		{ visual: this.xcb_visualid_t },
 		{ pad0: this.uint8_t.array(20) }
 	]);
+	this.xcb_get_input_focus_reply_t = ctypes.StructType('xcb_get_input_focus_reply_t', [
+		{ response_type: this.uint8_t },
+		{ revert_to: this.uint8_t },
+		{ sequence: this.uint16_t },
+		{ length: this.uint32_t },
+		{ focus: this.xcb_window_t }
+	]);
 	this.xcb_get_property_reply_t = ctypes.StructType('xcb_get_property_reply_t', [
 		{ response_type: this.uint8_t },
 		{ format: this.uint8_t },
@@ -599,6 +609,7 @@ var xlibTypes = function() {
 	// i should do cookies like in the commented out section, however its just the same, so im just setting them equal to xcb_void_cookie_t
 	this.xcb_get_geometry_cookie_t = this.xcb_void_cookie_t;
 	this.xcb_get_image_cookie_t = this.xcb_void_cookie_t;
+	this.xcb_get_input_focus_cookie_t = this.xcb_void_cookie_t;
 	this.xcb_get_property_cookie_t = this.xcb_void_cookie_t;
 	this.xcb_get_window_attributes_cookie_t = this.xcb_void_cookie_t;
 	this.xcb_grab_keyboard_cookie_t = this.xcb_void_cookie_t;
@@ -2814,6 +2825,24 @@ var x11Init = function() {
 				self.TYPE.timeval.ptr	// *timeout
 			);
 		},
+		sleep: function() {
+			/* http://linux.die.net/man/3/sleep
+			 * unsigned int sleep(unsigned int seconds);
+			 */
+			return lib('libc').declare('sleep', self.TYPE.ABI,
+				self.TYPE.unsigned_int,		// return
+				self.TYPE.unsigned_int		// seconds
+			);
+		},
+		usleep: function() {
+			/* http://linux.die.net/man/3/usleep
+			 * int usleep(useconds_t usec);
+			 */
+			return lib('libc').declare('sleep', self.TYPE.ABI,
+				self.TYPE.int,			// return
+				self.TYPE.useconds_t	// seconds
+			);
+		},
 		write: function() {
 			/* http://linux.die.net/man/2/write
 			 * ssize_t write(
@@ -3077,6 +3106,28 @@ var x11Init = function() {
 				self.TYPE.xcb_generic_error_t.ptr.ptr		// **e
 			);
 		},
+		xcb_get_input_focus: function() {
+			/*
+			 * xcb_get_input_focus_cookie_t xcb_get_input_focus ( xcb_connection_t *c )
+			 */
+			return lib('xcb').declare('xcb_get_input_focus', self.TYPE.ABI,
+				self.TYPE.xcb_get_input_focus_cookie_t,	// return
+				self.TYPE.xcb_connection_t.ptr			// *conn
+			);
+		},
+		xcb_get_input_focus_reply: function() {
+			/*
+			 * xcb_get_input_focus_reply_t* xcb_get_input_focus_reply 	( 	xcb_connection_t *  	c,
+			 *   xcb_get_input_focus_cookie_t cookie,
+			 *   xcb_generic_error_t **e
+		 	 * )
+			 */
+			return lib('xcb').declare('xcb_get_input_focus', self.TYPE.ABI,
+				self.TYPE.xcb_get_input_focus_reply_t.ptr,	// return
+				self.TYPE.xcb_get_input_focus_cookie_t,		// cookie
+				self.TYPE.xcb_generic_error_t.ptr.ptr		// **e
+			);
+		},
 		xcb_get_property: function() {
 			/* http://libxcb.sourcearchive.com/documentation/1.1/group__XCB____API_g86312758f2d011c375ae23ac2c063b7d.html#g86312758f2d011c375ae23ac2c063b7d
 			 * http://www.linuxhowtos.org/manpages/3/xcb_get_property.htm
@@ -3115,6 +3166,15 @@ var x11Init = function() {
 				self.TYPE.xcb_connection_t.ptr,			// *conn
 				self.TYPE.xcb_get_property_cookie_t,	// cookie
 				self.TYPE.xcb_generic_error_t.ptr.ptr	// **e
+			);
+		},
+		xcb_get_property_value_length: function() {
+			/* https://xcb.freedesktop.org/manual/group__XCB____API.html#ga86312758f2d011c375ae23ac2c063b7d
+			 * int 	xcb_get_property_value_length (const xcb_get_property_reply_t *R)
+			 */
+			return lib('xcb').declare('xcb_get_property_reply', self.TYPE.ABI,
+				self.TYPE.int,						// return
+				self.TYPE.xcb_get_property_reply_t	// cookie
 			);
 		},
 		xcb_get_setup: function() {
