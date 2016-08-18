@@ -854,6 +854,9 @@ var x11Init = function() {
 		XCB_PROP_MODE_APPEND: 2,
 
 		// enum xcb_atom_enum_t // https://github.com/luminousone/dmedia/blob/2adad68fb72e86855176382a34d0fea671a7f68e/platforms/linux_x11/xcb/xcb.d#L438
+		XCB_ATOM_NONE: 0,
+		XCB_ATOM_ANY: 0,
+		XCB_ATOM_ATOM: 4,
         XCB_ATOM_STRING: 31,
         XCB_ATOM_WM_NAME: 39,
 		XCB_ATOM_WM_ICON_NAME: 37,
@@ -2911,6 +2914,7 @@ var x11Init = function() {
 				self.TYPE.xcb_connection_t.ptr,	// *c
 				self.TYPE.uint8_t,				// mode
 				self.TYPE.xcb_window_t,			// window
+				self.TYPE.xcb_atom_t,			// property
 				self.TYPE.xcb_atom_t,			// type
 				self.TYPE.uint8_t,				// format
 				self.TYPE.uint32_t,				// data_len
@@ -3117,13 +3121,15 @@ var x11Init = function() {
 		},
 		xcb_get_input_focus_reply: function() {
 			/*
-			 * xcb_get_input_focus_reply_t* xcb_get_input_focus_reply 	( 	xcb_connection_t *  	c,
+			 * xcb_get_input_focus_reply_t* xcb_get_input_focus_reply 	(
+			 *   xcb_connection_t *  	c,
 			 *   xcb_get_input_focus_cookie_t cookie,
 			 *   xcb_generic_error_t **e
 		 	 * )
 			 */
-			return lib('xcb').declare('xcb_get_input_focus', self.TYPE.ABI,
+			return lib('xcb').declare('xcb_get_input_focus_reply', self.TYPE.ABI,
 				self.TYPE.xcb_get_input_focus_reply_t.ptr,	// return
+				self.TYPE.xcb_connection_t.ptr,				// *conn
 				self.TYPE.xcb_get_input_focus_cookie_t,		// cookie
 				self.TYPE.xcb_generic_error_t.ptr.ptr		// **e
 			);
@@ -3162,19 +3168,28 @@ var x11Init = function() {
 			 * );
 			 */
 			return lib('xcb').declare('xcb_get_property_reply', self.TYPE.ABI,
-				self.TYPE.xcb_get_property_reply_t,		// return
+				self.TYPE.xcb_get_property_reply_t.ptr,	// return
 				self.TYPE.xcb_connection_t.ptr,			// *conn
 				self.TYPE.xcb_get_property_cookie_t,	// cookie
 				self.TYPE.xcb_generic_error_t.ptr.ptr	// **e
 			);
 		},
+		xcb_get_property_value: function() {
+			/* http://libxcb.sourcearchive.com/documentation/1.1/group__XCB____API_g86312758f2d011c375ae23ac2c063b7d.html#g86312758f2d011c375ae23ac2c063b7d
+			 * void * 	xcb_get_property_value (const xcb_get_property_reply_t *R)
+			 */
+			return lib('xcb').declare('xcb_get_property_value', self.TYPE.ABI,
+				self.TYPE.void.ptr,						// return
+				self.TYPE.xcb_get_property_reply_t.ptr	// *R
+			);
+		},
 		xcb_get_property_value_length: function() {
-			/* https://xcb.freedesktop.org/manual/group__XCB____API.html#ga86312758f2d011c375ae23ac2c063b7d
+			/* http://libxcb.sourcearchive.com/documentation/1.1/group__XCB____API_g86312758f2d011c375ae23ac2c063b7d.html#g86312758f2d011c375ae23ac2c063b7d
 			 * int 	xcb_get_property_value_length (const xcb_get_property_reply_t *R)
 			 */
-			return lib('xcb').declare('xcb_get_property_reply', self.TYPE.ABI,
-				self.TYPE.int,						// return
-				self.TYPE.xcb_get_property_reply_t	// cookie
+			return lib('xcb').declare('xcb_get_property_value_length', self.TYPE.ABI,
+				self.TYPE.int,							// return
+				self.TYPE.xcb_get_property_reply_t.ptr	// *R
 			);
 		},
 		xcb_get_setup: function() {
@@ -3209,7 +3224,7 @@ var x11Init = function() {
 				self.TYPE.xcb_get_window_attributes_reply_t.ptr,	// return
 				self.TYPE.xcb_connection_t.ptr,						// *conn
 				self.TYPE.xcb_get_window_attributes_cookie_t,		// cookie
-				self.TYPE.xcb_generic_error_t.e.ptr.ptr				// **e
+				self.TYPE.xcb_generic_error_t.ptr.ptr				// **e
 			);
 		},
 		xcb_grab_key: function() {
@@ -3759,8 +3774,8 @@ var x11Init = function() {
 			return GtkWinPtr;
 		},
 		gtkWinPtrToXID: function(aGTKWinPtr) {
-			var aGDKWinPtr = self.TYPE.HELPER.gtkWinPtrToGdkWinPtr(aGTKWinPtr);
-			var aXID = self.TYPE.HELPER.gdkWinPtrToXID(null, aGDKWinPtr);
+			var aGDKWinPtr = self.HELPER.gtkWinPtrToGdkWinPtr(aGTKWinPtr);
+			var aXID = self.HELPER.gdkWinPtrToXID(null, aGDKWinPtr);
 			return aXID;
 		},
 		gtkWinPtrToGdkWinPtr: function(aGTKWinPtr) {
@@ -3858,35 +3873,41 @@ var x11Init = function() {
 			}
 			return self._cacheAtoms[aAtomName];
 		},
-		cachedXCBAtom: function(aAtomName, createAtomIfDne, refreshCache) {
-			// createAtomIfDne is jsBool, true or false. if set to true/1 then the atom is creatd if it doesnt exist. if set to false/0, then an error is thrown when atom does not exist
+		cachedXCBAtom: function(aAtomName, aOptions={}) {
 			// default behavior is throw when atom doesnt exist
+			var default_options = {
+				create: false, // createAtomIfDne is jsBool, true or false. if set to true/1 then the atom is creatd if it doesnt exist. if set to false/0, then an error is thrown when atom does not exist actually see options.throw
+				refresh: false, // refreshCache
+				throw: true // only if `create` is `false` this option matters. it will throw. else it will return null
+			};
+
+			var options = Object.assign(default_options, aOptions);
 
 			// aAtomName is self.TYPE.char.ptr but im pretty sure you can just pass in a jsStr
 			// returns self.TYPE.Atom
 
-			if (!(aAtomName in self._cacheXCBAtoms) || refreshCache) {
-				var atom_cookie = self.API('xcb_intern_atom')(self.HELPER.cachedXCBConn(), createAtomIfDne ? 1 : 0, aAtomName.length, aAtomName);
+			if (!(aAtomName in self._cacheXCBAtoms) || options.refresh) {
+				var req_atom = self.API('xcb_intern_atom')(self.HELPER.cachedXCBConn(), options.create ? 0 : 1, aAtomName.length, aAtomName);
 
-				var atom_reply = self.API('xcb_intern_atom_reply')(self.HELPER.cachedXCBConn(), atom_cookie, null);
+				var rez_atom = self.API('xcb_intern_atom_reply')(self.HELPER.cachedXCBConn(), req_atom, null);
+				console.log('rez_atom:', rez_atom);
 
-				if (atom_reply.isNull()) {
-					throw new Error('failed to get atom reply');
-				} else {
-
-					var atom = atom_reply.atom;
-					console.log('atom:', atom, 'name:', aAtomName);
-					if (!createAtomIfDne) {
-						if (cutils.jscEqual(atom, self.CONST.XCB_NONE)) { // if i pass 3rd arg as False, it will will never equal self.CONST.None it gets creatd if it didnt exist on line before
-							console.error('No atom with name:', aAtomName, 'return val of atom:', atom, atom_reply);
-							throw new Error('No atom with name "' + aAtomName + '"), return val of atom:"' +  atom.toString() + '"');
-						}
+				console.log('rez_atom.contents:', rez_atom.contents);
+				var atom = rez_atom.contents.atom;
+				console.log('atom:', atom, 'name:', aAtomName);
+				if (cutils.jscEqual(atom, self.CONST.XCB_ATOM_NONE)) { // if options.create true, it will will never equal self.CONST.XCB_ATOM_NONE it gets creatd if it didnt exist on line before
+					// obviusly `options.create` was false, otherwise it wouldnt get here, as it would have created an atom
+					console.error('No atom with name:', aAtomName, 'return val of atom:', atom, rez_atom);
+					if (options.throw) {
+						throw new Error('No atom with name "' + aAtomName + '"), return val of atom:"' +  atom.toString() + '"');
+					} else {
+						return null;
 					}
-
-					self._cacheXCBAtoms[aAtomName] = atom;
-
-					self.API('free')(atom_reply);
 				}
+
+				self._cacheXCBAtoms[aAtomName] = atom;
+
+				self.API('free')(rez_atom);
 			}
 			return self._cacheXCBAtoms[aAtomName];
 		},
