@@ -10,11 +10,7 @@ if (!this.DedicatedWorkerGlobalScope) {
 const APP_64BIT = ctypes.voidptr_t.size === 4 ? false : true;
 const OS_NAME = this.DedicatedWorkerGlobalScope ? OS.Constants.Sys.Name.toLowerCase() : Services.appinfo.OS.toLowerCase(); // lower case platform name
 const FIREFOX_VERSION = this.DedicatedWorkerGlobalScope ? parseFloat(/Firefox\/(\d+\.\d+)/.exec(navigator.userAgent)[1]) : Services.appinfo.version; // not used for anything right now
-try {
-	var GTK_VERSION = (this.DedicatedWorkerGlobalScope ? core.os.toolkit : Services.appinfo.widgetToolkit) == 'gtk2' ? 2 : 3; // needed all over the place
-} catch(ignore) {
-	var GTK_VERSION = FIREFOX_VERSION < 46 ? 2 : 3; // guess fall back. this is horrible guess though, as on OpenSuse Firefox 47 is still Gtk2 (TWO) it is NOT gtk THREE
-}
+var GTK_VERSION = getGtkVersion(); // very very important
 
 var xlibTypes = function() {
 	// ABIs
@@ -4059,5 +4055,40 @@ function importOsConstsJsm() {
 	}
 }
 
+function getGtkVersion() {
+	// FIREFOX_VERSION must be set before this is called
+
+	var c_toolkit;
+
+	if (!this.DedicatedWorkerGlobalScope) {
+		c_toolkit = Services.appinfo.widgetToolkit.toLowerCase();
+	} else {
+		// its a worker
+		// try `TOOLKIT`, `core.os.toolkit`, `toolkit`
+		try {
+			c_toolkit = TOOLKIT;
+		} catch(ignore) {
+			try {
+				c_toolkit = core.os.toolkit;
+			} catch(ignore) {
+				try {
+					c_toolkit = toolkit;
+				} catch(ignore) {
+					// anything else to try?
+				}
+			}
+		}
+	}
+
+	if (c_toolkit) {
+		return c_toolkit.toLowerCase() == 'gtk2' ? 2 : 3;
+	} else {
+		// DO NOT FALL BACK throw, this is critical to get right
+		throw new Error('could not determine gtk version!');
+		// // fallback to guess work based on FIREFOX_VERSION - which is very bad
+		// // guess fall back. this is horrible guess though, as on OpenSuse Firefox 47 is still Gtk2 (TWO) it is NOT gtk THREE
+		// return = FIREFOX_VERSION < 46 ? 2 : 3;
+	}
+}
 // init
 var ostypes = new x11Init();
