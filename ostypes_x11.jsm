@@ -10,7 +10,7 @@ if (!this.DedicatedWorkerGlobalScope) {
 const APP_64BIT = ctypes.voidptr_t.size === 4 ? false : true;
 const OS_NAME = this.DedicatedWorkerGlobalScope ? OS.Constants.Sys.Name.toLowerCase() : Services.appinfo.OS.toLowerCase(); // lower case platform name
 const FIREFOX_VERSION = this.DedicatedWorkerGlobalScope ? parseFloat(/Firefox\/(\d+\.\d+)/.exec(navigator.userAgent)[1]) : Services.appinfo.version; // not used for anything right now
-var GTK_VERSION = getGtkVersion; // very very important
+Object.defineProperty(this, 'GTK_VERSION', { get: function() { return getGtkVersion() } }); // make this a getter, so that ostyeps can be loaded without needing to have first got `TOOLKIT` from mainthread if this is a worker
 
 var xlibTypes = function() {
 	// ABIs

@@ -45,7 +45,7 @@ The `Services.jsm` module has a lot of commonly used features. This is usually a
     const {utils: Cu} = Components;
     // var { Cu } = require('chrome'); // if you are using Addon SDK
     Cu.import('resource://gre/modules/Services.jsm');
-    
+
     var os_name = Services.appinfo.OS.toLowerCase();
 
 ## How to import the modules into your addon files
@@ -55,11 +55,11 @@ You cannot use js-ctypes from a Web Worker, it must be a Chrome Worker. This ost
 _**Note for Linux/Unix Systems** `ostypes_x11.jsm` is meant for *nix sysstems. GTK and X11 should only be used on the main thread, it will causes unexplainable crashes if used from a ChromeWorker. Inside `ostypes_x11.jsm` though is XCB, this is what you want to use if you want to do platform stuff on *nix systems from a ChromeWorker._
 
     var GLOBAL_SCOPE = this;
-    
+
     function importOstypes() {
       importScripts('chrome://myaddon/content/ostypes/cutils.jsm');
       importScripts('chrome://myaddon/content/ostypes/ctypes_math.jsm');
-      
+
       var os_name = OS.Constants.Sys.Name.toLowerCase();
       switch (os_name) {
           case 'winnt':
@@ -68,7 +68,7 @@ _**Note for Linux/Unix Systems** `ostypes_x11.jsm` is meant for *nix sysstems. G
                   importScripts('chrome://myaddon/content/ostypes/ostypes_win.jsm');
               break;
           case 'darwin':
-                  importScripts('chrome://myaddon/content/ostypes/ostypes_darwn.jsm');
+                  importScripts('chrome://myaddon/content/ostypes/ostypes_mac.jsm');
               break;
           default:
               // we assume it is a GTK based system. All Linux/Unix systems are GTK for Firefox. Even on Qt based *nix systems.
@@ -84,13 +84,13 @@ We will detect the platofrm, then we will import the the respective ostypes file
     const {utils: Cu} = Components;
     // var { Cu } = require('chrome'); // if you are using Addon SDK
     Cu.import('resource://gre/modules/Services.jsm');
-    
+
     var GLOBAL_SCOPE = this;
-    
+
     function importOstypes() {
       Services.scriptloader.loadSubScript('chrome://myaddon/content/ostypes/cutils.jsm', GLOBAL_SCOPE);
       Services.scriptloader.loadSubScript('chrome://myaddon/content/ostypes/ctypes_math.jsm', GLOBAL_SCOPE);
-      
+
       var os_name = Services.appinfo.OS.toLowerCase();
       switch (os_name) {
           case 'winnt':
