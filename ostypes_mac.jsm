@@ -504,6 +504,16 @@ var macInit = function() {
         NX_KEYTYPE_ILLUMINATION_DOWN: 22,
 		NX_KEYTYPE_ILLUMINATION_TOGGLE: 23,
 
+		NSAlphaShiftKeyMask: 1 << 16,
+		NSShiftKeyMask: 1 << 17,
+		NSControlKeyMask: 1 << 18,
+		NSAlternateKeyMask: 1 << 19,
+		NSCommandKeyMask: 1 << 20,
+		NSNumericPadKeyMask: 1 << 21,
+		NSHelpKeyMask: 1 << 22,
+		NSFunctionKeyMask: 1 << 23,
+		NSDeviceIndependentModifierFlagsMask: 0xffff0000, // 0xffff0000UL // #if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_4
+
 		kLSRolesNone: 1,
 	    kLSRolesViewer: 2,
 	    kLSRolesEditor: 4,
