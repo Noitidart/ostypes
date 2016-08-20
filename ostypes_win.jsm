@@ -3954,6 +3954,17 @@ var winInit = function() {
 				self.TYPE.HDC // hDc
 			);
 		},
+		ResetEvent: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms685081(v=vs.85).aspx
+			 * BOOL WINAPI ResetEvent(
+			 *   _In_ HANDLE hEvent
+			 * );
+			 */
+			return lib('kernel32').declare('ResetEvent', self.TYPE.ABI,
+				self.TYPE.BOOL,		// return
+				self.TYPE.HANDLE	// hEvent
+			);
+		},
 		SelectObject: function() {
 			/* http://msdn.microsoft.com/en-us/library/windows/desktop/dd183489%28v=vs.85%29.aspx
 			 * HGDIOBJ SelectObject(
@@ -4004,6 +4015,17 @@ var winInit = function() {
 				self.TYPE.HWND,										// hWnd
 				self.TYPE.INT,										// nIndex
 				is64bit ? self.TYPE.LONG_PTR : self.TYPE.LONG		// dwNewLong
+			);
+		},
+		SetEvent: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms686211(v=vs.85).aspx
+			 * BOOL WINAPI SetEvent(
+			 *   _In_ HANDLE hEvent
+			 * );
+			 */
+			return lib('kernel32').declare('SetEvent', self.TYPE.ABI,
+				self.TYPE.BOOL,		// return
+				self.TYPE.HANDLE	// hEvent
 			);
 		},
 		SetForegroundWindow: function() {
