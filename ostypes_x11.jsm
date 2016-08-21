@@ -349,6 +349,8 @@ var xlibTypes = function() {
 	/////////////// XCB stuff
 	// SIMPLE TYPES
 	// lots of types i cant find out there are found here file:///C:/Users/Vayeate/Downloads/xcb%20types/libxcb-1.9/doc/tutorial/index.html BUT this i am realizing is just from xproto.h - https://github.com/netzbasis/openbsd-xenocara/blob/e6500f41b55e38013ac9b489f66fe49df6b8b68c/lib/libxcb/src/xproto.h#L453
+	this.iovec_count_t = this.unsigned_int;
+	this.iovec_size_t = this.unsigned_int;
 	this.xcb_atom_t = this.uint32_t;
 	this.xcb_colormap_t = this.uint32_t;
 	this.xcb_drawable_t = this.uint32_t;
@@ -361,7 +363,18 @@ var xlibTypes = function() {
 	this.xcb_visualid_t = this.uint32_t;
 	this.xcb_window_t = this.uint32_t;
 
-	// SIMPLE STRUCTS
+	///// STRUCTS
+	// STRUCTs - Level -1
+	this.xcb_extension_t = ctypes.StructType('xcb_extension_t', [
+		{ name: this.char.ptr },
+		{ global_id: this.int }
+	]);
+
+	// STRUCTs - Level 0
+	this.iovec = ctypes.StructType('iovec', [
+		{ data: this.void.ptr },
+		{ len: this.iovec_size_t }
+	]);
 	this.xcb_client_message_data_t = ctypes.StructType('xcb_client_message_data_t', [ // union - https://xcb.freedesktop.org/manual/xproto_8h_source.html#l01151
 		// { data8: this.uint8_t.array(20) }
 		// { data32: this.uint16_t.array(10) }
@@ -475,6 +488,12 @@ var xlibTypes = function() {
 		{ pad0: this.uint8_t }
 	]);
 	this.xcb_key_symbols_t = ctypes.StructType('_XCBKeySymbols');
+	this.xcb_protocol_request_t = ctypes.StructType('xcb_protocol_request_t', [
+		{ count: this.size_t },
+        { ext: this.xcb_extension_t.ptr },
+        { opcode: this.uint8_t },
+        { isvoid: this.uint8_t }
+	]);
 	this.xcb_query_tree_reply_t = ctypes.StructType('xcb_query_tree_reply_t', [
 		{ response_type: this.uint8_t },
 		{ pad0: this.uint8_t },
@@ -549,6 +568,15 @@ var xlibTypes = function() {
 		{ save_unders: this.uint8_t },
 		{ root_depth: this.uint8_t },
 		{ allowed_depths_len: this.uint8_t }
+	]);
+
+	this.xcb_send_event_request_t = ctypes.StructType('xcb_send_event_request_t', [
+		{ major_opcode: this.uint8_t },
+		{ propagate: this.uint8_t },
+		{ length: this.uint16_t },
+		{ destination: this.xcb_window_t },
+		{ event_mask: this.uint32_t },
+		{ event: this.char.array(32) }
 	]);
 
 	this.xcb_setup_t = ctypes.StructType('xcb_setup_t', [ // https://github.com/netzbasis/openbsd-xenocara/blob/e6500f41b55e38013ac9b489f66fe49df6b8b68c/lib/libxcb/src/xproto.h#L453
@@ -946,6 +974,19 @@ var x11Init = function() {
 		XCB_IMAGE_FORMAT_XY_BITMAP: 0,
 		XCB_IMAGE_FORMAT_XY_PIXMAP: 1,
 		XCB_IMAGE_FORMAT_Z_PIXMAP: 2,
+
+		// enum xcb_send_request_flags_t
+		XCB_REQUEST_CHECKED: 1 << 0,
+		XCB_REQUEST_RAW: 1 << 1,
+		XCB_REQUEST_DISCARD_REPLY: 1 << 2,
+
+		// opcode's
+		XCB_SEND_EVENT: 25,
+		XCB_CLIENT_MESSAGE: 33,
+
+		// enum xcb_send_event_dest_t
+		XCB_SEND_EVENT_DEST_POINTER_WINDOW: 0,
+ 		XCB_SEND_EVENT_DEST_ITEM_FOCUS: 1,
 
 		// GTK CONST
 		EXPOSURE_MASK: 1 << 1,
@@ -3606,6 +3647,24 @@ var x11Init = function() {
 				self.TYPE.char.ptr				// *event
 			);
 		},
+		xcb_send_request: function() {
+			/* https://xcb.freedesktop.org/ProtocolExtensionApi/
+			 * int xcb_send_request (
+			 *   xcb_connection *c,
+			 *   int flags, // a combination of the flags `XCB_REQUEST_CHECKED`, `XCB_REQUEST_RAW`, and `XCB_REQUEST_DISCARD_REPLY`
+			 *   unsigned int *sequence,
+			 *   struct iovec *vector,
+			 *   const xcb_protocol_request_t *request
+			 * );
+			 */
+			return lib('xcb').declare('xcb_send_request', self.TYPE.ABI,
+				self.TYPE.xcb_connection.ptr,			// *c
+				self.TYPE.int,							// flags
+				self.TYPE.unsigned_int.ptr,				// *sequence
+				self.TYPE.iovec.ptr,					// *vector
+				self.TYPE.xcb_protocol_request_t.ptr	// *request
+			);
+		},
 		xcb_set_input_focus: function() {
 			/* https://www.x.org/releases/current/doc/man/man3/xcb_set_input_focus.3.xhtml
 			 * xcb_void_cookie_t xcb_set_input_focus(
@@ -3622,6 +3681,44 @@ var x11Init = function() {
 				self.TYPE.xcb_window_t,				// focus
 				self.TYPE.xcb_timestamp_t			// time
 			);
+		},
+		xcb_send_event: function() {
+			/* http://www.linuxhowtos.org/manpages/3/xcb_send_event.htm
+			 * xcb_void_cookie_t xcb_send_event(
+			 *   xcb_connection_t *conn,
+			 *   uint8_t propagate,
+			 *   xcb_window_t destination,
+			 *   uint32_t event_mask,
+			 *   const char *event
+		 	 * );
+			 */
+			return lib('xcb').declare('xcb_send_event', self.TYPE.ABI,
+				self.TYPE.xcb_void_cookie_t,	// return
+				self.TYPE.xcb_connection_t.ptr,	// *conn
+				self.TYPE.uint8_t,				// propagate
+				self.TYPE.xcb_window_t,			// destination
+				self.TYPE.uint32_t,				// event_mask
+				self.TYPE.char.ptr				// *event
+		 	);
+		},
+		xcb_send_event_checked: function() {
+			/* http://libxcb.sourcearchive.com/documentation/1.1/group__XCB____API_gb052d5d58e37346d947e03eeac64c071.html#gb052d5d58e37346d947e03eeac64c071
+			 * xcb_void_cookie_t xcb_send_event(
+			 *   xcb_connection_t *conn,
+			 *   uint8_t propagate,
+			 *   xcb_window_t destination,
+			 *   uint32_t event_mask,
+			 *   const char *event
+		 	 * );
+			 */
+			 return lib('xcb').declare('xcb_send_event_checked', self.TYPE.ABI,
+ 				self.TYPE.xcb_void_cookie_t,	// return
+ 				self.TYPE.xcb_connection_t.ptr,	// *conn
+ 				self.TYPE.uint8_t,				// propagate
+ 				self.TYPE.xcb_window_t,			// destination
+ 				self.TYPE.uint32_t,				// event_mask
+ 				self.TYPE.char.ptr				// *event
+ 		 	);
 		},
 		xcb_setup_roots_iterator: function() {
 			// https://github.com/netzbasis/openbsd-xenocara/blob/e6500f41b55e38013ac9b489f66fe49df6b8b68c/lib/libxcb/src/xproto.h#L5409
