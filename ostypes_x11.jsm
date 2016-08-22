@@ -437,6 +437,13 @@ var xlibTypes = function() {
 		{ value_len: this.uint32_t },
 		{ pad0: this.uint8_t.array(12) }
 	]);
+	this.xcb_get_selection_owner_reply_t = ctypes.StructType('xcb_get_selection_owner_reply_t', [
+		{ response_type: this.uint8_t },
+		{ pad0: this.uint8_t },
+		{ sequence: this.uint16_t },
+		{ length: this.uint32_t },
+		{ owner: this.xcb_window_t }
+	]);
 	this.xcb_get_window_attributes_reply_t = ctypes.StructType('xcb_get_window_attributes_reply_t', [ // http://www.linuxhowtos.org/manpages/3/xcb_get_window_attributes_unchecked.htm
 		{ response_type: this.uint8_t },
 		{ backing_store: this.uint8_t },
@@ -635,6 +642,7 @@ var xlibTypes = function() {
 	this.xcb_get_image_cookie_t = this.xcb_void_cookie_t;
 	this.xcb_get_input_focus_cookie_t = this.xcb_void_cookie_t;
 	this.xcb_get_property_cookie_t = this.xcb_void_cookie_t;
+	this.xcb_get_selection_owner_cookie_t = this.xcb_void_cookie_t;
 	this.xcb_get_window_attributes_cookie_t = this.xcb_void_cookie_t;
 	this.xcb_grab_keyboard_cookie_t = this.xcb_void_cookie_t;
 	this.xcb_intern_atom_cookie_t = this.xcb_void_cookie_t;
@@ -643,7 +651,7 @@ var xlibTypes = function() {
 	this.xcb_randr_get_output_info_cookie_t = this.xcb_void_cookie_t;
 	this.xcb_randr_get_screen_resources_current_cookie_t = this.xcb_void_cookie_t;
 
-	// ADVANCED STRUCTS
+	// STRUCTs - Level 2
 	this.xcb_client_message_event_t = ctypes.StructType('xcb_client_message_event_t', [// http://www.linuxhowtos.org/manpages/3/xcb_client_message_event_t.htm // ftp://www.x.org/pub/X11R7.7/doc/man/man3/xcb_client_message_event_t.3.xhtml
 		{ response_type: this.uint8_t },
 		{ format: this.uint8_t },
@@ -651,6 +659,13 @@ var xlibTypes = function() {
 		{ window: this.xcb_window_t },
 		{ type: this.xcb_atom_t },
 		{ data: this.xcb_client_message_data_t }
+	]);
+	this.xcb_icccm_get_text_property_reply_t = ctypes.StructType('xcb_icccm_get_text_property_reply_t', [
+		{ _reply: this.xcb_get_property_reply_t.ptr },
+		{ encoding: this.xcb_atom_t  },				/** Encoding used */
+		{ name_len: this.unsigned_int  },				/** Length of the name field above */
+		{ name: this.char.ptr },				/** Property value */
+		{ format: this.unsigned_char  },				/** Format, may be 8, 16 or 32 */
 	]);
 
 	// end - xcb
@@ -982,6 +997,7 @@ var x11Init = function() {
 
 		// opcode's
 		XCB_SEND_EVENT: 25,
+		XCB_SELECTION_NOTIFY: 31,
 		XCB_CLIENT_MESSAGE: 33,
 
 		// enum xcb_send_event_dest_t
@@ -1445,9 +1461,9 @@ var x11Init = function() {
 						libAttempter(path, preferred, possibles);
 
 					break;
-				case 'xcbutil':
+				case 'xcbkey':
 
-						var possibles = ['libxcb-util.so', 'libxcb-util.so.1'];
+						var possibles = ['libxcb-keysyms.so', 'libxcb-keysyms.so.1'];
 
 						var preferred;
 						// all values of preferred MUST exist in possibles reason is link123543939
@@ -1460,7 +1476,31 @@ var x11Init = function() {
 							case 'dragonfly': // physcially unverified
 							case 'gnu/kfreebsd': // physically unverified
 							case 'linux':
-								preferred = 'libxcb-util.so';
+								preferred = 'libxcb-keysyms.so';
+								break;
+							default:
+								// do nothing
+						}
+
+						libAttempter(path, preferred, possibles);
+
+					break;
+				case 'xcbicccm':
+
+						var possibles = ['libxcb-icccm.so', 'libxcb-icccm.so.4'];
+
+						var preferred;
+						// all values of preferred MUST exist in possibles reason is link123543939
+						switch (OS_NAME) {
+							case 'freebsd': // physically unverified
+							case 'openbsd': // physically unverified
+							case 'android': // physically unverified
+							case 'sunos': // physically unverified
+							case 'netbsd': // physically unverified
+							case 'dragonfly': // physcially unverified
+							case 'gnu/kfreebsd': // physically unverified
+							case 'linux':
+								preferred = 'libxcb-icccm.so.4';
 								break;
 							default:
 								// do nothing
@@ -3229,6 +3269,46 @@ var x11Init = function() {
 				self.TYPE.xcb_get_property_reply_t.ptr	// *R
 			);
 		},
+
+		xcb_get_property_unchecked: function() {
+			/* http://libxcb.sourcearchive.com/documentation/1.1/group__XCB____API_g86312758f2d011c375ae23ac2c063b7d.html#g86312758f2d011c375ae23ac2c063b7d
+			 * http://www.linuxhowtos.org/manpages/3/xcb_get_property.htm
+			 * xcb_get_property_cookie_t xcb_get_property_unchecked(
+			 *   im guessing same as xcb_get_property
+			 * );
+			 */
+			return lib('xcb').declare('xcb_get_property_unchecked', self.TYPE.ABI,
+				self.TYPE.xcb_get_property_cookie_t,		// return
+				self.TYPE.xcb_connection_t.ptr,				// *conn
+				self.TYPE.uint8_t,							// _delete
+				self.TYPE.xcb_window_t,						// window
+				self.TYPE.xcb_atom_t,						// property
+				self.TYPE.xcb_atom_t,						// type
+				self.TYPE.uint32_t,							// long_offset
+				self.TYPE.uint32_t							// long_length
+			);
+		},
+		xcb_get_selection_owner: function() {
+			/* http://www.linuxhowtos.org/manpages/3/xcb_get_selection_owner.htm
+			 * xcb_get_selection_owner_cookie_t xcb_get_selection_owner(xcb_connection_t *conn, xcb_atom_t selection);
+			 */
+			return lib('xcb').declare('xcb_get_selection_owner', self.TYPE.ABI,
+				self.TYPE.xcb_get_selection_owner_cookie_t,	// return
+				self.TYPE.xcb_connection_t.ptr,				// *conn
+				self.TYPE.xcb_atom_t						// selection
+			);
+		},
+		xcb_get_selection_owner_reply: function() {
+			/* http://www.linuxhowtos.org/manpages/3/xcb_get_selection_owner.htm
+			 * xcb_get_selection_owner_reply_t *xcb_get_selection_owner_reply(xcb_connection_t *conn, xcb_get_selection_owner_cookie_t cookie, xcb_generic_error_t **e);
+			 */
+			return lib('xcb').declare('xcb_get_selection_owner_reply', self.TYPE.ABI,
+				self.TYPE.xcb_get_selection_owner_reply_t.ptr,	// return
+				self.TYPE.xcb_connection_t.ptr,					// *conn
+				self.TYPE.xcb_get_selection_owner_cookie_t,		// selection
+				self.TYPE.xcb_generic_error_t.ptr.ptr			// **e
+			);
+		},
 		xcb_get_setup: function() {
 			// http://xcb.freedesktop.org/PublicApi/#index7h2
 			return lib('xcb').declare('xcb_get_setup', self.TYPE.ABI,
@@ -3347,6 +3427,60 @@ var x11Init = function() {
 				self.TYPE.uint8_t					// keyboard_mode
 			);
 		},
+		xcb_icccm_get_text_property: function() {
+			/* https://github.com/rtbo/xcb-util-wm-d/blob/c025b35735f4e2c00cded2ba9e93ffdc669b57c9/source/xcb/xcb_icccm.d#L60
+			 * xcb_get_property_cookie_t xcb_icccm_get_text_property(
+			 *   xcb_connection_t *c,
+			 *   xcb_window_t window,
+			 *   xcb_atom_t property
+		 	 * );
+			 */
+			return lib('xcbicccm').declare('xcb_icccm_get_text_property', self.TYPE.ABI,
+				self.TYPE.xcb_get_property_cookie_t,	// return
+				self.TYPE.xcb_connection_t.ptr,			// *c
+				self.TYPE.xcb_window_t,					// window
+				self.TYPE.xcb_atom_t					// property
+			);
+		},
+		xcb_icccm_get_text_property_reply: function() {
+			/* https://github.com/rtbo/xcb-util-wm-d/blob/c025b35735f4e2c00cded2ba9e93ffdc669b57c9/source/xcb/xcb_icccm.d#L96
+			 * ubyte xcb_icccm_get_text_property_reply(xcb_connection_t *c,
+                                            xcb_get_property_cookie_t cookie,
+                                            xcb_icccm_get_text_property_reply_t *prop,
+											xcb_generic_error_t **e);
+			 */
+			return lib('xcbicccm').declare('xcb_icccm_get_text_property_reply', self.TYPE.ABI,
+				self.TYPE.unsigned_char,							// return
+				self.TYPE.xcb_connection_t.ptr,						// *c
+				self.TYPE.xcb_get_property_cookie_t,				// cookie
+				self.TYPE.xcb_icccm_get_text_property_reply_t.ptr,	// *prop
+				self.TYPE.xcb_generic_error_t.ptr.ptr				// **e
+			);
+		},
+		xcb_icccm_get_text_property_reply_wipe: function() {
+			/* https://github.com/rtbo/xcb-util-wm-d/blob/c025b35735f4e2c00cded2ba9e93ffdc669b57c9/source/xcb/xcb_icccm.d#L106
+			 * void xcb_icccm_get_text_property_reply_wipe(xcb_icccm_get_text_property_reply_t *prop);
+			 */
+			return lib('xcbicccm').declare('xcb_icccm_get_text_property_reply_wipe', self.TYPE.ABI,
+				self.TYPE.void,										// return
+				self.TYPE.xcb_icccm_get_text_property_reply_t.ptr	// *prop
+			);
+		},
+		xcb_icccm_get_text_property_unchecked: function() {
+			/* https://github.com/rtbo/xcb-util-wm-d/blob/c025b35735f4e2c00cded2ba9e93ffdc669b57c9/source/xcb/xcb_icccm.d#L74
+			 * xcb_get_property_cookie_t xcb_icccm_get_text_property_unchecked(
+			 *   xcb_connection_t *c,
+			 *   xcb_window_t window,
+			 *   xcb_atom_t property
+		 	 * );
+			 */
+			return lib('xcbicccm').declare('xcb_icccm_get_text_property_unchecked', self.TYPE.ABI,
+				self.TYPE.xcb_get_property_cookie_t,	// return
+				self.TYPE.xcb_connection_t.ptr,			// *c
+				self.TYPE.xcb_window_t,					// window
+				self.TYPE.xcb_atom_t					// property
+			);
+		},
 		xcb_intern_atom: function() {
 			/* http://libxcb.sourcearchive.com/documentation/1.1/group__XCB____API_g5c9806a2cfa188c38ed35bff51c60410.html#g5c9806a2cfa188c38ed35bff51c60410
 			 * http://www.linuxhowtos.org/manpages/3/xcb_intern_atom.htm
@@ -3412,7 +3546,15 @@ var x11Init = function() {
 		xcb_map_window: function() {
 			// http://damnsmallbsd.org/man?query=xcb_map_window&apropos=0&sektion=3&manpath=OSF1+V5.1%2Falpha&arch=default&format=html
 			return lib('xcb').declare('xcb_map_window', self.TYPE.ABI,
-				self.TYPE.xcb_void_cookie_t,	// return
+				self.TYPE.xcb_void_cookie_t,		// return
+				self.TYPE.xcb_connection_t.ptr,		// *conn
+				self.TYPE.xcb_window_t				// window
+			);
+		},
+		xcb_map_window_checked: function() {
+			// im guessing declare is same as non-checked
+			return lib('xcb').declare('xcb_map_window_checked', self.TYPE.ABI,
+				self.TYPE.xcb_void_cookie_t,		// return
 				self.TYPE.xcb_connection_t.ptr,		// *conn
 				self.TYPE.xcb_window_t				// window
 			);
@@ -3758,6 +3900,14 @@ var x11Init = function() {
 				self.TYPE.xcb_window_t				// window
 			);
 		},
+		xcb_unmap_window_checked: function() {
+			// im guessing declare is same as non-checked
+			return lib('xcb').declare('xcb_unmap_window_checked', self.TYPE.ABI,
+				self.TYPE.xcb_void_cookie_t,		// return
+				self.TYPE.xcb_connection_t.ptr,		// *conn
+				self.TYPE.xcb_window_t				// window
+			);
+		},
 		xcb_wait_for_event: function() {
 			// http://xcb.freedesktop.org/PublicApi/#index10h2
 			return lib('xcb').declare('xcb_wait_for_event', self.TYPE.ABI,
@@ -3911,6 +4061,15 @@ var x11Init = function() {
 				self._cache.XCBConn = ostypes.API('xcb_connect')(null, null);
 			}
 			return self._cache.XCBConn;
+		},
+		cachedXCBRootWindow: function(refreshCache) {
+			if (refreshCache || !self._cache.XCBRootWindow)  {
+				var setup = ostypes.API('xcb_get_setup')(ostypes.HELPER.cachedXCBConn());
+				var screens = ostypes.API('xcb_setup_roots_iterator')(setup);
+				var root = screens.data.contents.root;
+				self._cache.XCBRootWindow = root;
+			}
+			return self._cache.XCBRootWindow;
 		},
 		cachedDefaultRootWindow: function(refreshCache/*, disp*/) {
 			if (refreshCache || !self._cache.DefaultRootWindow)  {
