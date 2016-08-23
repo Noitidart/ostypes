@@ -2088,7 +2088,7 @@ var x11Init = function() {
 			);
 		},
 		XKeysymToKeycode: function() {
-			/* http://domesjö.se/xlib/utilities/keyboard/XKeysymToKeycode.html
+			/* http://domesjo.se/xlib/utilities/keyboard/XKeysymToKeycode.html
 			 * KeyCode XKeysymToKeycode(
 			 *   Display *display,
 			 *   KeySym keysym
