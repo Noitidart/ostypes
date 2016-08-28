@@ -490,6 +490,13 @@ var winTypes = function() {
 		{ 'type': this.DWORD },
 		{ 'mi': this.MOUSEINPUT } // union, pick which one you want, i picked mouse
 	]);
+	this.KBDLLHOOKSTRUCT = ctypes.StructType('tagKBDLLHOOKSTRUCT', [
+		{ vkCode: this.DWORD },
+		{ scanCode: this.DWORD },
+		{ flags: this.DWORD },
+		{ time: this.DWORD },
+		{ dwExtraInfo: this.ULONG_PTR }
+	]);
 	this.LPCWAVEFORMATEX = this.WAVEFORMATEX.ptr;
 	this.LPCGUID = this.GUID.ptr;
 	this.LPOVERLAPPED = this.OVERLAPPED.ptr;
@@ -682,8 +689,10 @@ var winTypes = function() {
 
 	// ADV FUNC TYPES
 	this.FONTENUMPROC = this.EnumFontFamProc.ptr;
-	this.HOOKPROC = this.LowLevelMouseProc.ptr; // not a guess really, as this is the hook type i use, so yeah it has to be a pointer to it
 	this.LPOVERLAPPED_COMPLETION_ROUTINE = this.FileIOCompletionRoutine.ptr;
+
+	// INACCURATE TYPES
+	this.HOOKPROC = ctypes.voidptr_t; // note really a guess type. just slightly inaccurate because i made voidptr_t because sometimes i need it as `this.LowLevelMouseProc.ptr` and others as `this.LowLevelKeyboardProc.ptr` // not a guess really, as this is the hook type i use, so yeah it has to be a pointer to it
 
 	// STRUCTS USING FUNC TYPES
 	this.WNDCLASS = ctypes.StructType('tagWNDCLASS', [
@@ -1868,6 +1877,11 @@ var winInit = function() {
 		PM_REMOVE: 1,
 		WM_HOTKEY: 0x0312,
 
+		WM_KEYDOWN: 0x0100,
+		WM_KEYUP: 0x0101,
+		WM_SYSKEYDOWN: 0x0104,
+		WM_SYSKEYUP: 0x0105,
+
 		WM_MOUSEMOVE: 0x200,
 		WM_LBUTTONDOWN: 0x201,
 		WM_LBUTTONUP: 0x202,
@@ -1886,6 +1900,7 @@ var winInit = function() {
 		WM_NCXBUTTONDOWN: 0x00AB,
 		WM_NCXBUTTONUP: 0x00AC,
 		WM_NCXBUTTONDBLCLK: 0x00AD,
+		WH_KEYBOARD_LL: 13,
 		WH_MOUSE_LL: 14,
 		RIDEV_INPUTSINK: 0x00000100,
 		RID_INPUT: 0x10000003,
