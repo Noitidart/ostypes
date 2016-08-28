@@ -669,6 +669,7 @@ var winTypes = function() {
 	this.FileIOCompletionRoutine = ctypes.FunctionType(this.CALLBACK_ABI, this.VOID, [this.DWORD, this.DWORD, this.LPOVERLAPPED]);
 	this.MONITORENUMPROC = ctypes.FunctionType(this.CALLBACK_ABI, this.BOOL, [this.HMONITOR, this.HDC, this.LPRECT, this.LPARAM]);
 	this.LowLevelMouseProc = ctypes.FunctionType(this.CALLBACK_ABI, this.LRESULT, [this.INT, this.WPARAM, this.LPARAM]);
+	this.LowLevelKeyboardProc = ctypes.FunctionType(this.CALLBACK_ABI, this.LRESULT, [this.INT, this.WPARAM, this.LPARAM]);
 	this.WNDPROC = ctypes.FunctionType(this.CALLBACK_ABI, this.LRESULT, [
 		this.HWND,		// hwnd,
 		this.UINT,		// uMsg,
