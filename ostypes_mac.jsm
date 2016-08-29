@@ -308,6 +308,7 @@ var macTypes = function() {
 	this.NSEventType = this.NSUInteger;
 	this.NSEventMask = this.NSUInteger;
 	this.NSURLBookmarkCreationOptions = this.NSUInteger;
+	this.NSEventModifierFlags = this.NSUInteger; // guess
 
 	// GUESS TYPES OBJC - they work though
 	this.id = ctypes.voidptr_t;
