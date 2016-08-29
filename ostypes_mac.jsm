@@ -667,25 +667,25 @@ var macInit = function() {
 		'KEY_/': 44,
 		'KEY_.': 47,
 		'KEY_`': 50,
-		'KEY_F1': 114,
-		'KEY_F2': 112,
-		'KEY_F3': 91,
-		'KEY_F4': 110,
-		'KEY_F5': 88,
-		'KEY_F6': 89,
-		'KEY_F7': 90,
-		'KEY_F8': 92,
-		'KEY_F9': 93,
-		'KEY_F10': 101,
-		'KEY_F11': 95,
-		'KEY_F12': 103,
+		'KEY_F1': 114, // 122
+		'KEY_F2': 112, // 120
+		'KEY_F3': 91, // 99
+		'KEY_F4': 110, // 118
+		'KEY_F5': 88, // 96
+		'KEY_F6': 89, // 97
+		'KEY_F7': 90, // 98
+		'KEY_F8': 92, // 100
+		'KEY_F9': 93, // 101
+		'KEY_F10': 101, // 109
+		'KEY_F11': 95, // could not get in my test, it woudl split the windows apart and give me subtype 7, for not key event
+		'KEY_F12': 103, // 111
 		'KEY_F13': 97,
 		'KEY_F14': 99,
 		'KEY_F15': 105,
-		'KEY_Left': 67,
-		'KEY_Right': 64,
-		'KEY_Down': 69,
-		'KEY_Up': 72,
+		'KEY_Left': 67, // 123
+		'KEY_Right': 64, // 124
+		'KEY_Down': 69, // 125
+		'KEY_Up': 72, // 126
 		// this guy has two sets for arrow keys, neither seem to line up with other references linekd in comment above, but for now i just pick one as i dont use it. when i need to use it, test it first to see if it works
 		// 'KEY_Left': 115,
 		// 'KEY_Right': 116,
@@ -715,14 +715,14 @@ var macInit = function() {
 		'KEY_Escape': 53,
 		'KEY_Return': 36, // same as `\n` https://github.com/bretthodgkins/aios/blob/f4434c578f65b286167035cb519cf8e83ce299f2/src/maccontroller.h#L134
 		'KEY_Help': 106,
-		'KEY_Home': 107,
-		'KEY_Page Up': 108,
+		'KEY_Home': 107, // 115
+		'KEY_Page Up': 108, // 116
 		'KEY_Del': 109,
-		'KEY_End': 111,
-		'KEY_Page Down': 113,
-		'KEY_Delete': 51,
+		'KEY_End': 111, // 119
+		'KEY_Page Down': 113, // 121
+		'KEY_Delete': 51, // 117
 		'KEY_Shift': 55,
-		'KEY_Caps Lock': 56,
+		'KEY_Caps Lock': 56, // 4
 		'KEY_Option': 57,
 		'KEY_Control': 58,
 		'KEY_Right Shift': 59,
@@ -738,6 +738,8 @@ var macInit = function() {
 		// 'KEY_Eisuu': 94,
 		// 'KEY_Kana': 96,
 		// {F(0,255)}
+
+		// KEY_Insert: 114,
 
 		kEventParamDirectObject: 757935405,
 

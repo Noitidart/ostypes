@@ -97,7 +97,17 @@ var xlibTypes = function() {
 	this.Visual = ctypes.StructType('Visual');
 	this.Depth = ctypes.StructType('Depth');
 
+	// Inaccurate STRUCTS
+	this.XComposeStatus = ctypes.StructType('XComposeStatus'); // i didnt bother looking this up as i didnt need its internals
+
 	// SIMPLE STRUCTS
+	this.XAnyEvent = ctypes.StructType('XAnyEvent', [ // https://tronche.com/gui/x/xlib/events/structures.html
+		{ type: this.int },
+		{ serial: this.unsigned_long },
+		{ send_event: this.Bool },
+		{ display: this.Display.ptr },
+		{ window: this.Window }
+	]);
 	this.XButtonEvent = ctypes.StructType('XButtonEvent', [ // http://tronche.com/gui/x/xlib/events/keyboard-pointer/keyboard-pointer.html#XButtonEvent
 		{ type: this.int },
 		{ serial: this.unsigned_long },
@@ -205,7 +215,9 @@ var xlibTypes = function() {
 	// ADVANCED STRUCTS
 	// XEvent is one huge union, js-ctypes doesnt have union so i just set it to what I use for my addon
 	this.XEvent = ctypes.StructType('_XEvent', [ // http://tronche.com/gui/x/xlib/events/structures.html
-		{ xclient: this.XClientMessageEvent }
+		// { bytes: ctypes.uint64_t.array(100) }
+		{ xany: this.XAnyEvent }
+		// { xclient: this.XClientMessageEvent }
 		// { xbutton: this.XButtonEvent }
 		// { xkey: this.XKeyEvent }
 	]);
@@ -895,8 +907,10 @@ var x11Init = function() {
 		// enum xcb_atom_enum_t // https://github.com/luminousone/dmedia/blob/2adad68fb72e86855176382a34d0fea671a7f68e/platforms/linux_x11/xcb/xcb.d#L438
 		XCB_ATOM_NONE: 0,
 		XCB_ATOM_ANY: 0,
+		XCB_GET_PROPERTY_TYPE_ANY: 0,
 		XCB_ATOM_ATOM: 4,
         XCB_ATOM_STRING: 31,
+		XCB_ATOM_WINDOW: 33,
         XCB_ATOM_WM_NAME: 39,
 		XCB_ATOM_WM_ICON_NAME: 37,
 
@@ -2022,6 +2036,25 @@ var x11Init = function() {
 				self.TYPE.Bool,			// owner_events
 				self.TYPE.int,			// pointer_mode
 				self.TYPE.int			// keyboard_mode
+			);
+		},
+		XLookupString: function() {
+			/* https://tronche.com/gui/x/xlib/utilities/XLookupString.html
+			 * int XLookupString(
+			 *   XKeyEvent *event_struct;
+			 *   char *buffer_return;
+			 *   int bytes_buffer;
+			 *   KeySym *keysym_return;
+			 *   XComposeStatus *status_in_out;
+			 * );
+			 */
+			return lib('x11').declare('XLookupString', self.TYPE.ABI,
+				self.TYPE.int,					// return
+				self.TYPE.XKeyEvent.ptr,		// *event_struct
+				self.TYPE.char.ptr,				// *buffer_return
+				self.TYPE.int,					// bytes_buffer
+				self.TYPE.KeySym.ptr,			// *keysym_return
+				self.TYPE.XComposeStatus.ptr	// *status_in_out
 			);
 		},
 		XGrabPointer: function() {
@@ -3513,6 +3546,21 @@ var x11Init = function() {
 				self.TYPE.xcb_connection_t.ptr,			// *conn
 				self.TYPE.xcb_intern_atom_cookie_t,		// cookie
 				self.TYPE.xcb_generic_error_t.ptr.ptr	// **e
+			);
+		},
+		xcb_key_press_lookup_keysym: function() {
+			/* http://opensource.apple.com//source/X11libs/X11libs-60/xcb-util/xcb-util-0.3.6/keysyms/xcb_keysyms.h
+			 * xcb_keysym_t xcb_key_press_lookup_keysym(
+			 *   xcb_key_symbols_t *syms,
+			 *   xcb_key_press_event_t *event,
+			 *   int col
+		 	 * );
+			 */
+			return lib('xcbkey').declare('xcb_key_press_lookup_keysym', self.TYPE.ABI,
+				self.TYPE.xcb_keysym_t,					// return
+				self.TYPE.xcb_key_symbols_t.ptr,		// *syms
+				self.TYPE.xcb_key_press_event_t.ptr,	// *event
+				self.TYPE.int							// col
 			);
 		},
 		xcb_key_symbols_alloc: function() {
