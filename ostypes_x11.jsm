@@ -695,6 +695,7 @@ var x11Init = function() {
 	// xlib.py - https://github.com/hazelnusse/sympy-old/blob/65f802573e5963731a3e7e643676131b6a2500b8/sympy/thirdparty/pyglet/pyglet/window/xlib/xlib.py#L88
 	this.CONST = {
 		//// C
+		EINTR: 4,
 		POLLIN: 0x0001,
 		POLLOUT: 0x0004,
 		POLLERR: 0x0008,
