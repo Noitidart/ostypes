@@ -50,7 +50,7 @@ var xlibTypes = function() {
 		{ mask: this.uint32_t },											// Mask describing event
 		{ cookie: this.uint32_t },											// Unique cookie associating related events (for rename(2))
 		{ len: this.uint32_t },												// Size of name field
-		{ name: this.char.ptr }	// Optional null-terminated name // Within a ufs filesystem the maximum length from http://www.unix.com/unix-for-dummies-questions-and-answers/4260-maximum-file-name-length.htmlof a filename is 255 and i do 256 becuause i wnant it null terminated
+		{ name: this.char.array(struct_const.NAME_MAX + 1) } // + 1 for the null termination // Optional null-terminated name // Within a ufs filesystem the maximum length from http://www.unix.com/unix-for-dummies-questions-and-answers/4260-maximum-file-name-length.htmlof a filename is 255 and i do 256 becuause i wnant it null terminated
 	]);
 	this.pollfd = ctypes.StructType('pollfd', [ // http://linux.die.net/man/2/poll
 		{ fd: this.int },
@@ -2982,7 +2982,7 @@ var x11Init = function() {
 			*    int fd
 			*  );
 			*/
-			return lib('libc').declare('close', self.TYPE_ABI,
+			return lib('libc').declare('close', self.TYPE.ABI,
 				self.TYPE.int,		// return
 				self.TYPE.int		// fd
 			);
