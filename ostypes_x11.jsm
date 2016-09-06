@@ -313,9 +313,11 @@ var xlibTypes = function() {
 	this.GdkWindowTypeHint = ctypes.int;
 	this.gdouble = ctypes.double;
 	this.GFile = ctypes.StructType('_GFile');
+	this.GFileInfo = ctypes.StructType('GFileInfo');
 	this.GFileMonitor = ctypes.StructType('_GFileMonitor');
 	this.GFileMonitorEvent = ctypes.unsigned_int; // guess as its enum
 	this.GFileMonitorFlags = ctypes.unsigned_int; // guess as its enum
+	this.GFileQueryInfoFlags = ctypes.unsigned_int; // guess as its enum
 	this.gint = ctypes.int;
 	this.gpointer = ctypes.void_t.ptr;
 	this.GtkWidget = ctypes.StructType('GtkWidget');
@@ -324,6 +326,7 @@ var xlibTypes = function() {
 	this.guchar = ctypes.unsigned_char;
 	this.guint = ctypes.unsigned_int;
 	this.guint32 = ctypes.unsigned_int;
+	this.guint64 = ctypes.unsigned_long;
 	this.gulong = ctypes.unsigned_long;
 
 	// TYPEs - Level 2
@@ -828,6 +831,11 @@ var x11Init = function() {
 		GDK_FILTER_CONTINUE: 0,
 		GDK_FILTER_TRANSLATE: 1,
 		GDK_FILTER_REMOVE: 2,
+
+		G_FILE_ATTRIBUTE_UNIX_INODE: 'unix::inode',
+		G_FILE_QUERY_INFO_NONE: 0,
+		G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS: 1,
+
 
 		// XCB CONSTS
 		XCB_COPY_FROM_PARENT: 0,
@@ -2706,6 +2714,40 @@ var x11Init = function() {
 				self.TYPE.gchar.ptr				// *filename
 			);
 		},
+		g_file_get_path: function() {
+			/* https://developer.gnome.org/gio/stable/GFile.html#g-file-get-path
+			 * char *g_file_get_path (
+			 *   GFile *file
+		 	 * );
+			 */
+			return lib('gio').declare('g_file_get_path', self.TYPE.ABI,
+				self.TYPE.char.ptr,		// return
+				self.TYPE.GFile.ptr		// *file
+			);
+		},
+		g_file_get_uri: function() {
+			/* https://developer.gnome.org/gio/stable/GFile.html#g-file-get-uri
+			 * char * g_file_get_uri (
+			 *   GFile *file
+		 	 * );
+			 */
+			return lib('gio').declare('g_file_get_uri', self.TYPE.ABI,
+ 				self.TYPE.char.ptr,		// return
+ 				self.TYPE.GFile.ptr		// *file
+ 			);
+		},
+		g_file_info_get_attribute_uint64: function() {
+			/* https://developer.gnome.org/gio/stable/GFileInfo.html#g-file-info-get-attribute-uint64
+			guint64
+			g_file_info_get_attribute_uint64 (GFileInfo *info,
+			                                  const char *attribute);
+			 */
+			return lib('gio').declare('g_file_info_get_attribute_uint64', self.TYPE.ABI,
+				self.TYPE.guint64,			// return
+				self.TYPE.GFileInfo.ptr,	// *info
+				self.TYPE.char.ptr			// *attribute
+			);
+		},
 		g_file_monitor_directory: function() {
 			/* https://developer.gnome.org/gio/stable/GFile.html#g-file-monitor-directory
 			 * GFileMonitor *g_file_monitor_directory (
@@ -2734,6 +2776,24 @@ var x11Init = function() {
 				self.TYPE.char.ptr		// *char
 			);
 		},
+		g_file_query_info: function() {
+			/* https://developer.gnome.org/gio/stable/GFile.html#g-file-query-info
+			GFileInfo *
+			g_file_query_info (GFile *file,
+			                   const char *attributes,
+			                   GFileQueryInfoFlags flags,
+			                   GCancellable *cancellable,
+			                   GError **error);
+			 */
+			return lib('gio').declare('g_file_query_info', self.TYPE.ABI,
+				self.TYPE.GFileInfo.ptr,		// return
+				self.TYPE.GFile.ptr,			// *file
+				self.TYPE.char.ptr,				// *attributes
+				self.TYPE.GFileQueryInfoFlags,	// flags
+				self.TYPE.GCancellable.ptr,		// *cancellable
+				self.TYPE.GError.ptr.ptr		// **error
+			);
+		},
 		g_file_trash: function() {
 			/* https://developer.gnome.org/gio/stable/GFile.html#g-file-trash
 			 * gboolean g_file_trash (
@@ -2747,6 +2807,17 @@ var x11Init = function() {
 				self.TYPE.GFile.ptr,			// *file
 				self.TYPE.GCancellable.ptr,		// *cancellable
 				self.TYPE.GError.ptr.ptr		// **error
+			);
+		},
+		g_free: function() {
+			/* https://developer.gnome.org/glib/stable/glib-Memory-Allocation.html#g-free
+			 * void g_free (
+			 *   gpointer mem
+		 	 * );
+			 */
+			return lib('gio').declare('g_free', self.TYPE.ABI,
+				self.TYPE.void,			// return
+				self.TYPE.gpointer		// mem
 			);
 		},
 		g_object_unref: function() {
