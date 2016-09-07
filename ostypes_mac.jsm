@@ -302,6 +302,7 @@ var macTypes = function() {
 	this.BOOL = ctypes.signed_char;
 	this.NSInteger = is64bit ? ctypes.long: ctypes.int;
 	this.NSUInteger = is64bit ? ctypes.unsigned_long : ctypes.unsigned_int;
+	this.NSTimeInterval = ctypes.double;
 
 	// ADV OBJC TYPES
 	this.NSBitmapFormat = this.NSUInteger;
