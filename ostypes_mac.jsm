@@ -366,6 +366,10 @@ var macInit = function() {
 	// CONSTANTS
 	var _const = {}; // lazy load consts
 	this.CONST = {
+		// C
+		EINTR: 4,
+
+		// CoreFoundation
 		get CGRectNull () { if (!('CGRectNull' in _const)) { _const['CGRectNull'] = lib('CoreGraphics').declare('CGRectNull', self.TYPE.CGRect); } return _const['CGRectNull']; },
 		get _NSConcreteGlobalBlock () { if (!('_NSConcreteGlobalBlock' in _const)) { _const['_NSConcreteGlobalBlock'] = lib('objc').declare('_NSConcreteGlobalBlock', self.TYPE.void.ptr); } return _const['_NSConcreteGlobalBlock']; },
 		get kCFAllocatorDefault () { if (!('kCFAllocatorDefault' in _const)) { _const['kCFAllocatorDefault'] = lib('CoreFoundation').declare('kCFAllocatorDefault', self.TYPE.CFAllocatorRef); } return _const['kCFAllocatorDefault']; },
