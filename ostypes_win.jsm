@@ -2308,7 +2308,11 @@ var winInit = function() {
 		VK_ZOOM: 0xFB,
 		VK_NONAME: 0xFC,
 		VK_PA1: 0xFD,
-		VK_OEM_CLEAR: 0xFE
+		VK_OEM_CLEAR: 0xFE,
+
+		SPI_SETFOREGROUNDLOCKTIMEOUT: 0x2001,
+		SPIF_UPDATEINIFILE: 1,
+		SPIF_SENDWININICHANGE: 2
 	};
 
 	var _lib = {}; // cache for lib
@@ -4224,6 +4228,23 @@ var winInit = function() {
 			return lib('oleaut32').declare('SysAllocString', self.TYPE.ABI,
 				self.TYPE.BSTR,		// return
 				self.TYPE.OLECHAR	// *psz
+			);
+		},
+		SystemParametersInfo: function() {
+			/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms724947(v=vs.85).aspx
+			 * BOOL WINAPI SystemParametersInfo(
+			 *   _In_    UINT  uiAction,
+			 *   _In_    UINT  uiParam,
+			 *   _Inout_ PVOID pvParam,
+			 *   _In_    UINT  fWinIni
+			 * );
+			 */
+			return lib('user32').declare(ifdef_UNICODE ? 'SystemParametersInfoW' : 'SystemParametersInfoA', self.TYPE.ABI,
+				self.TYPE.BOOL,		// return
+				self.TYPE.UINT,		// uiAction
+				self.TYPE.UINT,		// uiParam
+				self.TYPE.PVOID,	// pvParam
+				self.TYPE.UINT		// fWinIni
 			);
 		},
 		UpdateResource: function() {
