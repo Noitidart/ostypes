@@ -1,3 +1,9 @@
+/*
+ * This Source Code is subject to the terms of the Mozilla Public License
+ * version 2.0 (the 'License'). You can obtain a copy of the License at
+ * http://mozilla.org/MPL/2.0/.
+ */
+
 var EXPORTED_SYMBOLS = ['ostypes'];
 
 // no need to define core or import cutils as all the globals of the worker who importScripts'ed it are availble here

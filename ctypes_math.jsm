@@ -1,3 +1,9 @@
+/*
+ * This Source Code is subject to the terms of the Mozilla Public License
+ * version 2.0 (the 'License'). You can obtain a copy of the License at
+ * http://mozilla.org/MPL/2.0/.
+ */
+
 /* Thanks to @arai-a - https://github.com/arai-a */
 
 var EXPORTED_SYMBOLS = ['ctypes_math'];
@@ -19,17 +25,17 @@ var ctypes_math = (function() {
 			}
 		}
 	}
-	
+
 	function UInt64_add(...uint64) {
 		ensureUInt64(uint64);
 
 		var hi = UInt64.hi(uint64[0]);
 		var lo = UInt64.lo(uint64[0]);;
-		
+
 		for (var i=1; i<uint64.length; i++) {
 			hi += UInt64.hi(uint64[i]);
 			lo += UInt64.lo(uint64[i]);
-			
+
 			if (lo > 0x100000000) {
 				hi += 1;
 			}
@@ -99,37 +105,37 @@ var ctypes_math = (function() {
 
 		return UInt64.join(ch, cl);
 	}
-  
+
 	function UInt64_or(...uint64) {
 		// bitwise OR
 		// if there are logical OR and bitwise OR, bitwise OR may be named `bor` or `bitor`, but I don't think there could be logical OR, so I think just `or` is the right name
-		
+
 		ensureUInt64(uint64);
-		
+
 		var hi = 0;
 		var lo = 0;
-		
+
 		for (var i=0; i<uint64.length; i++) {
 			hi |= UInt64.hi(uint64[i]);
 			lo |= UInt64.lo(uint64[i]);
 		}
-		
+
 		return UInt64.join(hi >>> 0, lo >>> 0);
 	}
-  
+
 	function UInt64_and(...uint64) {
 		// bitwise AND could be applied to more than 2 operands, not sure if it's useful tho
-		
+
 		ensureUInt64(uint64);
-		
+
 		var hi = UInt64.hi(uint64[0]);
 		var lo = UInt64.lo(uint64[0]);
-		
+
 		for (var i=1; i<uint64.length; i++) {
 			hi &= UInt64.hi(uint64[i]);
 			lo &= UInt64.lo(uint64[i]);
 		}
-		
+
 		return UInt64.join(hi >>> 0, lo >>> 0);
 	}
 
