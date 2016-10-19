@@ -1609,6 +1609,23 @@ var x11Init = function() {
 						libAttempter(path, preferred, possibles);
 
 					break;
+				case 'gtk3':
+
+						var possibles = ['libgtk-3.so.0'];
+
+						var preferred;
+						// all values of preferred MUST exist in possibles reason is link123543939
+						switch (OS_NAME) {
+							case 'linux':
+								preferred = 'libgtk-3.so.0';
+								break;
+							default:
+								// do nothing
+						}
+
+						libAttempter(path, preferred, possibles);
+
+					break;
 				case 'xcb':
 
 						var possibles = ['libxcb.so', 'libxcb.so.1'];
@@ -3027,7 +3044,7 @@ var x11Init = function() {
 			 *   GtkWidget *widget
 			 * );
 			 */
-			return lib('gtk2').declare('gtk_widget_get_window', self.TYPE.ABI,
+			return lib(GTK_VERSION === 2 ? 'gtk2' : 'gtk3').declare('gtk_widget_get_window', self.TYPE.ABI,
 				self.TYPE.GdkWindow.ptr,	// *return
 				self.TYPE.GtkWidget.ptr		// *widget
 			);
@@ -3039,7 +3056,7 @@ var x11Init = function() {
 			 *   gboolean setting
 			 * );
 			 */
-			return lib('gtk2').declare('gtk_window_set_keep_above', self.TYPE.ABI,
+			return lib(GTK_VERSION === 2 ? 'gtk2' : 'gtk3').declare('gtk_window_set_keep_above', self.TYPE.ABI,
 				self.TYPE.void,				// return
 				self.TYPE.GtkWindow.ptr,	// *window
 				self.TYPE.gboolean			// setting
