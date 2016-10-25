@@ -4415,11 +4415,13 @@ var x11Init = function() {
 			if (self._cache.XOpenDisplay) {
 				console.log('yes it was open, terminiating it');
 				self.API('XCloseDisplay')(self._cache.XOpenDisplay);
+				delete self._cache.XOpenDisplay;
 			}
 		},
 		ifOpenedXCBConnClose: function() {
 			if (self._cache.XCBConn) {
 				self.API('xcb_disconnect')(self._cache.XCBConn);
+				delete self._cache.XCBConn;
 			}
 		},
 		cachedAtom: function(aAtomName, createAtomIfDne, refreshCache) {
