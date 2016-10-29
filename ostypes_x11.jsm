@@ -305,15 +305,20 @@ var xlibTypes = function() {
 	this.GConnectFlags = ctypes.unsigned_int; // guess as its enum
 	this.GdkColormap = ctypes.StructType('GdkColormap');
 	this.GDesktopAppInfo = ctypes.StructType('GDesktopAppInfo');
+	this.GdkDevice = ctypes.StructType('GdkDevice');
+	this.GdkDeviceManager = ctypes.StructType('GdkDeviceManager');
 	this.GdkDisplay = ctypes.StructType('GdkDisplay');
 	this.GdkDisplayManager = ctypes.StructType('GdkDisplayManager');
 	this.GdkDrawable = ctypes.StructType('GdkDrawable');
 	this.GdkEventMask = ctypes.int; // enum, guessing enum is int
+	this.GdkEventType = ctypes.int; // enum // https://developer.gnome.org/gdk3/stable/gdk3-Events.html#GdkEventType
 	this.GdkFilterReturn = ctypes.int; // enum, guessing enum is int
 	this.GdkFullscreenMode = ctypes.int;
 	this.GdkGravity = ctypes.int;
+	this.GdkModifierType = ctypes.int; // enum, guess
 	this.GdkPixbuf = ctypes.StructType('GdkPixbuf');
 	this.GdkScreen = ctypes.StructType('GdkScreen');
+	this.GdkSeat = ctypes.StructType('GdkSeat');
 	this.GdkWindow = ctypes.StructType('GdkWindow');
 	this.GdkWindowHints = ctypes.int;
 	this.GdkWindowTypeHint = ctypes.int;
@@ -325,14 +330,15 @@ var xlibTypes = function() {
 	this.GFileMonitorFlags = ctypes.unsigned_int; // guess as its enum
 	this.GFileQueryInfoFlags = ctypes.unsigned_int; // guess as its enum
 	this.gint = ctypes.int;
+	this.gint8 = ctypes.int8_t;
 	this.gpointer = ctypes.void_t.ptr;
 	this.GtkWidget = ctypes.StructType('GtkWidget');
 	this.GtkWindow = ctypes.StructType('GtkWindow');
 	this.GtkWindowPosition = ctypes.int;
 	this.guchar = ctypes.unsigned_char;
 	this.guint = ctypes.unsigned_int;
-	this.guint32 = ctypes.unsigned_int;
-	this.guint64 = ctypes.unsigned_long;
+	this.guint32 = ctypes.uint32_t;
+	this.guint64 = ctypes.uint64_t;
 	this.gulong = ctypes.unsigned_long;
 
 	// TYPEs - Level 2
@@ -347,6 +353,21 @@ var xlibTypes = function() {
 	//]);
 	this.GdkEvent = ctypes.void_t;
 
+	// https://developer.gnome.org/gdk3/stable/gdk3-Event-Structures.html#GdkEventButton
+	this.GdkEventButton = ctypes.StructType('GdkEventType', [
+		{ 'type': this.GdkEventType },
+	    { 'window': this.GdkWindow.ptr },
+	    { 'send_event': this.gint8 },
+	    { 'time': this.guint32 },
+	    { 'x': this.gdouble },
+	    { 'y': this.gdouble },
+	    { 'axes': this.gdouble.ptr },
+	    { 'state': this.guint },
+	    { 'button': this.guint },
+	    { 'device': this.GdkDevice.ptr },
+	    { 'x_root': this.gdouble },
+	    { 'y_root': this.gdouble }
+	]);
 	// STRUCTs - Level 1
 	this.GClosure = ctypes.StructType('GClosure');
 	this.GError = ctypes.StructType('GError', [
@@ -365,6 +386,7 @@ var xlibTypes = function() {
 	this.GdkFilterFunc = ctypes.FunctionType(this.CALLBACK_ABI, this.GdkFilterReturn, [this.GdkXEvent.ptr, this.GdkEvent.ptr, this.gpointer]).ptr; // https://developer.gnome.org/gdk3/stable/gdk3-Windows.html#GdkFilterFunc
 	this.GClosureNotify = ctypes.FunctionType(this.CALLBACK_ABI, this.void, [this.gpointer, this.GClosure.ptr]).ptr; // https://developer.gnome.org/gobject/stable/gobject-Closures.html#GClosureNotify
 	this.GFileMonitor_changed_signal = ctypes.FunctionType(this.CALLBACK_ABI, this.void, [this.GFileMonitor.ptr, this.GFile.ptr, this.GFile.ptr, this.GFileMonitorEvent, this.gpointer]).ptr; // void user_function (GFileMonitor *monitor, GFile *file, GFile *other_file, GFileMonitorEvent event_type, gpointer user_data) // the `GFileMonitor_changed_signal` name is my made up name
+	this.GtkWidget_button_press_callback = ctypes.FunctionType(this.CALLBACK_ABI, this.gboolean, [this.GtkWidget.ptr, this.GdkEventButton.ptr, this.gpointer]).ptr; // https://developer.gnome.org/gtk3/stable/GtkWidget.html#GtkWidget-button-press-event // gboolean user_function (GtkWidget *widget, GdkEvent *event, gpointer user_data)
 	// end - gtk
 
 	/////////////// XCB stuff
@@ -842,6 +864,31 @@ var x11Init = function() {
 		G_FILE_QUERY_INFO_NONE: 0,
 		G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS: 1,
 
+		GDK_CURRENT_TIME: 0,
+
+		// needs verification
+		GDK_EXPOSURE_MASK: 1 << 1,
+		GDK_POINTER_MOTION_MASK: 1 << 2,
+		GDK_POINTER_MOTION_HINT_MASK: 1 << 3,
+		GDK_BUTTON_MOTION_MASK: 1 << 4,
+		GDK_BUTTON1_MOTION_MASK: 1 << 5,
+		GDK_BUTTON2_MOTION_MASK: 1 << 6,
+		GDK_BUTTON3_MOTION_MASK: 1 << 7,
+		GDK_BUTTON_PRESS_MASK: 1 << 8, // verified
+		GDK_BUTTON_RELEASE_MASK: 1 << 9,
+		GDK_KEY_PRESS_MASK: 1 << 10,
+		GDK_KEY_RELEASE_MASK: 1 << 11,
+		GDK_ENTER_NOTIFY_MASK: 1 << 12,
+		GDK_LEAVE_NOTIFY_MASK: 1 << 13,
+		GDK_FOCUS_CHANGE_MASK: 1 << 14,
+		GDK_STRUCTURE_MASK: 1 << 15,
+		GDK_PROPERTY_CHANGE_MASK: 1 << 16,
+		GDK_VISIBILITY_NOTIFY_MASK: 1 << 17,
+		GDK_PROXIMITY_IN_MASK: 1 << 18,
+		GDK_PROXIMITY_OUT_MASK: 1 << 19,
+		GDK_SUBSTRUCTURE_MASK: 1 << 20,
+		GDK_SCROLL_MASK: 1 << 21,
+		GDK_ALL_EVENTS_MASK: 0x3FFFFE,
 
 		// XCB CONSTS
 		XCB_COPY_FROM_PARENT: 0,
@@ -1574,6 +1621,21 @@ var x11Init = function() {
 							case 'linux':
 								preferred = 'libgdk-3.so.0';
 								break;
+							default:
+								// do nothing
+						}
+
+						libAttempter(path, preferred, possibles);
+
+					break;
+				case 'gdk32':
+
+						// TODO: figure out some `possibles` for gdk3.2, firefox doesnt use 3.2 yet so low priority
+						var possibles = ['I DONT KNOW ANY YET'];
+
+						var preferred;
+						// all values of preferred MUST exist in possibles reason is link123543939
+						switch (OS_NAME) {
 							default:
 								// do nothing
 						}
@@ -2875,6 +2937,25 @@ var x11Init = function() {
 				self.TYPE.GConnectFlags		// connect_flags
 		 	);
 		},
+		g_signal_connect_object: function() {
+			/* https://developer.gnome.org/gobject/stable/gobject-Signals.html#g-signal-connect-data
+			 * gulong
+				g_signal_connect_object (gpointer instance,
+				                         const gchar *detailed_signal,
+				                         GCallback c_handler,
+				                         gpointer gobject,
+				                         GConnectFlags connect_flags);
+			 * );
+			 */
+			return lib('gio').declare('g_signal_connect_object', self.TYPE.ABI,
+				self.TYPE.gulong,			// return
+				self.TYPE.gpointer,			// instance
+				self.TYPE.gchar.ptr,		// *detailed_signal
+				self.TYPE.GCallback,		// c_handler
+				self.TYPE.gpointer,			// gobject
+				self.TYPE.GConnectFlags		// connect_flags
+		 	);
+		},
 		g_signal_handler_disconnect: function() {
 			/* https://developer.gnome.org/gobject/stable/gobject-Signals.html#g-signal-handler-disconnect
 			 * void g_signal_handler_disconnect (
@@ -2888,12 +2969,74 @@ var x11Init = function() {
    				self.TYPE.gulong	// handler_id
 			);
 		},
+		gdk_device_get_position: function() {
+			/* https://developer.gnome.org/gdk3/stable/GdkDevice.html#gdk-device-get-position
+			void
+			gdk_device_get_position (GdkDevice *device,
+			                         GdkScreen **screen,
+			                         gint *x,
+			                         gint *y);
+			 */
+			 if (GTK_VERSION < 3) throw new Error('Requires GTK3!');
+
+			 return lib('gdk3').declare('gdk_device_get_position', self.TYPE.ABI,
+ 				self.TYPE.void,					// return
+				self.TYPE.GdkDevice.ptr,		// *device
+				self.TYPE.GdkScreen.ptr.ptr,	// **screen
+				self.TYPE.gint.ptr,				// *x
+				self.TYPE.gint.ptr				// *y
+ 			);
+		},
+		gdk_device_manager_get_client_pointer: function() {
+			/* https://developer.gnome.org/gdk3/stable/GdkDeviceManager.html#gdk-device-manager-get-client-pointer
+			GdkDevice *
+			gdk_device_manager_get_client_pointer (GdkDeviceManager *device_manager);
+			 */
+			if (GTK_VERSION < 3) throw new Error('Requires GTK3!');
+			if (GTK_VERSION >= 3.2) throw new Error('Requires GTK3! Deprecated in GTK3.2');
+			return lib('gdk3').declare('gdk_device_manager_get_client_pointer', self.TYPE.ABI,
+ 				self.TYPE.GdkDevice.ptr,		// return
+				self.TYPE.GdkDeviceManager.ptr	// *device_manager
+ 			);
+		},
 		gdk_get_default_root_window: function() {
 			/* https://developer.gnome.org/gdk3/stable/gdk3-Windows.html#gdk-get-default-root-window
 			 * GdkWindow *gdk_get_default_root_window (void);
 			 */
 			return lib(GTK_VERSION === 2 ? 'gdk2' : 'gdk3').declare('gdk_get_default_root_window', self.TYPE.ABI,
 				self.TYPE.GdkWindow.ptr	// return
+			);
+		},
+		gdk_display_get_default: function() {
+			/* https://developer.gnome.org/gdk3/stable/GdkDisplay.html#gdk-display-get-default
+			GdkDisplay *
+			gdk_display_get_default (void);
+			*/
+			return lib(GTK_VERSION === 2 ? 'gdk2' : 'gdk3').declare('gdk_display_get_default', self.TYPE.ABI,
+				self.TYPE.GdkDisplay.ptr	// return
+			);
+		},
+		gdk_display_get_device_manager: function() {
+			/* https://developer.gnome.org/gdk3/stable/GdkDisplay.html#gdk-display-get-device-manager
+			GdkDeviceManager *
+			gdk_display_get_device_manager (GdkDisplay *display);
+			*/
+			if (GTK_VERSION < 3) throw new Error('Requires GTK3!');
+			if (GTK_VERSION > 3.2) throw new Error('Requires GTK3! Deprecated in GTK3.2');
+			return lib('gdk3').declare('gdk_display_get_device_manager', self.TYPE.ABI,
+				self.TYPE.GdkDeviceManager.ptr,		// return
+				self.TYPE.GdkDisplay.ptr			// *display
+			);
+		},
+		gdk_display_get_default_seat: function() {
+			/* https://developer.gnome.org/gdk3/stable/GdkDisplay.html#gdk-display-get-default-seat
+			GdkSeat *
+			gdk_display_get_default_seat (GdkDisplay *display);
+			*/
+			if (GTK_VERSION < 3.2) throw new Error('Requires GTK3.2!');
+			return lib('gdk32').declare('gdk_display_get_default_seat', self.TYPE.ABI,
+				self.TYPE.GdkSeat.ptr,		// return
+				self.TYPE.GdkDisplay.ptr	// *display
 			);
 		},
 		gdk_screen_get_active_window: function() {
@@ -2926,6 +3069,17 @@ var x11Init = function() {
 				self.TYPE.GdkScreen.ptr		// *screen
 			);
 		},
+		gdk_seat_get_pointer: function() {
+			/* https://developer.gnome.org/gdk3/stable/GdkSeat.html#gdk-seat-get-pointer
+			GdkDevice *
+			gdk_seat_get_pointer (GdkSeat *seat);
+			*/
+			if (GTK_VERSION < 3.2) throw new Error('Requires GTK3.2!');
+			return lib('gdk32').declare('gdk_seat_get_pointer', self.TYPE.ABI,
+				self.TYPE.GdkDevice.ptr,	// return
+				self.TYPE.GdkSeat.ptr		// *seat
+			);
+		},
 		gdk_window_add_filter: function() {
 			/* https://developer.gnome.org/gdk3/stable/gdk3-Windows.html#gdk-window-add-filter
 			 * void gdk_window_add_filter (
@@ -2939,6 +3093,97 @@ var x11Init = function() {
 				self.TYPE.GdkWindow.ptr,	// *window
 				self.TYPE.GdkFilterFunc,	// function
 				self.TYPE.gpointer			// data
+			);
+		},
+		gdk_window_begin_move_drag: function() {
+			/* https://developer.gnome.org/gdk3/stable/gdk3-Windows.html#gdk-window-begin-move-drag
+			void
+			gdk_window_begin_move_drag (GdkWindow *window,
+			                            gint button,
+			                            gint root_x,
+			                            gint root_y,
+			                            guint32 timestamp);
+			*/
+			return lib(GTK_VERSION === 2 ? 'gdk2' : 'gdk3').declare('gdk_window_begin_move_drag', self.TYPE.ABI,
+				self.TYPE.void,				// return
+				self.TYPE.GdkWindow.ptr,	// *window
+				self.TYPE.gint,				// button
+				self.TYPE.gint,				// root_x
+				self.TYPE.gint,				// root_y
+				self.TYPE.guint32			// timestamp
+			);
+		},
+		gdk_window_get_geometry: function() {
+			/* https://developer.gnome.org/gdk3/stable/gdk3-Windows.html#gdk-window-get-geometry
+			void
+			gdk_window_get_geometry (GdkWindow *window,
+									 gint *x,
+									 gint *y,
+									 gint *width,
+									 gint *height);
+			*/
+			return lib(GTK_VERSION === 2 ? 'gdk2' : 'gdk3').declare('gdk_window_get_geometry', self.TYPE.ABI,
+				self.TYPE.void,				// return
+				self.TYPE.GdkWindow.ptr,	// *window
+				self.TYPE.gint.ptr,			// *x
+				self.TYPE.gint.ptr,			// *y
+				self.TYPE.gint.ptr,			// *width
+				self.TYPE.gint.ptr			// *height
+			);
+		},
+		gdk_window_get_pointer: function() {
+			/* https://developer.gnome.org/gdk3/stable/gdk3-Windows.html#gdk-window-get-pointer
+			GdkWindow *
+			gdk_window_get_pointer (GdkWindow *window,
+			                        gint *x,
+			                        gint *y,
+			                        GdkModifierType *mask);
+			*/
+			if (GTK_VERSION > 2) throw new Error('Requires GTK2! Deprecated after GTK2');
+			return lib('gdk2').declare('gdk_window_get_pointer', self.TYPE.ABI,
+				self.TYPE.GdkWindow.ptr,		// return
+				self.TYPE.GdkWindow.ptr,		// *window
+				self.TYPE.gint.ptr,				// *x
+				self.TYPE.gint.ptr,				// *y
+				self.TYPE.GdkModifierType.ptr	// *mask
+			);
+		},
+		gdk_window_get_position: function() {
+			/* https://developer.gnome.org/gdk3/stable/gdk3-Windows.html#gdk-window-get-position
+			void
+			gdk_window_get_position (GdkWindow *window,
+			                         gint *x,
+			                         gint *y);
+			*/
+			return lib(GTK_VERSION === 2 ? 'gdk2' : 'gdk3').declare('gdk_window_get_position', self.TYPE.ABI,
+				self.TYPE.void,				// return
+				self.TYPE.GdkWindow.ptr,	// *window
+				self.TYPE.gint.ptr,			// *x
+				self.TYPE.gint.ptr			// *y
+			);
+		},
+		gdk_window_get_root_origin: function() {
+			/* https://developer.gnome.org/gdk3/stable/gdk3-Windows.html#gdk-window-get-root-origin
+			void
+			gdk_window_get_root_origin (GdkWindow *window,
+			                            gint *x,
+			                            gint *y);
+			*/
+			return lib(GTK_VERSION === 2 ? 'gdk2' : 'gdk3').declare('gdk_window_get_root_origin', self.TYPE.ABI,
+				self.TYPE.void,				// return
+				self.TYPE.GdkWindow.ptr,	// *window
+				self.TYPE.gint.ptr,			// *x
+				self.TYPE.gint.ptr			// *y
+			);
+		},
+		gdk_window_get_toplevel: function() {
+			/* https://developer.gnome.org/gdk3/stable/gdk3-Windows.html#gdk-window-get-toplevel
+			GdkWindow *
+			gdk_window_get_toplevel (GdkWindow *window);
+			*/
+			return lib(GTK_VERSION === 2 ? 'gdk2' : 'gdk3').declare('gdk_window_get_toplevel', self.TYPE.ABI,
+				self.TYPE.GdkWindow.ptr,	// return
+				self.TYPE.GdkWindow.ptr		// *window
 			);
 		},
 		gdk_window_get_user_data: function() {
@@ -3042,6 +3287,18 @@ var x11Init = function() {
 			return lib('gdk2').declare('gdk_xid_table_lookup', self.TYPE.ABI,
 				self.TYPE.gpointer,		// return
 				self.TYPE.XID			// xid
+			);
+		},
+		gtk_widget_add_events: function() {
+			/* https://developer.gnome.org/gtk3/stable/GtkWidget.html#gtk-widget-add-events
+			void
+			gtk_widget_add_events (GtkWidget *widget,
+			                       gint events);
+			*/
+			return lib(GTK_VERSION === 2 ? 'gtk2' : 'gtk3').declare('gtk_widget_add_events', self.TYPE.ABI,
+				self.TYPE.void,				// return
+				self.TYPE.GtkWidget.ptr,	// *widget
+				self.TYPE.gint				// events
 			);
 		},
 		gtk_widget_get_window: function() {
