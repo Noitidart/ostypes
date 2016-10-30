@@ -890,6 +890,26 @@ var x11Init = function() {
 		GDK_SCROLL_MASK: 1 << 21,
 		GDK_ALL_EVENTS_MASK: 0x3FFFFE,
 
+		// enum GdkModifierType
+		GDK_SHIFT_MASK: 1 << 0,
+		GDK_LOCK_MASK: 1 << 1,
+		GDK_CONTROL_MASK: 1 << 2,
+		GDK_MOD1_MASK: 1 << 3,
+		GDK_MOD2_MASK: 1 << 4,
+		GDK_MOD3_MASK: 1 << 5,
+		GDK_MOD4_MASK: 1 << 6,
+		GDK_MOD5_MASK: 1 << 7,
+		GDK_BUTTON1_MASK: 1 << 8,
+		GDK_BUTTON2_MASK: 1 << 9,
+		GDK_BUTTON3_MASK: 1 << 10,
+		GDK_BUTTON4_MASK: 1 << 11,
+		GDK_BUTTON5_MASK: 1 << 12,
+		GDK_SUPER_MASK: 1 << 26,
+		GDK_HYPER_MASK: 1 << 27,
+		GDK_META_MASK: 1 << 28,
+		GDK_RELEASE_MASK: 1 << 30,
+		GDK_MODIFIER_MASK: 0x5c001fff,
+
 		// XCB CONSTS
 		XCB_COPY_FROM_PARENT: 0,
 		XCB_ALL_PLANES: 0xffffffff, // define XCB_ALL_PLANES ~0 i know its a ctypes.uint32_t so instead of doing ctypes.cast(ctypes.int(-1), ctypes.uint32_t).value.toString(16) i just type in the value
@@ -2985,6 +3005,23 @@ var x11Init = function() {
 				self.TYPE.GdkScreen.ptr.ptr,	// **screen
 				self.TYPE.gint.ptr,				// *x
 				self.TYPE.gint.ptr				// *y
+ 			);
+		},
+		gdk_device_get_state: function() {
+			/* https://developer.gnome.org/gdk3/stable/GdkDevice.html#gdk-device-get-state
+			void
+			gdk_device_get_state (GdkDevice *device,
+			                      GdkWindow *window,
+			                      gdouble *axes,
+			                      GdkModifierType *mask);
+			 */
+
+			 return lib(GTK_VERSION === 2 ? 'gdk2' : 'gdk3').declare('gdk_device_get_state', self.TYPE.ABI,
+ 				self.TYPE.void,					// return
+				self.TYPE.GdkDevice.ptr,		// *device
+				self.TYPE.GdkWindow.ptr,		// *window
+				self.TYPE.gdouble.ptr,			// *axes
+				self.TYPE.GdkModifierType.ptr	// *mask
  			);
 		},
 		gdk_device_manager_get_client_pointer: function() {
