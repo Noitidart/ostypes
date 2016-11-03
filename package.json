@@ -1,0 +1,19 @@
+{
+  "name": "ostypes",
+  "description": "Submodule for Firefox addons that need js-ctypes to tap into platform (Windows, Mac, Linux/Unix) APIs.",
+  "version": "1.0.0",
+  "author": "Noitidart (http://noitidart.github.io/)",
+  "bugs": {
+    "url": "https://github.com/Noitidart/ostypes/issues"
+  },
+  "homepage": "https://github.com/Noitidart/ostypes#readme",
+  "keywords": [],
+  "license": "MPL-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Noitidart/ostypes.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
