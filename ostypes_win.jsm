@@ -1857,6 +1857,8 @@ var winInit = function() {
 		SWP_NOSIZE: 1,
 		SWP_NOMOVE: 2,
 		SWP_NOREDRAW: 8,
+		SWP_FRAMECHANGED: 0x0020,
+		
 		MDT_Effective_DPI: 0,
 		MDT_Angular_DPI: 1,
 		MDT_Raw_DPI: 2,
