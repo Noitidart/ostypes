@@ -312,10 +312,11 @@ var macTypes = function() {
 
 	// ADV OBJC TYPES
 	this.NSBitmapFormat = this.NSUInteger;
-	this.NSEventType = this.NSUInteger;
 	this.NSEventMask = this.NSUInteger;
-	this.NSURLBookmarkCreationOptions = this.NSUInteger;
 	this.NSEventModifierFlags = this.NSUInteger; // guess
+	this.NSEventType = this.NSUInteger;
+	this.NSURLBookmarkCreationOptions = this.NSUInteger;
+	this.NSWindowCollectionBehavior = this.NSUInteger;
 
 	// GUESS TYPES OBJC - they work though
 	this.id = ctypes.voidptr_t;
@@ -747,7 +748,20 @@ var macInit = function() {
 
 		kEventParamDirectObject: 757935405,
 
-		noErr: 0
+		noErr: 0,
+
+		// enum NSWindowCollectionBehavior
+		NSWindowCollectionBehaviorDefault: 0,
+	    NSWindowCollectionBehaviorCanJoinAllSpaces: 1 << 0,
+	    NSWindowCollectionBehaviorMoveToActiveSpace: 1 << 1,
+	    NSWindowCollectionBehaviorManaged: 1 << 2,
+	    NSWindowCollectionBehaviorTransient: 1 << 3,
+	    NSWindowCollectionBehaviorStationary: 1 << 4,
+	    NSWindowCollectionBehaviorParticipatesInCycle: 1 << 5,
+	    NSWindowCollectionBehaviorIgnoresCycle: 1 << 6,
+	    NSWindowCollectionBehaviorFullScreenPrimary: 1 << 7,
+	    NSWindowCollectionBehaviorFullScreenAllowsTiling: 1 << 11,
+	    NSWindowCollectionBehaviorFullScreenDisallowsTiling: 1 << 12
 	};
 
 	// ADVANCED CONST
