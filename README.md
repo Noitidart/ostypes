@@ -1,3 +1,17 @@
+## Fork status: (barely) maintained
+
+Note: this is a (barely) maintained fork of https://github.com/noitidart/ostypes.
+
+This library provides some nice helper utilities to make it easier for an add-on
+to interact with OS-level C APIs; see [js-ctypes on MDN](https://developer.mozilla.org/en-US/docs/Mozilla/js-ctypes) for details on the
+underlying abstraction provided by Gecko.
+
+This library is now not very useful to add-on authors outside Mozilla, because
+post-57 addons have much stricter controls on how arbitrary XPCOM code can be
+executed. That said, I'm using it again for another prototype, so might as well
+maintain the thing as time allows. :beers:
+
+
 ## Table of Contents
 
 - [How to download this into your addon](#how-to-download-this-into-your-addon)
